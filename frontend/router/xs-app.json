@@ -1,13 +1,26 @@
 {
-  "welcomeFile": "/index.html",
+  "welcomeFile": "/registration/index.html",
   "authenticationMethod": "route",
   "routes": [
+    {
+      "source": "^/odata/v4/registration/(.*)$",
+      "target": "/odata/v4/registration/$1",
+      "destination": "srv-api",
+      "authenticationType": "none",
+      "csrfProtection": false
+    },
+    {
+      "source": "^/registration/(.*)$",
+      "target": "/registration/$1",
+      "localDir": ".",
+      "authenticationType": "none"
+    },
     {
       "source": "^/odata/v4/(.*)$",
       "target": "/odata/v4/$1",
       "destination": "srv-api",
       "authenticationType": "xsuaa",
-      "csrfProtection": false
+      "csrfProtection": true
     },
     {
       "source": "^/index.html$",

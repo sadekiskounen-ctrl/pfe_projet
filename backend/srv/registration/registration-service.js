@@ -2,6 +2,7 @@ const cds = require('@sap/cds');
 
 module.exports = class RegistrationService extends cds.ApplicationService {
     async init() {
+        await super.init();
         const { SubmitRegistration, RegistrationRequests } = this.entities;
 
         this.before('CREATE', SubmitRegistration, async (req) => {
@@ -72,7 +73,5 @@ module.exports = class RegistrationService extends cds.ApplicationService {
             await tx.run(UPDATE(RegistrationRequests).set({ status: 'REJECTED', adminComment: reason }).where({ ID: id }));
             return "L'inscription a été rejetée.";
         });
-
-        await super.init();
     }
 }

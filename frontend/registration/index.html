@@ -150,6 +150,8 @@
             ribName: fileRIB ? fileRIB.name : null
         };
 
+        console.log('Sending registration payload:', payload);
+
         try {
             const response = await fetch('/odata/v4/registration/SubmitRegistration', {
                 method: 'POST',
@@ -158,16 +160,22 @@
             });
 
             if(response.ok) {
+                console.log('Registration successful');
                 document.getElementById('registrationForm').style.display = 'none';
                 document.getElementById('successMsg').style.display = 'block';
                 document.getElementById('errorMsg').style.display = 'none';
             } else {
-                const err = await response.json();
+                const err = await response.json().catch(() => ({ error: { message: 'Unknown server error' } }));
+                console.error('Server returned error:', err);
                 throw new Error(err.error?.message || 'Server error');
             }
         } catch (error) {
-            console.error('Submission error:', error);
-            document.getElementById('errorMsg').innerText = 'Erreur : ' + error.message;
+            console.error('Submission error (detailed):', error);
+            let msg = error.message;
+            if (msg === 'Failed to fetch') {
+                msg = 'Impossible de contacter le serveur. Vérifiez que le backend est lancé sur le port 4004 ou que vous utilisez le bon domaine.';
+            }
+            document.getElementById('errorMsg').innerText = 'Erreur : ' + msg;
             document.getElementById('errorMsg').style.display = 'block';
             btn.disabled = false;
             btn.innerText = 'Soumettre ma candidature';

@@ -1,7 +1,7 @@
 using { pme.registration as db } from '../../db/index';
 
 @path: '/odata/v4/registration'
-// Service public pour soumettre les inscriptions
+@auth: 'none'
 service RegistrationService {
 
     @insertonly
