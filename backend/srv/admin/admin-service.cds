@@ -42,4 +42,10 @@ service AdminService {
   action activateBusinessPartner(bpId: UUID) returns BusinessPartners;
   action blockBusinessPartner(bpId: UUID, reason: String) returns BusinessPartners;
   action sendNotification(userId: String, title: String, message: String, type: String) returns Notifications;
+
+  // ── PDF Document Actions ──
+  action downloadRegistrationPDF(regId: UUID) returns String;
+  action downloadBusinessPartnerPDF(bpId: UUID) returns String;
+  action downloadFacturePDF(factId: UUID) returns String;
+  action downloadDevisPDF(devisId: UUID) returns String;
 }

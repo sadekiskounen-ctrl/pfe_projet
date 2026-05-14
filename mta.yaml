@@ -13,13 +13,13 @@ build-parameters:
       commands:
         - npm ci
         - npx cds build --production
-        - powershell -Command "Copy-Item -Path frontend -Destination gen/srv/app -Recurse -Force -Exclude router"
+        - powershell -Command "Copy-Item -Path frontend -Destination gen/backend/srv/app -Recurse -Force -Exclude router"
 
 modules:
   # ── Backend CAP Service ──
   - name: gestion-pme-srv
     type: nodejs
-    path: gen/srv
+    path: gen/backend/srv
     parameters:
       buildpack: nodejs_buildpack
       memory: 256M

@@ -274,15 +274,27 @@
                     <div class="kpi-label">Inscriptions en attente</div>
                 </div>
                 <div class="kpi-card">
-                    <div class="kpi-value">0,00 DA</div>
-                    <div class="kpi-label">Volume d'affaires</div>
+                    <div class="kpi-value" id="statRevenue">0,00 DA</div>
+                    <div class="kpi-label">Volume d'affaires (CA)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value" id="statConversion">0%</div>
+                    <div class="kpi-label">Taux de conversion</div>
                 </div>
             </div>
 
-            <div class="fiori-card">
-                <div class="card-header"><span class="card-title">Activité des inscriptions</span></div>
-                <div class="card-content">
-                    <canvas id="activityChart" height="80"></canvas>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+                <div class="fiori-card">
+                    <div class="card-header"><span class="card-title">📈 Performance Commerciale (Ventes)</span></div>
+                    <div class="card-content">
+                        <canvas id="salesChart" height="150"></canvas>
+                    </div>
+                </div>
+                <div class="fiori-card">
+                    <div class="card-header"><span class="card-title">📊 Répartition Partenaires</span></div>
+                    <div class="card-content">
+                        <canvas id="distributionChart" height="250"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -354,6 +366,7 @@
                     </div>
 
                     <div style="display: flex; justify-content: flex-end; gap: 1.5rem; margin-top: 2rem; border-top: 1px solid var(--sap-border); padding-top: 1.5rem;">
+                        <button class="sap-btn" id="btnDownloadCert" style="padding: 12px 20px; border-color: #6a6d70; color: #6a6d70;">[ 📥 CERTIFICAT PDF ]</button>
                         <button class="sap-btn sap-btn-negative" id="btnRejectFull" style="padding: 12px 30px;">[ ❌ REJETER ]</button>
                         <button class="sap-btn sap-btn-primary" id="btnApproveFull" style="padding: 12px 30px;">[ ✅ APPROUVER ]</button>
                     </div>
@@ -458,6 +471,7 @@
 
         document.getElementById('btnApproveFull').onclick = () => approveReg(reg.ID);
         document.getElementById('btnRejectFull').onclick = () => rejectReg(reg.ID);
+        document.getElementById('btnDownloadCert').onclick = () => downloadPDF('downloadRegistrationPDF', { regId: reg.ID }, `Certificat_${reg.companyName}.pdf`);
         
         // Scroll to detail
         document.getElementById('registrationDetail').scrollIntoView({ behavior: 'smooth' });
@@ -489,6 +503,38 @@
         fetchRegistrations();
     }
 
+    async function downloadPDF(action, params, filename) {
+        try {
+            const url = `${API_ADMIN}/${action}`;
+            const res = await fetch(url + `?${authQuery}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(params)
+            });
+            const data = await res.json();
+            const base64 = data.value;
+            
+            if(!base64) throw new Error('Pas de données PDF');
+
+            // Conversion base64 en Blob pour un téléchargement propre
+            const byteCharacters = atob(base64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'application/pdf' });
+            
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        } catch (e) {
+            console.error(e);
+            alert('Erreur lors du téléchargement du PDF');
+        }
+    }
+
     async function fetchPartners() {
         const res = await fetch(`${API_ADMIN}/BusinessPartners?${authQuery}`);
         const data = await res.json();
@@ -502,26 +548,58 @@
     }
 
     async function fetchStats() {
-        const resp = await fetch(`${API_ANALYTICS}/BusinessPartners/$count?${authQuery}`);
-        const count = await resp.text();
-        document.getElementById('statBP').innerText = count;
+        try {
+            // Fetch Global Admin KPIs
+            const resAdmin = await fetch(`${API_ANALYTICS}/getAdminDashboard()?${authQuery}`);
+            const adminKpis = await resAdmin.json();
+            
+            document.getElementById('statBP').innerText = adminKpis.value.totalBusinessPartners;
+            document.getElementById('statPending').innerText = adminKpis.value.bpEnAttente;
+            document.getElementById('badgeCount').innerText = adminKpis.value.bpEnAttente;
+            document.getElementById('badgeCountTitle').innerText = adminKpis.value.bpEnAttente;
+
+            // Fetch CRM KPIs for Revenue
+            const resCrm = await fetch(`${API_ANALYTICS}/getCRMDashboard()?${authQuery}`);
+            const crmKpis = await resCrm.json();
+            
+            document.getElementById('statRevenue').innerText = new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD' }).format(crmKpis.value.chiffreAffaireAnnee);
+            document.getElementById('statConversion').innerText = crmKpis.value.tauxConversion + '%';
+
+            // Update Charts with Real-ish data (mocking the trends for now based on totals)
+            updateCharts(crmKpis.value);
+        } catch (e) {
+            console.error('Erreur stats:', e);
+        }
     }
 
-    // Chart
-    new Chart(document.getElementById('activityChart'), {
-        type: 'line',
-        data: {
-            labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
-            datasets: [{
-                label: 'Inscriptions',
-                data: [10, 15, 8, 12, 19, 3, 7],
-                borderColor: '#0070f2',
-                tension: 0.3,
-                fill: false
-            }]
-        },
-        options: { plugins: { legend: { display: false } }, scales: { y: { display: false } } }
-    });
+    function updateCharts(kpis) {
+        // Sales Trend Chart
+        new Chart(document.getElementById('salesChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Ventes Mensuelles (DA)',
+                    data: [kpis.chiffreAffaireMois * 0.8, kpis.chiffreAffaireMois * 0.9, kpis.chiffreAffaireMois, 0, 0, 0],
+                    backgroundColor: '#0070f2'
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+
+        // Distribution Chart
+        new Chart(document.getElementById('distributionChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Clients B2B', 'Clients B2C'],
+                datasets: [{
+                    data: [kpis.totalClientsB2B, kpis.totalClientsB2C],
+                    backgroundColor: ['#0070f2', '#5b38b9']
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
 
     fetchStats();
     fetchRegistrations();

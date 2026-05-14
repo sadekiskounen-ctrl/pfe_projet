@@ -118,6 +118,72 @@ async function generateFacturePDF(facture) {
   });
 }
 
+/**
+ * Generate a Registration Certificate PDF buffer
+ * @param {Object} reg - RegistrationRequest entity
+ * @returns {Promise<Buffer>} PDF buffer
+ */
+async function generateRegistrationPDF(reg) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    const buffers = [];
+
+    doc.on('data', chunk => buffers.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(buffers)));
+    doc.on('error', reject);
+
+    // ── Header ──
+    _drawHeader(doc, 'ATTESTATION D\'INSCRIPTION', reg.ID.substring(0, 8));
+
+    // ── Status Stamp ──
+    const statusColor = reg.status === 'APPROVED' ? '#107e3e' : (reg.status === 'PENDING' ? '#e9730c' : '#bb0000');
+    doc.save();
+    doc.fontSize(14).fillColor(statusColor).font('Helvetica-Bold');
+    doc.text(`STATUT : ${reg.status}`, 350, 110, { align: 'right', width: 200 });
+    doc.restore();
+
+    // ── Registration Details ──
+    doc.moveDown(2);
+    doc.fontSize(12).fillColor('#1a3a5c').font('Helvetica-Bold');
+    doc.text('INFORMATIONS DU PARTENAIRE');
+    doc.moveDown(0.5);
+    
+    doc.fontSize(10).fillColor('#333333').font('Helvetica');
+    const labels = [
+      ['Dénomination Sociale', reg.companyName],
+      ['Type de Partenaire', reg.type],
+      ['Email Contact', reg.email],
+      ['Téléphone', reg.phone],
+      ['Adresse', reg.address],
+      ['NIF / SIRET', reg.siret || 'N/A'],
+      ['N° TVA', reg.tvaNumber || 'N/A'],
+      ['Date de Soumission', _formatDate(reg.createdAt)]
+    ];
+
+    labels.forEach(([label, value]) => {
+      const y = doc.y;
+      doc.font('Helvetica-Bold').text(`${label} :`, 50, y);
+      doc.font('Helvetica').text(String(value || 'Non renseigné'), 200, y);
+      doc.moveDown(0.5);
+    });
+
+    // ── Certification Text ──
+    doc.moveDown(3);
+    doc.fontSize(10).font('Helvetica-Oblique').text('Cette attestation certifie que la demande d\'inscription a été reçue et traitée par le système de gestion PME Cloud.');
+    doc.font('Helvetica').text(`Généré le : ${new Date().toLocaleString('fr-FR')}`);
+
+    // ── Signature Placeholder ──
+    doc.moveDown(4);
+    doc.fontSize(10).font('Helvetica-Bold').text('Cachet de l\'Administration', 350, doc.y, { align: 'center' });
+    doc.rect(350, doc.y + 10, 150, 80).stroke('#cccccc');
+
+    // ── Footer ──
+    _drawFooter(doc);
+
+    doc.end();
+  });
+}
+
 // ── Private Helpers ──
 
 function _drawHeader(doc, type, number) {
@@ -221,4 +287,4 @@ function _formatAmount(amount) {
   });
 }
 
-module.exports = { generateDevisPDF, generateFacturePDF };
+module.exports = { generateDevisPDF, generateFacturePDF, generateRegistrationPDF };

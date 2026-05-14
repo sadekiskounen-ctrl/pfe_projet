@@ -3,6 +3,7 @@
 // ============================================================
 
 const cds = require('@sap/cds');
+const { generateRegistrationPDF, generateFacturePDF, generateDevisPDF } = require('../lib/pdf-generator');
 
 module.exports = class AdminService extends cds.ApplicationService {
 
@@ -44,6 +45,52 @@ module.exports = class AdminService extends cds.ApplicationService {
           console.warn('Audit log failed:', e.message);
         }
       }
+    });
+
+    // ── PDF: Download Registration Certificate ──
+    this.on('downloadRegistrationPDF', async (req) => {
+      try {
+        const { regId } = req.data;
+        console.log('[PDF] Demande pour ID:', regId);
+        
+        const { RegistrationRequest } = cds.entities('pme.registration');
+        const reg = await SELECT.one.from(RegistrationRequest, regId);
+        
+        if (!reg) {
+          console.error('[PDF] Enregistrement non trouvé pour ID:', regId);
+          return req.error(404, `Registration ${regId} not found`);
+        }
+
+        console.log('[PDF] Génération en cours pour:', reg.companyName);
+        const pdfBuffer = await generateRegistrationPDF(reg);
+        console.log('[PDF] Succès, envoi base64...');
+        return pdfBuffer.toString('base64');
+      } catch (err) {
+        console.error('[PDF] Erreur critique:', err.message);
+        return req.error(500, err.message);
+      }
+    });
+
+    // ── PDF: Download Facture ──
+    this.on('downloadFacturePDF', async (req) => {
+      const { factId } = req.data;
+      const { FactureClient } = cds.entities('sap.pme.doc');
+      const fact = await SELECT.one.from(FactureClient, factId);
+      if (!fact) return req.error(404, `Facture ${factId} not found`);
+
+      const pdfBuffer = await generateFacturePDF(fact);
+      return pdfBuffer.toString('base64');
+    });
+
+    // ── PDF: Download Devis ──
+    this.on('downloadDevisPDF', async (req) => {
+      const { devisId } = req.data;
+      const { Devis } = cds.entities('sap.pme.doc');
+      const devis = await SELECT.one.from(Devis, devisId);
+      if (!devis) return req.error(404, `Devis ${devisId} not found`);
+
+      const pdfBuffer = await generateDevisPDF(devis);
+      return pdfBuffer.toString('base64');
     });
 
     await super.init();

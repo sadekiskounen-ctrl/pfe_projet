@@ -108,14 +108,18 @@
 </div>
 
 <script>
-    function toggleType() {
-        // Logique spécifique si besoin selon B2B ou Fournisseur
-    }
-
     function nextStep(step) {
         document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
         document.getElementById('step' + step).classList.add('active');
     }
+
+    // Fonction pour convertir un fichier en Base64
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = error => reject(error);
+    });
 
     document.getElementById('registrationForm').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -123,21 +127,31 @@
         btn.disabled = true;
         btn.innerText = 'Envoi en cours...';
 
-        const type = document.querySelector('input[name="regType"]:checked').value;
-        const endpoint = type === 'b2b' ? '/odata/v4/registration/RegisterClientB2B' : '/odata/v4/registration/RegisterFournisseur';
+        const typeValue = document.querySelector('input[name="regType"]:checked').value;
+        const type = typeValue === 'b2b' ? 'CLIENT_B2B' : 'FOURNISSEUR';
+        
+        // Préparation des fichiers
+        const fileRC = document.getElementById('fileRC').files[0];
+        const fileRIB = document.getElementById('fileRIB').files[0];
 
         const payload = {
+            type: type,
             companyName: document.getElementById('companyName').value,
-            rc: document.getElementById('rc').value,
-            nif: document.getElementById('nif').value,
-            sector: document.getElementById('sector').value,
-            contactName: document.getElementById('contactName').value,
+            siret: document.getElementById('rc').value,
+            tvaNumber: document.getElementById('nif').value,
             email: document.getElementById('email').value,
-            phone: document.getElementById('phone').value
+            phone: document.getElementById('phone').value,
+            address: 'Non renseignée', // On pourrait ajouter un champ adresse
+            kbis: fileRC ? await toBase64(fileRC) : null,
+            kbisType: fileRC ? 'application/pdf' : null,
+            kbisName: fileRC ? fileRC.name : null,
+            rib: fileRIB ? await toBase64(fileRIB) : null,
+            ribType: fileRIB ? 'application/pdf' : null,
+            ribName: fileRIB ? fileRIB.name : null
         };
 
         try {
-            const response = await fetch(endpoint, {
+            const response = await fetch('/odata/v4/registration/SubmitRegistration', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -148,10 +162,12 @@
                 document.getElementById('successMsg').style.display = 'block';
                 document.getElementById('errorMsg').style.display = 'none';
             } else {
-                throw new Error('Server error');
+                const err = await response.json();
+                throw new Error(err.error?.message || 'Server error');
             }
         } catch (error) {
-            console.error(error);
+            console.error('Submission error:', error);
+            document.getElementById('errorMsg').innerText = 'Erreur : ' + error.message;
             document.getElementById('errorMsg').style.display = 'block';
             btn.disabled = false;
             btn.innerText = 'Soumettre ma candidature';
