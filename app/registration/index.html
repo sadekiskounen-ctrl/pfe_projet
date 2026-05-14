@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail d'Inscription — Gestion PME</title>
+    <!-- Utilisation de Bootstrap pour un design rapide et propre -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .wizard-container { background: #fff; border-radius: 10px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 50px; }
+        .step { display: none; }
+        .step.active { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8 wizard-container">
+            <h2 class="text-center mb-4 text-primary">Rejoignez notre réseau</h2>
+            
+            <div class="mb-4 text-center">
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="regType" id="btnB2B" value="b2b" autocomplete="off" checked onchange="toggleType()">
+                    <label class="btn btn-outline-primary" for="btnB2B">Client B2B</label>
+
+                    <input type="radio" class="btn-check" name="regType" id="btnSupplier" value="supplier" autocomplete="off" onchange="toggleType()">
+                    <label class="btn btn-outline-primary" for="btnSupplier">Fournisseur</label>
+                </div>
+            </div>
+
+            <form id="registrationForm">
+                <!-- ÉTAPE 1: Informations Entreprise -->
+                <div id="step1" class="step active">
+                    <h4>1. Informations de l'entreprise</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Raison Sociale *</label>
+                        <input type="text" class="form-control" id="companyName" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Numéro RC</label>
+                            <input type="text" class="form-control" id="rc">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">NIF</label>
+                            <input type="text" class="form-control" id="nif">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Secteur d'activité</label>
+                        <input type="text" class="form-control" id="sector">
+                    </div>
+                    <button type="button" class="btn btn-primary float-end" onclick="nextStep(2)">Suivant</button>
+                </div>
+
+                <!-- ÉTAPE 2: Contact -->
+                <div id="step2" class="step">
+                    <h4>2. Contact Principal</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Nom complet *</label>
+                        <input type="text" class="form-control" id="contactName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email professionnel *</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Téléphone</label>
+                        <input type="tel" class="form-control" id="phone">
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="nextStep(1)">Précédent</button>
+                    <button type="button" class="btn btn-primary float-end" onclick="nextStep(3)">Suivant</button>
+                </div>
+
+                <!-- ÉTAPE 3: Documents KYC -->
+                <div id="step3" class="step">
+                    <h4>3. Documents (KYC)</h4>
+                    <p class="text-muted small">Pour valider votre compte, nous avons besoin de vos documents légaux.</p>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">K-bis / Registre de Commerce (PDF)</label>
+                        <input class="form-control" type="file" id="fileRC" accept="application/pdf">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">RIB (PDF)</label>
+                        <input class="form-control" type="file" id="fileRIB" accept="application/pdf">
+                    </div>
+                    
+                    <div class="alert alert-info mt-4">
+                        Une fois le formulaire soumis, notre équipe administrateur vérifiera vos informations. Vous recevrez un email pour définir votre mot de passe (via Cloud Identity Services) dès l'approbation.
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" onclick="nextStep(2)">Précédent</button>
+                    <button type="submit" class="btn btn-success float-end" id="btnSubmit">Soumettre ma candidature</button>
+                </div>
+            </form>
+            
+            <div id="successMsg" class="alert alert-success mt-4" style="display: none;">
+                <strong>Succès !</strong> Votre candidature a été transmise. Vous recevrez un email dès sa validation.
+            </div>
+            <div id="errorMsg" class="alert alert-danger mt-4" style="display: none;">
+                <strong>Erreur :</strong> Une erreur est survenue lors de l'envoi.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleType() {
+        // Logique spécifique si besoin selon B2B ou Fournisseur
+    }
+
+    function nextStep(step) {
+        document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+    }
+
+    document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmit');
+        btn.disabled = true;
+        btn.innerText = 'Envoi en cours...';
+
+        const type = document.querySelector('input[name="regType"]:checked').value;
+        const endpoint = type === 'b2b' ? '/odata/v4/registration/RegisterClientB2B' : '/odata/v4/registration/RegisterFournisseur';
+
+        const payload = {
+            companyName: document.getElementById('companyName').value,
+            rc: document.getElementById('rc').value,
+            nif: document.getElementById('nif').value,
+            sector: document.getElementById('sector').value,
+            contactName: document.getElementById('contactName').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value
+        };
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if(response.ok) {
+                document.getElementById('registrationForm').style.display = 'none';
+                document.getElementById('successMsg').style.display = 'block';
+                document.getElementById('errorMsg').style.display = 'none';
+            } else {
+                throw new Error('Server error');
+            }
+        } catch (error) {
+            console.error(error);
+            document.getElementById('errorMsg').style.display = 'block';
+            btn.disabled = false;
+            btn.innerText = 'Soumettre ma candidature';
+        }
+    });
+</script>
+</body>
+</html>

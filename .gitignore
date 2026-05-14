@@ -1,0 +1,35 @@
+node_modules/
+target/
+_out/
+gen/
+
+.cdsrc-private.json
+default-*.json
+*.sqlite
+
+# MTA
+mta_archives/
+*_mta_build_tmp
+*.mtar
+
+# Environment
+.env
+*.env.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+
+# @cap-js/cds-typer
+@cds-models
+
+# Package lock (optional — remove if you want to commit it)
+# package-lock.json

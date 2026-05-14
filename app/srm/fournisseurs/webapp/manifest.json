@@ -1,0 +1,96 @@
+{
+  "_version": "1.65.0",
+  "sap.app": {
+    "id": "gestionpme.srm.fournisseurs",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": { "version": "1.0.0" },
+    "title": "Portail Fournisseurs",
+    "description": "Gestion des fournisseurs, KYC et achats",
+    "dataSources": {
+      "mainService": {
+        "uri": "/odata/v4/srm/",
+        "type": "OData",
+        "settings": { "odataVersion": "4.0" }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": { "icon": "sap-icon://supplier" },
+    "deviceTypes": { "desktop": true, "tablet": true, "phone": true }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.fe.templates": {},
+        "sap.uxap": {}
+      }
+    },
+    "models": {
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": { "bundleName": "gestionpme.srm.fournisseurs.i18n.i18n" }
+      }
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.f.routing.Router",
+        "async": true
+      },
+      "routes": [
+        { "pattern": "", "name": "FournisseursList", "target": "FournisseursList" },
+        { "pattern": "Fournisseurs({key})", "name": "FournisseursDetail", "target": "FournisseursDetail" },
+        { "pattern": "RFQs", "name": "RFQsList", "target": "RFQsList" },
+        { "pattern": "RFQs({key})", "name": "RFQsDetail", "target": "RFQsDetail" }
+      ],
+      "targets": {
+        "FournisseursList": {
+          "type": "Component",
+          "id": "FournisseursList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "Fournisseurs",
+              "variantManagement": "Page",
+              "initialLoad": true
+            }
+          }
+        },
+        "FournisseursDetail": {
+          "type": "Component",
+          "id": "FournisseursDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": { "settings": { "entitySet": "Fournisseurs" } }
+        },
+        "RFQsList": {
+          "type": "Component",
+          "id": "RFQsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": { "settings": { "entitySet": "RFQs", "initialLoad": true } }
+        },
+        "RFQsDetail": {
+          "type": "Component",
+          "id": "RFQsDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": { "settings": { "entitySet": "RFQs" } }
+        }
+      }
+    },
+    "contentDensities": { "compact": true, "cozy": true }
+  }
+}

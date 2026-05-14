@@ -1,0 +1,39 @@
+{
+  "specVersion": "2.0",
+  "metadata": {
+    "name": "crm-clients"
+  },
+  "type": "application",
+  "framework": {
+    "name": "SAPUI5",
+    "version": "1.120.x"
+  },
+  "server": {
+    "customMiddleware": [
+      {
+        "name": "fiori-tools-proxy",
+        "afterMiddleware": "compression",
+        "configuration": {
+          "backend": [
+            {
+              "path": "/odata/v4/crm",
+              "url": "http://localhost:4004"
+            },
+            {
+              "path": "/odata/v4/analytics",
+              "url": "http://localhost:4004"
+            }
+          ]
+        }
+      },
+      {
+        "name": "fiori-tools-appreload",
+        "afterMiddleware": "compression",
+        "configuration": {
+          "port": 35729,
+          "path": "webapp"
+        }
+      }
+    ]
+  }
+}

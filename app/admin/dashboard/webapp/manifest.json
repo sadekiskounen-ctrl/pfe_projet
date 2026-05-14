@@ -1,0 +1,51 @@
+{
+  "_version": "1.65.0",
+  "sap.app": {
+    "id": "gestionpme.admin.dashboard",
+    "type": "application",
+    "title": "Administration — Gestion PME",
+    "description": "Backoffice administrateur",
+    "applicationVersion": { "version": "1.0.0" },
+    "dataSources": {
+      "adminService": {
+        "uri": "/odata/v4/admin/",
+        "type": "OData",
+        "settings": { "odataVersion": "4.0" }
+      },
+      "analyticsService": {
+        "uri": "/odata/v4/analytics/",
+        "type": "OData",
+        "settings": { "odataVersion": "4.0" }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": { "icon": "sap-icon://technical-object" },
+    "deviceTypes": { "desktop": true, "tablet": true, "phone": false }
+  },
+  "sap.ui5": {
+    "rootView": {
+      "viewName": "gestionpme.admin.dashboard.view.App",
+      "type": "XML",
+      "id": "app"
+    },
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.tnt": {},
+        "sap.ui.layout": {}
+      }
+    },
+    "models": {
+      "admin": {
+        "dataSource": "adminService",
+        "settings": { "synchronizationMode": "None", "autoExpandSelect": true }
+      },
+      "kpi": { "type": "sap.ui.model.json.JSONModel" }
+    },
+    "contentDensities": { "compact": true, "cozy": false }
+  }
+}

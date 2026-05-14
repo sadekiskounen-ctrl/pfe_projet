@@ -1,0 +1,54 @@
+{
+  "_version": "1.65.0",
+  "sap.app": {
+    "id": "gestionpme.crm.dashboard",
+    "type": "application",
+    "title": "Dashboard CRM",
+    "description": "Tableau de bord analytique CRM",
+    "applicationVersion": { "version": "1.0.0" },
+    "dataSources": {
+      "analyticsService": {
+        "uri": "/odata/v4/analytics/",
+        "type": "OData",
+        "settings": { "odataVersion": "4.0" }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": { "icon": "sap-icon://bar-chart" },
+    "deviceTypes": { "desktop": true, "tablet": true, "phone": false }
+  },
+  "sap.ui5": {
+    "rootView": {
+      "viewName": "gestionpme.crm.dashboard.view.Dashboard",
+      "type": "XML",
+      "id": "root"
+    },
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.viz": {},
+        "sap.suite.ui.microchart": {}
+      }
+    },
+    "models": {
+      "": {
+        "dataSource": "analyticsService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true
+        }
+      },
+      "kpi": {
+        "type": "sap.ui.model.json.JSONModel",
+        "settings": { "data": {} }
+      }
+    },
+    "contentDensities": { "compact": true, "cozy": true }
+  }
+}

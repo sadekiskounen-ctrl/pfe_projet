@@ -1,0 +1,166 @@
+name: CI/CD — Gestion PME SAP BTP
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: '20.x'
+  CF_API: 'https://api.cf.us10-001.hana.ondemand.com'
+  CF_ORG: 'ffbe6148trial'
+  CF_SPACE: ${{ secrets.CF_SPACE }}
+
+jobs:
+  # ── Job 1: Build & Test ──────────────────────────────────────
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install SAP CDS CLI
+        run: npm install -g @sap/cds-dk
+
+      - name: Validate CDS models
+        run: cds compile db/index.cds --to json > /dev/null
+        continue-on-error: false
+
+      - name: Run unit tests
+        run: npm test
+        env:
+          NODE_ENV: test
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: coverage/
+
+  # ── Job 2: Code Quality ──────────────────────────────────────
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npx eslint srv/ --ext .js --format stylish
+        continue-on-error: true
+
+      - name: Check for security vulnerabilities
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
+  # ── Job 3: Deploy to Development ────────────────────────────
+  deploy-dev:
+    name: Deploy to Dev (BTP)
+    runs-on: ubuntu-latest
+    needs: [build-and-test, code-quality]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: development
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install MBT
+        run: npm install -g mbt
+
+      - name: Build MTA Archive
+        run: mbt build --mtar gestion-pme-dev.mtar
+
+      - name: Install CF CLI
+        run: |
+          curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
+          sudo mv cf8 /usr/local/bin/cf
+          cf --version
+
+      - name: Login to SAP BTP Cloud Foundry
+        run: |
+          cf api ${{ env.CF_API }}
+          cf auth ${{ secrets.CF_USERNAME }} ${{ secrets.CF_PASSWORD }}
+          cf target -o ${{ env.CF_ORG }} -s ${{ secrets.CF_SPACE_DEV }}
+
+      - name: Deploy to Development Space
+        run: cf deploy mta_archives/gestion-pme-dev.mtar --retries 1 -f
+
+      - name: Verify deployment
+        run: cf apps | grep gestion-pme
+
+  # ── Job 4: Deploy to Production ─────────────────────────────
+  deploy-prod:
+    name: Deploy to Production (BTP)
+    runs-on: ubuntu-latest
+    needs: [build-and-test, code-quality]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install MBT
+        run: npm install -g mbt
+
+      - name: Build MTA Archive (Production)
+        run: mbt build
+
+      - name: Install CF CLI
+        run: |
+          curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
+          sudo mv cf8 /usr/local/bin/cf
+
+      - name: Login to SAP BTP Cloud Foundry
+        run: |
+          cf api ${{ env.CF_API }}
+          cf auth ${{ secrets.CF_USERNAME }} ${{ secrets.CF_PASSWORD }}
+          cf target -o ${{ env.CF_ORG }} -s ${{ secrets.CF_SPACE_PROD }}
+
+      - name: Blue-Green Deploy to Production
+        run: cf deploy mta_archives/*.mtar --strategy rolling -f
+
+      - name: Post-deployment smoke test
+        run: |
+          sleep 30
+          curl -f https://gestion-pme-srv.${{ secrets.CF_DOMAIN }}/odata/v4/crm/ || exit 1

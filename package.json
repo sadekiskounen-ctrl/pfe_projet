@@ -1,0 +1,53 @@
+{
+  "name": "gestion-pme",
+  "version": "1.0.0",
+  "description": "Solution Cloud de Gestion des Clients et Fournisseurs pour PME/Startups — SAP BTP",
+  "repository": "",
+  "license": "UNLICENSED",
+  "private": true,
+  "dependencies": {
+    "@cap-js/hana": "^1",
+    "@sap/cds": "^8",
+    "@sap/xssec": "^4",
+    "cors": "^2.8.6",
+    "express": "^4",
+    "git": "^0.1.5",
+    "nodemailer": "^6",
+    "passport": "^0.7",
+    "pdfkit": "^0.15"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1",
+    "@sap/cds-dk": "^8",
+    "@sap/ux-specification": "latest",
+    "jest": "^29"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "dev": "cds watch",
+    "build": "cds build --production",
+    "test": "jest --forceExit",
+    "mta:build": "mbt build",
+    "deploy": "mbt build && cf deploy mta_archives/*.mtar"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sql"
+      }
+    },
+    "[production]": {
+      "requires": {
+        "db": {
+          "kind": "hana"
+        },
+        "auth": {
+          "kind": "xsuaa"
+        }
+      }
+    },
+    "hana": {
+      "deploy-format": "hdbtable"
+    }
+  }
+}

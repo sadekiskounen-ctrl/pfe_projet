@@ -1,0 +1,248 @@
+<mvc:View
+  controllerName="gestionpme.crm.dashboard.controller.Dashboard"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:l="sap.ui.layout"
+  xmlns:f="sap.ui.layout.form"
+  xmlns:micro="sap.suite.ui.microchart"
+  displayBlock="true">
+
+  <App id="dashboardApp">
+    <pages>
+      <Page
+        id="dashboardPage"
+        title="Dashboard CRM — Gestion PME"
+        showHeader="true">
+
+        <customHeader>
+          <Bar>
+            <contentLeft>
+              <Title text="📊 Dashboard CRM" level="H2" />
+            </contentLeft>
+            <contentRight>
+              <Button text="Rafraîchir" icon="sap-icon://refresh" press="onRefresh" type="Emphasized" />
+            </contentRight>
+          </Bar>
+        </customHeader>
+
+        <content>
+          <VBox class="sapUiSmallMargin">
+
+            <!-- ── KPI Cards Row 1 ── -->
+            <HBox wrap="Wrap" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
+
+              <!-- Total Clients -->
+              <GenericTile
+                id="tileClients"
+                header="Clients Totaux"
+                subheader="B2B + B2C"
+                tileContent="tileContentClients"
+                press="onClientsTilePress"
+                class="sapUiSmallMarginEnd sapUiSmallMarginBottom"
+                frameType="TwoByOne">
+                <tileContent>
+                  <TileContent id="tileContentClients">
+                    <content>
+                      <NumericContent
+                        id="numClients"
+                        value="{kpi>/totalClients}"
+                        scale=""
+                        indicator="None"
+                        valueColor="Good"
+                        icon="sap-icon://group" />
+                    </content>
+                  </TileContent>
+                </tileContent>
+              </GenericTile>
+
+              <!-- Clients B2B -->
+              <GenericTile
+                id="tileClientsB2B"
+                header="Clients B2B"
+                subheader="Entreprises"
+                class="sapUiSmallMarginEnd sapUiSmallMarginBottom"
+                frameType="TwoByOne">
+                <tileContent>
+                  <TileContent id="tileContentB2B">
+                    <content>
+                      <NumericContent
+                        id="numB2B"
+                        value="{kpi>/totalClientsB2B}"
+                        valueColor="Good"
+                        icon="sap-icon://building" />
+                    </content>
+                  </TileContent>
+                </tileContent>
+              </GenericTile>
+
+              <!-- Devis en cours -->
+              <GenericTile
+                id="tileDevis"
+                header="Devis"
+                subheader="En cours"
+                class="sapUiSmallMarginEnd sapUiSmallMarginBottom"
+                frameType="TwoByOne">
+                <tileContent>
+                  <TileContent id="tileContentDevis">
+                    <content>
+                      <NumericContent
+                        id="numDevis"
+                        value="{kpi>/totalDevis}"
+                        valueColor="Neutral"
+                        icon="sap-icon://document" />
+                    </content>
+                  </TileContent>
+                </tileContent>
+              </GenericTile>
+
+              <!-- Factures impayées -->
+              <GenericTile
+                id="tileFacturesImpayees"
+                header="Factures Impayées"
+                subheader="À recouvrer"
+                class="sapUiSmallMarginEnd sapUiSmallMarginBottom"
+                frameType="TwoByOne">
+                <tileContent>
+                  <TileContent id="tileContentImpayees">
+                    <content>
+                      <NumericContent
+                        id="numImpayees"
+                        value="{kpi>/facturesImpayees}"
+                        valueColor="Critical"
+                        icon="sap-icon://alert" />
+                    </content>
+                  </TileContent>
+                </tileContent>
+              </GenericTile>
+
+            </HBox>
+
+            <!-- ── KPI Cards Row 2 — Financial ── -->
+            <HBox wrap="Wrap" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
+
+              <!-- CA Mois -->
+              <GenericTile
+                id="tileCaMois"
+                header="CA ce Mois"
+                subheader="Chiffre d'affaires"
+                class="sapUiSmallMarginEnd sapUiSmallMarginBottom"
+                frameType="TwoByOne">
+                <tileContent>
+                  <TileContent id="tileContentCaMois" unit="DZD">
+                    <content>
+                      <NumericContent
+                        id="numCaMois"
+                        value="{kpi>/chiffreAffaireMois}"
+                        scale="K"
+                        valueColor="Good"
+                        icon="sap-icon://money-bills" />
+                    </content>
+                  </TileContent>
+                </tileContent>
+              </GenericTile>
+
+              <!-- CA Année -->
+              <GenericTile
+                id="tileCaAnnee"
+                header="CA Annuel"
+                subheader="Exercice en cours"
+                class="sapUiSmallMarginEnd sapUiSmallMarginBottom"
+                frameType="TwoByOne">
+                <tileContent>
+                  <TileContent id="tileContentCaAnnee" unit="DZD">
+                    <content>
+                      <NumericContent
+                        id="numCaAnnee"
+                        value="{kpi>/chiffreAffaireAnnee}"
+                        scale="K"
+                        valueColor="Good"
+                        icon="sap-icon://chart-axis" />
+                    </content>
+                  </TileContent>
+                </tileContent>
+              </GenericTile>
+
+              <!-- Taux Conversion -->
+              <GenericTile
+                id="tileTauxConv"
+                header="Taux Conversion"
+                subheader="Devis → Commandes"
+                class="sapUiSmallMarginEnd sapUiSmallMarginBottom"
+                frameType="TwoByOne">
+                <tileContent>
+                  <TileContent id="tileContentConv" unit="%">
+                    <content>
+                      <NumericContent
+                        id="numTauxConv"
+                        value="{kpi>/tauxConversion}"
+                        valueColor="Good"
+                        icon="sap-icon://trend-up" />
+                    </content>
+                  </TileContent>
+                </tileContent>
+              </GenericTile>
+
+              <!-- Total Commandes -->
+              <GenericTile
+                id="tileCommandes"
+                header="Commandes"
+                subheader="Total"
+                class="sapUiSmallMarginEnd sapUiSmallMarginBottom"
+                frameType="TwoByOne">
+                <tileContent>
+                  <TileContent id="tileContentCmds">
+                    <content>
+                      <NumericContent
+                        id="numCommandes"
+                        value="{kpi>/totalCommandes}"
+                        valueColor="Neutral"
+                        icon="sap-icon://sales-order" />
+                    </content>
+                  </TileContent>
+                </tileContent>
+              </GenericTile>
+
+            </HBox>
+
+            <!-- ── Pipeline Section ── -->
+            <Panel headerText="Pipeline Commercial" expandable="true" expanded="true" class="sapUiSmallMarginBottom">
+              <VBox class="sapUiSmallMargin">
+                <l:HorizontalLayout>
+                  <Label text="Devis en cours : " class="sapUiSmallMarginEnd" />
+                  <Text text="{kpi>/devisEnCours}" />
+                  <Label text="  |  Commandes en cours : " class="sapUiSmallMarginEnd sapUiSmallMarginBegin" />
+                  <Text text="{kpi>/commandesEnCours}" />
+                  <Label text="  |  Paiements encaissés (DZD) : " class="sapUiSmallMarginEnd sapUiSmallMarginBegin" />
+                  <Text text="{kpi>/totalPaiements}" />
+                </l:HorizontalLayout>
+              </VBox>
+            </Panel>
+
+            <!-- ── Recent Clients Table ── -->
+            <Panel headerText="Clients Récents" expandable="true" expanded="true">
+              <Table id="recentClientsTable" items="{/ClientsB2B}" growing="true" growingThreshold="5">
+                <columns>
+                  <Column><Text text="Entreprise" /></Column>
+                  <Column><Text text="Wilaya" /></Column>
+                  <Column><Text text="Secteur" /></Column>
+                  <Column><Text text="Statut" /></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <Text text="{companyName}" />
+                      <Text text="{wilaya}" />
+                      <Text text="{sector}" />
+                      <ObjectStatus text="{status}" state="{= ${status} === 'ACTIVE' ? 'Success' : ${status} === 'PENDING' ? 'Warning' : 'Error'}" />
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </Panel>
+
+          </VBox>
+        </content>
+      </Page>
+    </pages>
+  </App>
+</mvc:View>

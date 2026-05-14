@@ -1,0 +1,99 @@
+{
+  "xsappname": "gestion-pme",
+  "tenant-mode": "dedicated",
+  "description": "Gestion PME/Startups — Security Configuration",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.Admin",
+      "description": "Full administrator access"
+    },
+    {
+      "name": "$XSAPPNAME.Commercial",
+      "description": "Sales representative access"
+    },
+    {
+      "name": "$XSAPPNAME.ClientB2B",
+      "description": "B2B client access"
+    },
+    {
+      "name": "$XSAPPNAME.ClientB2C",
+      "description": "B2C client access"
+    },
+    {
+      "name": "$XSAPPNAME.Fournisseur",
+      "description": "Supplier access"
+    }
+  ],
+  "attributes": [
+    {
+      "name": "CompanyId",
+      "description": "Company identifier for data isolation",
+      "valueType": "string"
+    }
+  ],
+  "role-templates": [
+    {
+      "name": "Admin",
+      "description": "Administrateur système — accès complet",
+      "scope-references": ["$XSAPPNAME.Admin"],
+      "attribute-references": ["CompanyId"]
+    },
+    {
+      "name": "Commercial",
+      "description": "Commercial — gestion pipeline, devis, commandes",
+      "scope-references": ["$XSAPPNAME.Commercial"],
+      "attribute-references": ["CompanyId"]
+    },
+    {
+      "name": "ClientB2B",
+      "description": "Client entreprise B2B",
+      "scope-references": ["$XSAPPNAME.ClientB2B"],
+      "attribute-references": ["CompanyId"]
+    },
+    {
+      "name": "ClientB2C",
+      "description": "Client particulier B2C",
+      "scope-references": ["$XSAPPNAME.ClientB2C"]
+    },
+    {
+      "name": "Fournisseur",
+      "description": "Fournisseur / Supplier",
+      "scope-references": ["$XSAPPNAME.Fournisseur"],
+      "attribute-references": ["CompanyId"]
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "GestionPME_Admin",
+      "description": "Administrateurs système",
+      "role-template-references": ["$XSAPPNAME.Admin"]
+    },
+    {
+      "name": "GestionPME_Commercial",
+      "description": "Commerciaux / Sales",
+      "role-template-references": ["$XSAPPNAME.Commercial"]
+    },
+    {
+      "name": "GestionPME_ClientB2B",
+      "description": "Clients B2B",
+      "role-template-references": ["$XSAPPNAME.ClientB2B"]
+    },
+    {
+      "name": "GestionPME_ClientB2C",
+      "description": "Clients B2C",
+      "role-template-references": ["$XSAPPNAME.ClientB2C"]
+    },
+    {
+      "name": "GestionPME_Fournisseur",
+      "description": "Fournisseurs",
+      "role-template-references": ["$XSAPPNAME.Fournisseur"]
+    }
+  ],
+  "oauth2-configuration": {
+    "redirect-uris": [
+      "https://*.cfapps.us10-001.hana.ondemand.com/**",
+      "https://*.cfapps.us10.hana.ondemand.com/**",
+      "http://localhost:5000/**"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+ID;objectType;prefix;currentNumber;padLength
+nr-001;BP;BP;8;5
+nr-002;DEVIS;DEV;0;5
+nr-003;COMMANDE;CMD;0;5
+nr-004;FACTURE;FAC;0;5
+nr-005;PAIEMENT;PAY;0;5
+nr-006;RFQ;RFQ;0;5
+nr-007;PO;PO;0;5
+nr-008;RECEPTION;REC;0;5
+nr-009;FACTURE_FRS;FFA;0;5

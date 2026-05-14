@@ -1,0 +1,162 @@
+<mvc:View
+  controllerName="gestionpme.admin.dashboard.controller.App"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:tnt="sap.tnt"
+  xmlns:l="sap.ui.layout"
+  displayBlock="true">
+
+  <tnt:ToolPage id="toolPage">
+
+    <!-- ── Sidebar Navigation ── -->
+    <tnt:sideContent>
+      <tnt:SideNavigation id="sideNav" expanded="true">
+        <tnt:NavigationList>
+          <tnt:NavigationListItem text="Tableau de Bord" icon="sap-icon://home" press="onNavDashboard" />
+          <tnt:NavigationListItem text="Business Partners" icon="sap-icon://group" press="onNavBP" />
+          <tnt:NavigationListItem text="Clients B2B" icon="sap-icon://building" press="onNavClientsB2B" />
+          <tnt:NavigationListItem text="Fournisseurs" icon="sap-icon://supplier" press="onNavFournisseurs" />
+          <tnt:NavigationListItem text="Produits" icon="sap-icon://product" press="onNavProduits" />
+          <tnt:NavigationListItem text="Audit Logs" icon="sap-icon://log" press="onNavAuditLogs" />
+          <tnt:NavigationListItem text="Notifications" icon="sap-icon://bell" press="onNavNotifications" />
+          <tnt:NavigationListItem text="Configuration" icon="sap-icon://settings" press="onNavConfig" />
+        </tnt:NavigationList>
+      </tnt:SideNavigation>
+    </tnt:sideContent>
+
+    <!-- ── Main Content ── -->
+    <tnt:mainContents>
+      <Page id="adminPage" showHeader="false">
+        <content>
+          <VBox class="sapUiSmallMargin">
+
+            <!-- ── Header ── -->
+            <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
+              <VBox>
+                <Title text="⚙️ Administration" level="H1" />
+                <Text text="Backoffice — Gestion PME" class="sapUiTinyMarginTop" />
+              </VBox>
+              <HBox>
+                <Button text="Actualiser" icon="sap-icon://refresh" press="onRefresh" class="sapUiSmallMarginEnd" />
+                <Button text="Nouvel Utilisateur" icon="sap-icon://add" type="Emphasized" press="onAddUser" />
+              </HBox>
+            </HBox>
+
+            <!-- ── KPI Cards ── -->
+            <HBox wrap="Wrap" justifyContent="SpaceBetween" class="sapUiSmallMarginBottom">
+
+              <GenericTile header="Business Partners" subheader="Total enregistrés"
+                class="sapUiSmallMarginEnd sapUiSmallMarginBottom" frameType="TwoByOne">
+                <tileContent>
+                  <TileContent>
+                    <content>
+                      <NumericContent value="{kpi>/totalBusinessPartners}" icon="sap-icon://group" valueColor="Neutral"/>
+                    </content>
+                  </TileContent>
+                </tileContent>
+              </GenericTile>
+
+              <GenericTile header="En Attente" subheader="Validation requise"
+                class="sapUiSmallMarginEnd sapUiSmallMarginBottom" frameType="TwoByOne">
+                <tileContent>
+                  <TileContent>
+                    <content>
+                      <NumericContent value="{kpi>/bpEnAttente}" icon="sap-icon://alert" valueColor="Critical"/>
+                    </content>
+                  </TileContent>
+                </tileContent>
+              </GenericTile>
+
+              <GenericTile header="Documents" subheader="Total documents"
+                class="sapUiSmallMarginEnd sapUiSmallMarginBottom" frameType="TwoByOne">
+                <tileContent>
+                  <TileContent>
+                    <content>
+                      <NumericContent value="{kpi>/totalDocuments}" icon="sap-icon://documents" valueColor="Neutral"/>
+                    </content>
+                  </TileContent>
+                </tileContent>
+              </GenericTile>
+
+              <GenericTile header="Système" subheader="État général"
+                class="sapUiSmallMarginEnd sapUiSmallMarginBottom" frameType="TwoByOne">
+                <tileContent>
+                  <TileContent>
+                    <content>
+                      <NumericContent value="100" unit="%" icon="sap-icon://status-positive" valueColor="Good"/>
+                    </content>
+                  </TileContent>
+                </tileContent>
+              </GenericTile>
+
+            </HBox>
+
+            <!-- ── Business Partners en attente ── -->
+            <Panel headerText="Business Partners en Attente de Validation" expandable="true" expanded="true"
+              class="sapUiSmallMarginBottom">
+              <Table id="bpPendingTable"
+                items="{admin>/BusinessPartners}"
+                growing="true" growingThreshold="10"
+                noDataText="Aucun partenaire en attente">
+                <columns>
+                  <Column><Text text="Nom" /></Column>
+                  <Column><Text text="Type" /></Column>
+                  <Column><Text text="Email" /></Column>
+                  <Column><Text text="Statut" /></Column>
+                  <Column><Text text="Actions" /></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <Text text="{admin>displayName}" />
+                      <ObjectStatus text="{admin>bpType}"
+                        state="{= ${admin>bpType} === 'CLIENT_B2B' ? 'Information' : ${admin>bpType} === 'FOURNISSEUR' ? 'Warning' : 'None'}" />
+                      <Text text="{admin>email}" />
+                      <ObjectStatus text="{admin>status}"
+                        state="{= ${admin>status} === 'ACTIVE' ? 'Success' : ${admin>status} === 'PENDING' ? 'Warning' : 'Error'}" />
+                      <HBox>
+                        <Button icon="sap-icon://accept" type="Accept" tooltip="Activer"
+                          press="onActivateBP" class="sapUiTinyMarginEnd" />
+                        <Button icon="sap-icon://decline" type="Reject" tooltip="Bloquer"
+                          press="onBlockBP" />
+                      </HBox>
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </Panel>
+
+            <!-- ── Audit Log ── -->
+            <Panel headerText="Journal d'Audit (Dernières Actions)" expandable="true" expanded="false">
+              <Table id="auditTable"
+                items="{admin>/AuditLogs}"
+                growing="true" growingThreshold="15">
+                <columns>
+                  <Column><Text text="Action" /></Column>
+                  <Column><Text text="Entité" /></Column>
+                  <Column><Text text="Utilisateur" /></Column>
+                  <Column><Text text="Date/Heure" /></Column>
+                  <Column><Text text="Détails" /></Column>
+                </columns>
+                <items>
+                  <ColumnListItem>
+                    <cells>
+                      <ObjectStatus text="{admin>actionType}"
+                        state="{= ${admin>actionType} === 'DELETE' ? 'Error' : ${admin>actionType} === 'CREATE' ? 'Success' : 'Information'}" />
+                      <Text text="{admin>entityName}" />
+                      <Text text="{admin>userName}" />
+                      <Text text="{path: 'admin>createdAt', type: 'sap.ui.model.type.DateTime'}" />
+                      <Text text="{admin>details}" />
+                    </cells>
+                  </ColumnListItem>
+                </items>
+              </Table>
+            </Panel>
+
+          </VBox>
+        </content>
+      </Page>
+    </tnt:mainContents>
+
+  </tnt:ToolPage>
+</mvc:View>

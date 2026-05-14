@@ -1,0 +1,3 @@
+ID;bp_ID;firstName;lastName;email;phone;dateOfBirth;gender;street;city;postalCode;wilaya;country;status
+cb2c-001;bp-004;Ahmed;Benali;ahmed.benali@gmail.com;+213 555 10 20 30;1990-03-15;M;Rue des Frères Bouadou;Alger;16000;Alger;DZ;ACTIVE
+cb2c-002;bp-005;Fatima Zohra;Kaci;fz.kaci@outlook.com;+213 555 40 50 60;1985-11-22;F;Hai El Badr;Sétif;19000;Sétif;DZ;ACTIVE

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portail Fournisseurs — Gestion PME</title>
+    
+    <script>
+        window["sap-ushell-config"] = {
+            defaultRenderer: "fiori2",
+            renderers: {
+                fiori2: {
+                    componentData: {
+                        config: {
+                            search: "hidden"
+                        }
+                    }
+                }
+            },
+            applications: {
+                "srm-fournisseurs": {
+                    title: "Gestion Fournisseurs",
+                    description: "Gestion des fournisseurs",
+                    additionalInformation: "SAPUI5.Component=gestionpme.srm.fournisseurs",
+                    applicationType: "URL",
+                    url: "./",
+                    navigationMode: "embedded"
+                }
+            }
+        };
+    </script>
+
+    <script id="sap-ushell-bootstrap" src="https://ui5.sap.com/test-resources/sap/ushell/bootstrap/sandbox.js"></script>
+    <script id="sap-ui-bootstrap" src="https://ui5.sap.com/resources/sap-ui-core.js"
+        data-sap-ui-libs="sap.m, sap.ushell, sap.fe.templates"
+        data-sap-ui-compatVersion="edge"
+        data-sap-ui-theme="sap_horizon"
+        data-sap-ui-frameOptions="allow"
+        data-sap-ui-resourceroots='{"gestionpme.srm.fournisseurs": "./"}'>
+    </script>
+
+    <script>
+        sap.ui.getCore().attachInit(function() {
+            sap.ushell.Container.createRenderer().placeAt("content");
+        });
+    </script>
+</head>
+<body class="sapUiBody" id="content"></body>
+</html>

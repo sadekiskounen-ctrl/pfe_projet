@@ -1,0 +1,41 @@
+{
+  "[development]": {
+    "auth": {
+      "kind": "mocked",
+      "users": {
+        "admin@pme.dz": {
+          "password": "admin",
+          "roles": ["Admin"],
+          "attr": { "name": "Admin PME" }
+        },
+        "commercial@pme.dz": {
+          "password": "commercial",
+          "roles": ["Commercial"],
+          "attr": { "name": "Commercial PME" }
+        },
+        "clientb2b@pme.dz": {
+          "password": "client",
+          "roles": ["ClientB2B"],
+          "attr": { "name": "SARL TechDZ" }
+        },
+        "clientb2c@pme.dz": {
+          "password": "client",
+          "roles": ["ClientB2C"],
+          "attr": { "name": "Ahmed Benali" }
+        },
+        "fournisseur@pme.dz": {
+          "password": "fournisseur",
+          "roles": ["Fournisseur"],
+          "attr": { "name": "Fournisseur Alger" }
+        }
+      }
+    }
+  },
+  "build": {
+    "target": "gen",
+    "tasks": [
+      { "for": "hana" },
+      { "for": "node-cf" }
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "SAPSE.vscode-cds",
+    "SAPOSS.app-studio-toolkit",
+    "SAPOSS.app-studio-remote-access",
+    "SAPSE.sap-ux-fiori-tools-extension-pack",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "humao.rest-client"
+  ]
+}

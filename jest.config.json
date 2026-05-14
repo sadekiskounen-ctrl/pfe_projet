@@ -1,0 +1,7 @@
+{
+  "testEnvironment": "node",
+  "transform": {},
+  "testMatch": ["**/test/**/*.test.js"],
+  "testTimeout": 30000,
+  "globalSetup": "./test/setup.js"
+}

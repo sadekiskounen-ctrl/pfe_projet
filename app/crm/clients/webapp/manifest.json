@@ -1,0 +1,113 @@
+{
+  "_version": "1.65.0",
+  "sap.app": {
+    "id": "gestionpme.crm.clients",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": { "version": "1.0.0" },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "dataSources": {
+      "mainService": {
+        "uri": "/odata/v4/crm/",
+        "type": "OData",
+        "settings": { "odataVersion": "4.0" }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "sap-icon://customer",
+      "favIcon": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.fe.templates": {},
+        "sap.uxap": {}
+      }
+    },
+    "models": {
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": { "bundleName": "gestionpme.crm.clients.i18n.i18n" }
+      }
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.f.routing.Router",
+        "async": true
+      },
+      "routes": [
+        {
+          "pattern": "",
+          "name": "ClientsB2BList",
+          "target": "ClientsB2BList"
+        },
+        {
+          "pattern": "ClientsB2B({key})",
+          "name": "ClientsB2BDetail",
+          "target": "ClientsB2BDetail"
+        }
+      ],
+      "targets": {
+        "ClientsB2BList": {
+          "type": "Component",
+          "id": "ClientsB2BList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "entitySet": "ClientsB2B",
+              "variantManagement": "Page",
+              "initialLoad": true,
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "tableSettings": {
+                    "type": "ResponsiveTable",
+                    "selectionMode": "Multi"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ClientsB2BDetail": {
+          "type": "Component",
+          "id": "ClientsB2BDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "entitySet": "ClientsB2B",
+              "editableHeaderContent": false
+            }
+          }
+        }
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    }
+  }
+}

@@ -1,0 +1,4 @@
+ID;bp_ID;companyName;rc;nif;nis;ai;sector;legalForm;contactName;contactRole;email;phone;street;city;postalCode;wilaya;country;status
+cb2b-001;bp-001;SARL TechDZ Solutions;16/00-1234567B19;001216123456789;16012345678901;16012345;Technologies & IT;SARL;Karim Hadj;Gérant;contact@techdz.dz;+213 21 55 00 01;Rue Didouche Mourad 45;Alger;16000;Alger;DZ;ACTIVE
+cb2b-002;bp-002;EURL DataFlow Algérie;31/00-7654321A19;003117654321098;31076543210987;31076543;Services Numériques;EURL;Lina Boudiaf;Directrice;info@dataflow.dz;+213 21 55 00 02;Boulevard Mohamed V 12;Oran;31000;Oran;DZ;ACTIVE
+cb2b-003;bp-003;SPA MegaBuild Construction;25/00-1112233C19;002511122334455;25011122334455;25011122;BTP & Construction;SPA;Omar Mansouri;PDG;mega@megabuild.dz;+213 21 55 00 03;Cité 1er Mai;Constantine;25000;Constantine;DZ;PENDING
