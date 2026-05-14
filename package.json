@@ -31,7 +31,35 @@
     "deploy": "mbt build && cf deploy mta_archives/*.mtar"
   },
   "cds": {
+    "folders": {
+      "db": "backend/db",
+      "srv": "backend/srv",
+      "app": "frontend"
+    },
     "requires": {
+      "auth": {
+        "kind": "mocked",
+        "users": {
+          "admin": {
+            "roles": [
+              "Admin",
+              "authenticated-user"
+            ]
+          },
+          "client": {
+            "roles": [
+              "ClientB2B",
+              "authenticated-user"
+            ]
+          },
+          "fournisseur": {
+            "roles": [
+              "Fournisseur",
+              "authenticated-user"
+            ]
+          }
+        }
+      },
       "db": {
         "kind": "sql"
       }

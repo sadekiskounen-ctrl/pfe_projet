@@ -1,0 +1,6 @@
+ID;companyName;email;type;status;phone;address;siret;tvaNumber;createdAt
+reg-001;AlgeriSoft SPA;admin@algerisoft.com;CLIENT_B2B;PENDING;+213 21 00 11 22;Boulevard des Martyrs, Alger;12345678901234;DZ123456789;2026-05-10T10:00:00Z
+reg-002;Global Logistics EURL;contact@global-log.dz;CLIENT_B2B;PENDING;+213 31 44 55 66;Zone Industrielle, Oran;98765432109876;DZ987654321;2026-05-11T14:30:00Z
+reg-003;ElectroDistri SARL;info@electro-distri.dz;FOURNISSEUR;PENDING;+213 25 77 88 99;Route de Sétif, Bordj Bou Arreridj;11223344556677;DZ112233445;2026-05-12T09:15:00Z
+reg-004;AgroFood Algeria;sales@agrofood.dz;FOURNISSEUR;PENDING;+213 34 22 33 44;Plaine de la Mitidja, Blida;55443322110099;DZ554433221;2026-05-13T16:45:00Z
+reg-005;InnoTech Startup;hello@innotech.dz;CLIENT_B2B;APPROVED;+213 550 11 22 33;Cyberparc de Sidi Abdellah;66778899001122;DZ667788990;2026-05-01T11:00:00Z

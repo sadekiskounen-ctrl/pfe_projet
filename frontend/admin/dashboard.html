@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration — SAP Fiori Horizon</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --sap-shell-bg: #354a5f;
+            --sap-bg: #eff4f9;
+            --sap-card-bg: #ffffff;
+            --sap-primary: #0070f2;
+            --sap-text: #32363a;
+            --sap-text-light: #6a6d70;
+            --sap-border: #d8d8d8;
+            --sap-success: #107e3e;
+            --sap-error: #bb0000;
+            --sap-warning: #e9730c;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', Arial, Helvetica, sans-serif;
+            background-color: var(--sap-bg);
+            color: var(--sap-text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ── SAP Shell Bar (Standard) ── */
+        .shell-bar {
+            height: 48px;
+            background-color: var(--sap-shell-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 1rem;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .shell-left, .shell-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sap-logo {
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .shell-title {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        .user-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        /* ── Layout ── */
+        .app-container {
+            display: flex;
+            flex: 1;
+        }
+
+        /* ── Side Navigation ── */
+        .side-nav {
+            width: 240px;
+            background: white;
+            border-right: 1px solid var(--sap-border);
+            display: flex;
+            flex-direction: column;
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--sap-text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        .nav-item.active {
+            color: var(--sap-primary);
+            font-weight: 600;
+            border-left: 4px solid var(--sap-primary);
+            background-color: #f0f7ff;
+        }
+
+        /* ── Main Area ── */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .view-section {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; } to { opacity: 1; }
+        }
+
+        h1 { font-size: 1.5rem; font-weight: 400; margin-bottom: 2rem; color: #32363a; }
+
+        /* ── Fiori Cards ── */
+        .fiori-card {
+            background: var(--sap-card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--sap-border);
+            margin-bottom: 2rem;
+            box-shadow: 0 0 0.5rem rgba(0,0,0,0.05);
+        }
+
+        .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--sap-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title { font-weight: 600; font-size: 1rem; }
+        .card-content { padding: 1.5rem; }
+
+        /* ── Stats Grid ── */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--sap-border);
+            text-align: center;
+        }
+
+        .kpi-value { font-size: 1.5rem; font-weight: 700; color: var(--sap-primary); }
+        .kpi-label { font-size: 0.8rem; color: var(--sap-text-light); margin-top: 0.5rem; }
+
+        /* ── Fiori Table ── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background: #f7f7f7;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid var(--sap-border);
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--sap-border);
+        }
+
+        tr:hover { background-color: #fbfbfb; }
+
+        .sap-btn {
+            padding: 6px 12px;
+            border-radius: 4px;
+            border: 1px solid var(--sap-primary);
+            background: white;
+            color: var(--sap-primary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sap-btn:hover { background: var(--sap-primary); color: white; }
+        .sap-btn-primary { background: var(--sap-primary); color: white; }
+        .sap-btn-negative { border-color: var(--sap-error); color: var(--sap-error); }
+        .sap-btn-negative:hover { background: var(--sap-error); color: white; }
+
+        .status-badge {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending { background: #fff4e5; color: #e9730c; }
+        .status-approved { background: #e7f4e9; color: #107e3e; }
+
+        /* ── Modal ── */
+        .sap-dialog-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none;
+            align-items: center; justify-content: center; z-index: 2000;
+        }
+        .sap-dialog {
+            background: white; border-radius: 8px; width: 600px; padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="shell-bar">
+    <div class="shell-left">
+        <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" class="sap-logo" alt="SAP">
+        <span class="shell-title">Administration PME</span>
+    </div>
+    <div class="shell-right">
+        <span>Aide</span>
+        <div class="user-icon">AD</div>
+    </div>
+</div>
+
+<div class="app-container">
+    <aside class="side-nav">
+        <button class="nav-item active" onclick="showSection('overview', this)">📊 Vue d'ensemble</button>
+        <button class="nav-item" onclick="showSection('registrations', this)">📝 Inscriptions <span id="badgeCount" style="margin-left:auto; color: var(--sap-warning)">0</span></button>
+        <button class="nav-item" onclick="showSection('partners', this)">👥 Business Partners</button>
+        <button class="nav-item">📦 Catalogue Produits</button>
+        <button class="nav-item">⚙️ Paramètres</button>
+    </aside>
+
+    <main class="main-content">
+        <!-- Overview -->
+        <div id="overview" class="view-section active">
+            <h1>Tableau de bord</h1>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-value" id="statBP">--</div>
+                    <div class="kpi-label">Business Partners</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value" id="statPending">--</div>
+                    <div class="kpi-label">Inscriptions en attente</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">0,00 €</div>
+                    <div class="kpi-label">Volume d'affaires</div>
+                </div>
+            </div>
+
+            <div class="fiori-card">
+                <div class="card-header"><span class="card-title">Activité des inscriptions</span></div>
+                <div class="card-content">
+                    <canvas id="activityChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registrations -->
+        <div id="registrations" class="view-section">
+            <h1>Gestion des inscriptions</h1>
+            <div class="fiori-card">
+                <div class="card-header">
+                    <span class="card-title">Demandes en attente (KYC)</span>
+                    <button class="sap-btn" onclick="fetchRegistrations()">Actualiser</button>
+                </div>
+                <div class="card-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Compagnie</th>
+                                <th>Type</th>
+                                <th>Email</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="regTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Partners -->
+        <div id="partners" class="view-section">
+            <h1>Business Partners</h1>
+            <div class="fiori-card">
+                <div class="card-header"><span class="card-title">Liste des partenaires</span></div>
+                <div class="card-content">
+                    <table id="bpTable">
+                        <thead>
+                            <tr>
+                                <th>N° Client</th>
+                                <th>Nom</th>
+                                <th>Type</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bpTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal Détails -->
+<div id="regModal" class="sap-dialog-overlay">
+    <div class="sap-dialog">
+        <h2 style="margin-bottom: 1.5rem;">Détails de la demande</h2>
+        <div id="modalData" style="line-height: 1.8; margin-bottom: 2rem;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+            <button class="sap-btn" onclick="closeModal()">Annuler</button>
+            <button class="sap-btn sap-btn-negative" id="btnReject">Refuser</button>
+            <button class="sap-btn sap-btn-primary" id="btnApprove">Approuver</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const API_REG = '/odata/v4/registration';
+    const API_ADMIN = '/odata/v4/admin';
+    const API_ANALYTICS = '/odata/v4/analytics';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const mockUser = urlParams.get('user');
+    const authQuery = mockUser ? `user=${mockUser}` : '';
+
+    function showSection(id, btn) {
+        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        if(id === 'registrations') fetchRegistrations();
+        if(id === 'partners') fetchPartners();
+    }
+
+    async function fetchRegistrations() {
+        const res = await fetch(`${API_REG}/RegistrationRequests?${authQuery}`);
+        const data = await res.json();
+        const pending = (data.value || []).filter(r => r.status === 'PENDING');
+        
+        document.getElementById('statPending').innerText = pending.length;
+        document.getElementById('badgeCount').innerText = pending.length;
+
+        const tbody = document.getElementById('regTable');
+        tbody.innerHTML = '';
+        pending.forEach(reg => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${reg.companyName}</strong></td>
+                <td>${reg.type}</td>
+                <td>${reg.email}</td>
+                <td>${new Date(reg.createdAt).toLocaleDateString()}</td>
+                <td><span class="status-badge status-pending">PENDING</span></td>
+                <td><button class="sap-btn" onclick='viewReg(${JSON.stringify(reg)})'>Gérer</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function viewReg(reg) {
+        document.getElementById('modalData').innerHTML = `
+            <b>Compagnie :</b> ${reg.companyName}<br>
+            <b>Type :</b> ${reg.type}<br>
+            <b>Email :</b> ${reg.email}<br>
+            <b>SIRET :</b> ${reg.siret || 'N/A'}<br>
+            <b>Adresse :</b> ${reg.address || 'N/A'}
+        `;
+        document.getElementById('btnApprove').onclick = () => approveReg(reg.ID);
+        document.getElementById('regModal').style.display = 'flex';
+    }
+
+    function closeModal() { document.getElementById('regModal').style.display = 'none'; }
+
+    async function approveReg(id) {
+        await fetch(`${API_REG}/approveRegistration?${authQuery}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        });
+        alert('Inscription approuvée');
+        closeModal();
+        fetchRegistrations();
+    }
+
+    async function fetchPartners() {
+        const res = await fetch(`${API_ADMIN}/BusinessPartners?${authQuery}`);
+        const data = await res.json();
+        const body = document.getElementById('bpTableBody');
+        body.innerHTML = '';
+        (data.value || []).forEach(bp => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${bp.bpNumber}</td><td>${bp.displayName}</td><td>${bp.bpType}</td><td><span class="status-badge status-approved">${bp.status}</span></td>`;
+            body.appendChild(tr);
+        });
+    }
+
+    async function fetchStats() {
+        const resp = await fetch(`${API_ANALYTICS}/BusinessPartners/$count?${authQuery}`);
+        const count = await resp.text();
+        document.getElementById('statBP').innerText = count;
+    }
+
+    // Chart
+    new Chart(document.getElementById('activityChart'), {
+        type: 'line',
+        data: {
+            labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+            datasets: [{
+                label: 'Inscriptions',
+                data: [10, 15, 8, 12, 19, 3, 7],
+                borderColor: '#0070f2',
+                tension: 0.3,
+                fill: false
+            }]
+        },
+        options: { plugins: { legend: { display: false } }, scales: { y: { display: false } } }
+    });
+
+    fetchStats();
+    fetchRegistrations();
+</script>
+
+</body>
+</html>

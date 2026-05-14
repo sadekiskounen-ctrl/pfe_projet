@@ -13,7 +13,7 @@ build-parameters:
       commands:
         - npm ci
         - npx cds build --production
-        - powershell -Command "Copy-Item -Path app -Destination gen/srv/app -Recurse -Force -Exclude router"
+        - powershell -Command "Copy-Item -Path frontend -Destination gen/srv/app -Recurse -Force -Exclude router"
 
 modules:
   # ── Backend CAP Service ──
@@ -47,7 +47,7 @@ modules:
   # ── Approuter ──
   - name: gestion-pme-approuter
     type: approuter.nodejs
-    path: app/router
+    path: frontend/router
     parameters:
       memory: 128M
       disk-quota: 256M
@@ -109,7 +109,7 @@ resources:
     parameters:
       service: xsuaa
       service-plan: application
-      path: ./xs-security.json
+      path: ./backend/xs-security.json
       config:
         xsappname: gestion-pme
         tenant-mode: dedicated

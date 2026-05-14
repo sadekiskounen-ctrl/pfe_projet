@@ -2,7 +2,7 @@
 // Analytics Service — KPI & Dashboards
 // ============================================================
 
-using { sap.pme as pme }           from '../../db/schema/common';
+using { sap.pme as pme }           from '../../db/index';
 using { sap.pme.crm as crm }       from '../../db/schema/crm';
 using { sap.pme.srm as srm }       from '../../db/schema/srm';
 using { sap.pme.doc as doc }        from '../../db/schema/documents';
@@ -20,6 +20,7 @@ service AnalyticsService {
   @readonly entity Paiements     as projection on doc.Paiement;
   @readonly entity BonsCommande  as projection on doc.BonCommandeFournisseur;
   @readonly entity Produits      as projection on pme.Produit;
+  @readonly entity BusinessPartners as projection on pme.BusinessPartner;
 
   // ── Functions for KPI ──
   function getCRMDashboard()  returns CRMDashboardKPI;

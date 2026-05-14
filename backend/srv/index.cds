@@ -7,3 +7,4 @@ using from './crm/crm-service';
 using from './srm/srm-service';
 using from './admin/admin-service';
 using from './analytics/analytics-service';
+using from './registration/registration-service';

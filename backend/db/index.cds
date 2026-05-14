@@ -20,3 +20,6 @@ using from './schema/documents';
 
 // Admin & system entities
 using from './schema/admin';
+
+// Registration workflows
+using from './schema/registration';

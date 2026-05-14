@@ -2,7 +2,7 @@
 // SRM Fiori Annotations — Fournisseurs, RFQ
 // ============================================================
 
-using SRMService from '../../../srv/srm/srm-service';
+using SRMService from '../../../backend/srv/srm/srm-service';
 
 // ────────────────────────────────────────────
 // FOURNISSEURS — List Report

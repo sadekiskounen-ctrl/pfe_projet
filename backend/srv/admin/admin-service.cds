@@ -3,7 +3,7 @@
 // Backoffice: Users, Audit, Config, KPI, Notifications
 // ============================================================
 
-using { sap.pme as pme }           from '../../db/schema/common';
+using { sap.pme as pme }           from '../../db/index';
 using { sap.pme.crm as crm }       from '../../db/schema/crm';
 using { sap.pme.srm as srm }       from '../../db/schema/srm';
 using { sap.pme.doc as doc }        from '../../db/schema/documents';

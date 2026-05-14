@@ -2,7 +2,7 @@
 // CRM Fiori Annotations — ListReport & ObjectPage
 // ============================================================
 
-using CRMService from '../../../srv/crm/crm-service';
+using CRMService from '../../../backend/srv/crm/crm-service';
 
 // ────────────────────────────────────────────
 // CLIENTS B2B — List Report Columns
