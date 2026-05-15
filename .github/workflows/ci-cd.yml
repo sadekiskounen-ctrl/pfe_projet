@@ -60,20 +60,18 @@ jobs:
       - name: Install MBT & CF CLI
         run: |
           npm install -g mbt
-          wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
-          echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
-          sudo apt-get update
-          sudo apt-get install -y cf8-cli
-          cf install-plugin -f https://github.com/cloudfoundry-incubator/multiapps-cli-plugin/releases/latest/download/multiapps-plugin.linux64
+          curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
+          ./cf install-plugin -f https://github.com/cloudfoundry-incubator/multiapps-cli-plugin/releases/latest/download/multiapps-plugin.linux64
+          ./cf plugins
 
       - name: Login to SAP BTP Cloud Foundry
         run: |
-          cf api ${{ env.CF_API }}
-          cf auth $CF_USERNAME $CF_PASSWORD
-          cf target -o ${{ env.CF_ORG }} -s $CF_SPACE
+          ./cf api ${{ env.CF_API }}
+          ./cf auth $CF_USERNAME $CF_PASSWORD
+          ./cf target -o ${{ env.CF_ORG }} -s $CF_SPACE
 
       - name: Deploy to Development Space
-        run: cf deploy mta_archives/gestion-pme-dev.mtar --retries 1 -f
+        run: ./cf deploy mta_archives/gestion-pme-dev.mtar --retries 1 -f
 
   # ── Job 3: Deploy to Production ─────────────────────────────
   deploy-prod:
@@ -102,17 +100,15 @@ jobs:
       - name: Install MBT & CF CLI
         run: |
           npm install -g mbt
-          wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | sudo apt-key add -
-          echo "deb https://packages.cloudfoundry.org/debian stable main" | sudo tee /etc/apt/sources.list.d/cloudfoundry-cli.list
-          sudo apt-get update
-          sudo apt-get install -y cf8-cli
-          cf install-plugin -f https://github.com/cloudfoundry-incubator/multiapps-cli-plugin/releases/latest/download/multiapps-plugin.linux64
+          curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
+          ./cf install-plugin -f https://github.com/cloudfoundry-incubator/multiapps-cli-plugin/releases/latest/download/multiapps-plugin.linux64
+          ./cf plugins
 
       - name: Login to SAP BTP Cloud Foundry
         run: |
-          cf api ${{ env.CF_API }}
-          cf auth $CF_USERNAME $CF_PASSWORD
-          cf target -o ${{ env.CF_ORG }} -s $CF_SPACE
+          ./cf api ${{ env.CF_API }}
+          ./cf auth $CF_USERNAME $CF_PASSWORD
+          ./cf target -o ${{ env.CF_ORG }} -s $CF_SPACE
 
       - name: Blue-Green Deploy to Production
-        run: cf deploy mta_archives/gestion-pme_1.0.0.mtar --strategy rolling -f
+        run: ./cf deploy mta_archives/gestion-pme_1.0.0.mtar --strategy rolling -f
