@@ -10,7 +10,7 @@ env:
   NODE_VERSION: '20.x'
   CF_API: 'https://api.cf.us10-001.hana.ondemand.com'
   CF_ORG: 'ffbe6148trial'
-  CF_SPACE: ${{ secrets.CF_SPACE }}
+#  CF_SPACE: ${{ secrets.CF_SPACE }}
 
 jobs:
   # ── Job 1: Build & Test ──────────────────────────────────────
@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-and-test, code-quality]
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-    environment: development
+#    environment: development
 
     steps:
       - uses: actions/checkout@v4
@@ -126,7 +126,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-and-test, code-quality]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: production
+#    environment: production
 
     steps:
       - uses: actions/checkout@v4
