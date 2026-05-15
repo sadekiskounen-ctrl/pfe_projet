@@ -83,6 +83,10 @@ jobs:
     needs: [build-and-test, code-quality]
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
 #    environment: development
+    env:
+      CF_USERNAME: ${{ secrets.CF_USERNAME }}
+      CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
+      CF_SPACE: ${{ secrets.CF_SPACE_DEV }}
 
     steps:
       - uses: actions/checkout@v4
@@ -111,8 +115,8 @@ jobs:
       - name: Login to SAP BTP Cloud Foundry
         run: |
           cf api ${{ env.CF_API }}
-          cf auth ${{ secrets.CF_USERNAME }} ${{ secrets.CF_PASSWORD }}
-          cf target -o ${{ env.CF_ORG }} -s ${{ secrets.CF_SPACE_DEV }}
+          cf auth $CF_USERNAME $CF_PASSWORD
+          cf target -o ${{ env.CF_ORG }} -s $CF_SPACE
 
       - name: Deploy to Development Space
         run: cf deploy mta_archives/gestion-pme-dev.mtar --retries 1 -f
@@ -127,6 +131,11 @@ jobs:
     needs: [build-and-test, code-quality]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 #    environment: production
+    env:
+      CF_USERNAME: ${{ secrets.CF_USERNAME }}
+      CF_PASSWORD: ${{ secrets.CF_PASSWORD }}
+      CF_SPACE: ${{ secrets.CF_SPACE_PROD }}
+      CF_DOMAIN: ${{ secrets.CF_DOMAIN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -154,8 +163,8 @@ jobs:
       - name: Login to SAP BTP Cloud Foundry
         run: |
           cf api ${{ env.CF_API }}
-          cf auth ${{ secrets.CF_USERNAME }} ${{ secrets.CF_PASSWORD }}
-          cf target -o ${{ env.CF_ORG }} -s ${{ secrets.CF_SPACE_PROD }}
+          cf auth $CF_USERNAME $CF_PASSWORD
+          cf target -o ${{ env.CF_ORG }} -s $CF_SPACE
 
       - name: Blue-Green Deploy to Production
         run: cf deploy mta_archives/*.mtar --strategy rolling -f
@@ -163,4 +172,4 @@ jobs:
       - name: Post-deployment smoke test
         run: |
           sleep 30
-          curl -f https://gestion-pme-srv.${{ secrets.CF_DOMAIN }}/odata/v4/crm/ || exit 1
+          curl -f https://gestion-pme-srv.$CF_DOMAIN/odata/v4/crm/ || exit 1
