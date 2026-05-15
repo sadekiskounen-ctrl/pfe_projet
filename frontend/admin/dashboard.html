@@ -246,10 +246,23 @@
         <span class="shell-title">Administration PME</span>
     </div>
     <div class="shell-right">
-        <span>Aide</span>
+        <span style="cursor:pointer; font-size: 0.9rem; margin-right: 1rem;" onclick="logout()">Déconnexion</span>
         <div class="user-icon">AD</div>
     </div>
 </div>
+
+<script>
+    // Session & Role Check
+    if (localStorage.getItem('isLoggedIn') !== 'true' || localStorage.getItem('userRole') !== 'admin') {
+        window.location.href = '/auth.html?app=admin';
+    }
+    
+    function logout() {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userRole');
+        window.location.href = '/auth.html';
+    }
+</script>
 
 <div class="app-container">
     <aside class="side-nav">

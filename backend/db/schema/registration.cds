@@ -19,6 +19,7 @@ entity RegistrationRequest : cuid, managed {
     email       : String(100);
     phone       : String(30);
     address     : String(200);
+    password    : String(100);
 
     // KYC B2B & Fournisseur
     siret       : String(14);

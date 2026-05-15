@@ -29,6 +29,7 @@ module.exports = class RegistrationService extends cds.ApplicationService {
                     displayName: request.companyName,
                     email: request.email,
                     phone: request.phone,
+                    password: request.password,
                     status: 'ACTIVE'
                 }));
 

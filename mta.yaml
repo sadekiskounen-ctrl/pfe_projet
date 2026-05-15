@@ -13,7 +13,7 @@ build-parameters:
       commands:
         - npm ci
         - npx cds build --production
-        - powershell -Command "Copy-Item -Path frontend -Destination gen/backend/srv/app -Recurse -Force -Exclude router"
+        - node scripts/build-cloud.js
 
 modules:
   # ── Backend CAP Service ──
@@ -37,7 +37,7 @@ modules:
   # ── Database Deployer ──
   - name: gestion-pme-db-deployer
     type: hdb
-    path: gen/db
+    path: gen/backend/db
     parameters:
       buildpack: nodejs_buildpack
       memory: 256M
@@ -47,7 +47,7 @@ modules:
   # ── Approuter ──
   - name: gestion-pme-approuter
     type: approuter.nodejs
-    path: frontend/router
+    path: frontend
     parameters:
       memory: 128M
       disk-quota: 256M

@@ -336,7 +336,15 @@
     }
 
     footer strong { color: var(--sap-blue); }
-  </style>
+  <script>
+    // Session Check
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+        // window.location.href = '/auth.html'; 
+        // Note: For the landing page, we might want to allow viewing, 
+        // but the user requested "oblige l'utilisateur a ce connecter".
+        // However, if they are on the landing page, they haven't clicked CRM/SRM/Admin yet.
+    }
+  </script>
 </head>
 <body>
 
@@ -381,7 +389,7 @@
   <div class="section-title">Applications métier</div>
 
   <div class="apps-grid">
-    <a class="app-card crm" href="/odata/v4/crm">
+    <a class="app-card crm" href="/auth.html?app=crm">
       <div class="app-arrow">→</div>
       <div class="app-icon">👥</div>
       <div class="app-name">CRM — Gestion Clients</div>
@@ -393,7 +401,7 @@
       </div>
     </a>
 
-    <a class="app-card srm" href="/odata/v4/srm">
+    <a class="app-card srm" href="/auth.html?app=srm">
       <div class="app-arrow">→</div>
       <div class="app-icon">🏭</div>
       <div class="app-name">SRM — Gestion Fournisseurs</div>
@@ -405,27 +413,15 @@
       </div>
     </a>
 
-    <a class="app-card admin" href="/admin/login.html">
+    <a class="app-card admin" href="/auth.html?app=admin">
       <div class="app-arrow">→</div>
       <div class="app-icon">⚙️</div>
-      <div class="app-name">Administration</div>
-      <div class="app-desc">Audit logs, Configurations système, Notifications, Numérotation</div>
+      <div class="app-name">Administration & Analytics</div>
+      <div class="app-desc">Audit logs, KPIs, Configurations système, Notifications</div>
       <div class="app-tags">
         <span class="tag">AuditLog</span>
-        <span class="tag">Config</span>
-        <span class="tag">Alertes</span>
-      </div>
-    </a>
-
-    <a class="app-card analytics" href="/odata/v4/analytics">
-      <div class="app-arrow">→</div>
-      <div class="app-icon">📊</div>
-      <div class="app-name">Analytics & KPIs</div>
-      <div class="app-desc">Tableaux de bord, Indicateurs CRM/SRM, Pipeline commercial</div>
-      <div class="app-tags">
-        <span class="tag">Dashboard</span>
         <span class="tag">KPIs</span>
-        <span class="tag">Pipeline</span>
+        <span class="tag">Config</span>
       </div>
     </a>
   </div>

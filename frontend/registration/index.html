@@ -3,117 +3,344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portail d'Inscription — Gestion PME</title>
-    <!-- Utilisation de Bootstrap pour un design rapide et propre -->
+    <title>Inscription — Gestion PME</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .wizard-container { background: #fff; border-radius: 10px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 50px; }
-        .step { display: none; }
-        .step.active { display: block; }
+        :root {
+            --sap-blue: #0070f2;
+            --sap-blue-dark: #0040b0;
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #1d2733;
+            --border: #e0e5ee;
+        }
+
+        body {
+            background-color: var(--bg);
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .wizard-container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 800px;
+            border: 1px solid var(--border);
+        }
+
+        /* Progress Bar */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--border);
+            z-index: 1;
+        }
+
+        .step-indicator {
+            width: 42px;
+            height: 42px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--border);
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s;
+        }
+
+        .step-indicator.active {
+            border-color: var(--sap-blue);
+            color: var(--sap-blue);
+            box-shadow: 0 0 0 4px rgba(0, 112, 242, 0.1);
+        }
+
+        .step-indicator.completed {
+            background: var(--sap-blue);
+            border-color: var(--sap-blue);
+            color: white;
+        }
+
+        .step-label {
+            position: absolute;
+            top: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--border);
+        }
+
+        .step-indicator.active .step-label { color: var(--sap-blue); }
+
+        /* Form Steps */
+        .step-content { display: none; }
+        .step-content.active { display: block; animation: slideUp 0.4s ease-out; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-label { font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; }
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 16px;
+            border: 1.5px solid var(--border);
+            transition: all 0.2s;
+        }
+        .form-control:focus {
+            border-color: var(--sap-blue);
+            box-shadow: 0 0 0 3px rgba(0, 112, 242, 0.1);
+        }
+
+        .btn-primary { background: var(--sap-blue); border: none; padding: 12px 30px; border-radius: 10px; font-weight: 600; }
+        .btn-primary:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn-primary:hover { background: var(--sap-blue-dark); }
+        .btn-secondary { background: #e2e8f0; color: var(--text); border: none; padding: 12px 30px; border-radius: 10px; font-weight: 600; }
+        .btn-secondary:hover { background: #cbd5e1; }
+
+        .invalid-feedback { font-size: 0.8rem; }
+
+        .card-type-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .card-type {
+            flex: 1;
+            padding: 20px;
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .card-type.active {
+            border-color: var(--sap-blue);
+            background: rgba(0, 112, 242, 0.04);
+        }
+
+        .card-type input { display: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8 wizard-container">
-            <h2 class="text-center mb-4 text-primary">Rejoignez notre réseau</h2>
-            
-            <div class="mb-4 text-center">
-                <div class="btn-group" role="group">
-                    <input type="radio" class="btn-check" name="regType" id="btnB2B" value="b2b" autocomplete="off" checked onchange="toggleType()">
-                    <label class="btn btn-outline-primary" for="btnB2B">Client B2B</label>
+<div class="wizard-container">
+    <div class="progress-steps">
+        <div class="step-indicator active" id="ind1">1 <span class="step-label">Société</span></div>
+        <div class="step-indicator" id="ind2">2 <span class="step-label">Contact</span></div>
+        <div class="step-indicator" id="ind3">3 <span class="step-label">Documents</span></div>
+    </div>
 
-                    <input type="radio" class="btn-check" name="regType" id="btnSupplier" value="supplier" autocomplete="off" onchange="toggleType()">
-                    <label class="btn btn-outline-primary" for="btnSupplier">Fournisseur</label>
+    <form id="registrationForm" class="needs-validation" novalidate>
+        <!-- ÉTAPE 1: Société -->
+        <div id="step1" class="step-content active">
+            <h4 class="mb-4">1. Identité de l'entreprise</h4>
+            
+            <div class="card-type-selector">
+                <div class="card-type active" onclick="setRegType('b2b', this)">
+                    <input type="radio" name="regType" value="b2b" checked>
+                    <strong>Client B2B</strong>
+                    <p class="small text-muted mb-0">Accès au catalogue et commandes</p>
+                </div>
+                <div class="card-type" onclick="setRegType('supplier', this)">
+                    <input type="radio" name="regType" value="supplier">
+                    <strong>Fournisseur</strong>
+                    <p class="small text-muted mb-0">Gestion des ventes et RFQ</p>
                 </div>
             </div>
 
-            <form id="registrationForm">
-                <!-- ÉTAPE 1: Informations Entreprise -->
-                <div id="step1" class="step active">
-                    <h4>1. Informations de l'entreprise</h4>
-                    <div class="mb-3">
-                        <label class="form-label">Raison Sociale *</label>
-                        <input type="text" class="form-control" id="companyName" required>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Numéro RC</label>
-                            <input type="text" class="form-control" id="rc">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">NIF</label>
-                            <input type="text" class="form-control" id="nif">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Secteur d'activité</label>
-                        <input type="text" class="form-control" id="sector">
-                    </div>
-                    <button type="button" class="btn btn-primary float-end" onclick="nextStep(2)">Suivant</button>
-                </div>
-
-                <!-- ÉTAPE 2: Contact -->
-                <div id="step2" class="step">
-                    <h4>2. Contact Principal</h4>
-                    <div class="mb-3">
-                        <label class="form-label">Nom complet *</label>
-                        <input type="text" class="form-control" id="contactName" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Email professionnel *</label>
-                        <input type="email" class="form-control" id="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Téléphone</label>
-                        <input type="tel" class="form-control" id="phone">
-                    </div>
-                    <button type="button" class="btn btn-secondary" onclick="nextStep(1)">Précédent</button>
-                    <button type="button" class="btn btn-primary float-end" onclick="nextStep(3)">Suivant</button>
-                </div>
-
-                <!-- ÉTAPE 3: Documents KYC -->
-                <div id="step3" class="step">
-                    <h4>3. Documents (KYC)</h4>
-                    <p class="text-muted small">Pour valider votre compte, nous avons besoin de vos documents légaux.</p>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">K-bis / Registre de Commerce (PDF)</label>
-                        <input class="form-control" type="file" id="fileRC" accept="application/pdf">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">RIB (PDF)</label>
-                        <input class="form-control" type="file" id="fileRIB" accept="application/pdf">
-                    </div>
-                    
-                    <div class="alert alert-info mt-4">
-                        Une fois le formulaire soumis, notre équipe administrateur vérifiera vos informations. Vous recevrez un email pour définir votre mot de passe (via Cloud Identity Services) dès l'approbation.
-                    </div>
-
-                    <button type="button" class="btn btn-secondary" onclick="nextStep(2)">Précédent</button>
-                    <button type="submit" class="btn btn-success float-end" id="btnSubmit">Soumettre ma candidature</button>
-                </div>
-            </form>
-            
-            <div id="successMsg" class="alert alert-success mt-4" style="display: none;">
-                <strong>Succès !</strong> Votre candidature a été transmise. Vous recevrez un email dès sa validation.
+            <div class="mb-4">
+                <label class="form-label">Raison Sociale *</label>
+                <input type="text" class="form-control" id="companyName" placeholder="Ex: SARL PME ALGERIE" required>
             </div>
-            <div id="errorMsg" class="alert alert-danger mt-4" style="display: none;">
-                <strong>Erreur :</strong> Une erreur est survenue lors de l'envoi.
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Numéro RC (14 chiffres) *</label>
+                    <input type="text" class="form-control" id="rc" placeholder="Ex: 01234567890123" 
+                           pattern="[0-9]{14}" minlength="14" maxlength="14" required>
+                    <div class="invalid-feedback">Veuillez saisir exactement 14 chiffres.</div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">NIF (14 chiffres) *</label>
+                    <input type="text" class="form-control" id="nif" placeholder="Ex: 98765432109876" 
+                           pattern="[0-9]{14}" minlength="14" maxlength="14" required>
+                    <div class="invalid-feedback">Veuillez saisir exactement 14 chiffres.</div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Secteur d'activité *</label>
+                <select class="form-control" id="sector" required>
+                    <option value="" selected disabled>Choisir un secteur...</option>
+                    <option>Informatique & Tech</option>
+                    <option>Industrie & Manufacture</option>
+                    <option>BTP & Construction</option>
+                    <option>Commerce & Distribution</option>
+                    <option>Autre</option>
+                </select>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+                <button type="button" class="btn btn-primary" onclick="validateAndNext(2)">Suivant</button>
             </div>
         </div>
+
+        <!-- ÉTAPE 2: Contact & Sécurité -->
+        <div id="step2" class="step-content">
+            <h4 class="mb-4">2. Contact & Sécurité</h4>
+            
+            <div class="mb-4">
+                <label class="form-label">Nom complet du responsable *</label>
+                <input type="text" class="form-control" id="contactName" placeholder="Nom et Prénom" required>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Email professionnel *</label>
+                    <input type="email" class="form-control" id="email" placeholder="email@entreprise.com" required>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Téléphone *</label>
+                    <input type="tel" class="form-control" id="phone" placeholder="05XX XX XX XX" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Mot de passe *</label>
+                    <input type="password" class="form-control" id="password" minlength="8" placeholder="Minimum 8 caractères" required>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Confirmer le mot de passe *</label>
+                    <input type="password" class="form-control" id="confirmPassword" required>
+                    <div class="invalid-feedback" id="passError">Les mots de passe ne correspondent pas.</div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-secondary" onclick="goToStep(1)">Précédent</button>
+                <button type="button" class="btn btn-primary" onclick="validateAndNext(3)">Suivant</button>
+            </div>
+        </div>
+
+        <!-- ÉTAPE 3: KYC -->
+        <div id="step3" class="step-content">
+            <h4 class="mb-4">3. Documents (KYC)</h4>
+            <div class="alert alert-info">
+                Téléchargez vos documents pour validation par notre équipe. Format PDF uniquement.
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Registre de Commerce (PDF) *</label>
+                <input class="form-control" type="file" id="fileRC" accept="application/pdf" required>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">RIB (PDF) *</label>
+                <input class="form-control" type="file" id="fileRIB" accept="application/pdf" required>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-secondary" onclick="goToStep(2)">Précédent</button>
+                <button type="submit" class="btn btn-primary" id="btnSubmit">Soumettre mon dossier</button>
+            </div>
+        </div>
+    </form>
+
+    <div id="successMsg" class="text-center mt-4" style="display: none;">
+        <div class="display-1 text-success mb-4">✅</div>
+        <h3>Dossier transmis avec succès !</h3>
+        <p class="text-muted">Notre équipe va examiner vos documents. Vous recevrez un email de confirmation dès validation de votre compte.</p>
+        <a href="/auth.html" class="btn btn-primary mt-3">Retour à la connexion</a>
     </div>
 </div>
 
 <script>
-    function nextStep(step) {
-        document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-        document.getElementById('step' + step).classList.add('active');
+    function setRegType(type, element) {
+        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('active'));
+        element.classList.add('active');
+        element.querySelector('input').checked = true;
     }
 
-    // Fonction pour convertir un fichier en Base64
+    function validateAndNext(step) {
+        const currentStepEl = document.querySelector('.step-content.active');
+        const inputs = currentStepEl.querySelectorAll('input, select');
+        let valid = true;
+
+        inputs.forEach(input => {
+            if (!input.checkValidity()) {
+                input.classList.add('is-invalid');
+                valid = false;
+            } else {
+                input.classList.remove('is-invalid');
+            }
+        });
+
+        // Validation spécifique mot de passe à l'étape 2
+        if (step === 3) {
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            if (pass !== confirm) {
+                document.getElementById('confirmPassword').classList.add('is-invalid');
+                document.getElementById('passError').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('passError').style.display = 'none';
+            }
+        }
+
+        if (valid) {
+            goToStep(step);
+        }
+    }
+
+    function goToStep(step) {
+        document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+        
+        // Update indicators
+        document.querySelectorAll('.step-indicator').forEach((ind, idx) => {
+            ind.classList.remove('active', 'completed');
+            if (idx + 1 < step) ind.classList.add('completed');
+            if (idx + 1 === step) ind.classList.add('active');
+        });
+    }
+
     const toBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -123,14 +350,15 @@
 
     document.getElementById('registrationForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        
         const btn = document.getElementById('btnSubmit');
+        const originalText = btn.innerText;
         btn.disabled = true;
-        btn.innerText = 'Envoi en cours...';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Envoi du dossier...';
 
         const typeValue = document.querySelector('input[name="regType"]:checked').value;
         const type = typeValue === 'b2b' ? 'CLIENT_B2B' : 'FOURNISSEUR';
         
-        // Préparation des fichiers
         const fileRC = document.getElementById('fileRC').files[0];
         const fileRIB = document.getElementById('fileRIB').files[0];
 
@@ -141,16 +369,15 @@
             tvaNumber: document.getElementById('nif').value,
             email: document.getElementById('email').value,
             phone: document.getElementById('phone').value,
-            address: 'Non renseignée', // On pourrait ajouter un champ adresse
-            kbis: fileRC ? await toBase64(fileRC) : null,
-            kbisType: fileRC ? 'application/pdf' : null,
-            kbisName: fileRC ? fileRC.name : null,
-            rib: fileRIB ? await toBase64(fileRIB) : null,
-            ribType: fileRIB ? 'application/pdf' : null,
-            ribName: fileRIB ? fileRIB.name : null
+            password: document.getElementById('password').value,
+            address: 'Non renseignée',
+            kbis: await toBase64(fileRC),
+            kbisType: 'application/pdf',
+            kbisName: fileRC.name,
+            rib: await toBase64(fileRIB),
+            ribType: 'application/pdf',
+            ribName: fileRIB.name
         };
-
-        console.log('Sending registration payload:', payload);
 
         try {
             const response = await fetch('/odata/v4/registration/SubmitRegistration', {
@@ -160,25 +387,27 @@
             });
 
             if(response.ok) {
-                console.log('Registration successful');
+                // Pour la démo, on stocke aussi en local pour simuler la connexion immédiate
+                localStorage.setItem(`user_${payload.email}`, JSON.stringify({
+                    email: payload.email,
+                    password: payload.password,
+                    role: type === 'CLIENT_B2B' ? 'client' : 'fournisseur'
+                }));
+
                 document.getElementById('registrationForm').style.display = 'none';
                 document.getElementById('successMsg').style.display = 'block';
-                document.getElementById('errorMsg').style.display = 'none';
+                document.querySelector('.progress-steps').style.display = 'none';
             } else {
-                const err = await response.json().catch(() => ({ error: { message: 'Unknown server error' } }));
-                console.error('Server returned error:', err);
-                throw new Error(err.error?.message || 'Server error');
+                const err = await response.json();
+                alert('Erreur: ' + (err.error?.message || 'Erreur inconnue'));
+                btn.disabled = false;
+                btn.innerText = originalText;
             }
         } catch (error) {
-            console.error('Submission error (detailed):', error);
-            let msg = error.message;
-            if (msg === 'Failed to fetch') {
-                msg = 'Impossible de contacter le serveur. Vérifiez que le backend est lancé sur le port 4004 ou que vous utilisez le bon domaine.';
-            }
-            document.getElementById('errorMsg').innerText = 'Erreur : ' + msg;
-            document.getElementById('errorMsg').style.display = 'block';
+            console.error(error);
+            alert('Erreur de connexion au serveur');
             btn.disabled = false;
-            btn.innerText = 'Soumettre ma candidature';
+            btn.innerText = originalText;
         }
     });
 </script>

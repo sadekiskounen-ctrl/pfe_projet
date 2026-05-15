@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentification — Gestion PME</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sap-blue: #0070f2;
+            --sap-blue-dark: #0040b0;
+            --bg: #eff4f9;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text: #1d2733;
+            --text-muted: #556b82;
+            --border: rgba(224, 229, 238, 0.5);
+            --shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #354a5f 0%, #eff4f9 100%);
+            color: var(--text);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 480px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, var(--sap-blue-dark), var(--sap-blue));
+            padding: 4rem 2rem;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .auth-header::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: var(--card-bg);
+            border-radius: 50% 50% 0 0;
+        }
+
+        .auth-header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-body {
+            padding: 3rem 2.5rem 2.5rem;
+        }
+
+        .role-selector {
+            display: flex;
+            background: #f1f5f9;
+            padding: 6px;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .role-option {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+
+        .role-option.active {
+            background: white;
+            color: var(--sap-blue);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.6rem;
+            color: var(--text);
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+            box-sizing: border-box;
+            background: white;
+        }
+
+        input:focus {
+            border-color: var(--sap-blue);
+            box-shadow: 0 0 0 4px rgba(0, 112, 242, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, var(--sap-blue), var(--sap-blue-dark));
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 112, 242, 0.3);
+        }
+
+        .auth-footer {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(248, 250, 252, 0.5);
+            border-top: 1px solid var(--border);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .auth-footer a {
+            color: var(--sap-blue);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        #errorMsg {
+            color: #ef4444;
+            background: #fee2e2;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            text-align: center;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="auth-header">
+        <h1>Gestion PME</h1>
+        <p style="opacity: 0.8; font-size: 0.9rem;">Accédez à votre écosystème SAP BTP</p>
+    </div>
+
+    <div class="auth-body">
+        <div id="errorMsg">Identifiants incorrects. Veuillez vérifier vos informations.</div>
+        
+        <div class="role-selector">
+            <div class="role-option active" data-role="client" onclick="selectRole('client')">Client</div>
+            <div class="role-option" data-role="fournisseur" onclick="selectRole('fournisseur')">Fournisseur</div>
+            <div class="role-option" data-role="admin" onclick="selectRole('admin')">Admin</div>
+        </div>
+
+        <form id="loginForm">
+            <input type="hidden" id="selectedRole" value="client">
+
+            <div class="form-group">
+                <label for="username">Email ou Identifiant</label>
+                <input type="text" id="username" placeholder="votre@email.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe</label>
+                <input type="password" id="password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-primary">Connexion sécurisée</button>
+        </form>
+    </div>
+
+    <div class="auth-footer">
+        Nouveau sur la plateforme ? <br/>
+        <a href="/registration/index.html">Créer un compte entreprise</a>
+    </div>
+</div>
+
+<script>
+    function selectRole(role) {
+        document.querySelectorAll('.role-option').forEach(opt => opt.classList.remove('active'));
+        document.querySelector(`.role-option[data-role="${role}"]`).classList.add('active');
+        document.getElementById('selectedRole').value = role;
+        
+        // Auto-fill logic for demo users
+        const userMap = { 'admin': 'admin', 'client': 'client', 'fournisseur': 'fournisseur' };
+        if(userMap[role]) {
+            document.getElementById('username').value = userMap[role];
+            document.getElementById('password').value = userMap[role];
+        }
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const role = document.getElementById('selectedRole').value;
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        
+        let success = false;
+        let finalRole = role;
+
+        // 1. Check Demo Users (Package.json)
+        if ((user === 'admin' && pass === 'admin' && role === 'admin') ||
+            (user === 'client' && pass === 'client' && role === 'client') ||
+            (user === 'fournisseur' && pass === 'fournisseur' && role === 'fournisseur')) {
+            success = true;
+        } 
+        // 2. Check Registered Users (LocalStorage for demo simulation)
+        else {
+            const registeredUser = JSON.parse(localStorage.getItem(`user_${user}`));
+            if (registeredUser && registeredUser.password === pass && registeredUser.role === role) {
+                success = true;
+                finalRole = registeredUser.role;
+            }
+        }
+
+        if (success) {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('userRole', finalRole);
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetApp = urlParams.get('app');
+            
+            if (targetApp === 'crm') window.location.href = '/crm/clients/webapp/index.html';
+            else if (targetApp === 'srm') window.location.href = '/srm/fournisseurs/webapp/index.html';
+            else if (targetApp === 'admin' || finalRole === 'admin') window.location.href = '/admin/dashboard.html';
+            else window.location.href = '/index.html';
+        } else {
+            document.getElementById('errorMsg').style.display = 'block';
+            // Animation de secousse
+            const container = document.querySelector('.auth-container');
+            container.style.animation = 'none';
+            container.offsetHeight; // trigger reflow
+            container.style.animation = 'shake 0.4s';
+        }
+    });
+
+    // Handle Shake Animation
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            75% { transform: translateX(-8px); }
+        }
+    `;
+    document.head.appendChild(style);
+
+    // Initial role based on URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetApp = urlParams.get('app');
+    if (targetApp === 'crm') selectRole('client');
+    else if (targetApp === 'srm') selectRole('fournisseur');
+    else if (targetApp === 'admin') selectRole('admin');
+</script>
+
+</body>
+</html>

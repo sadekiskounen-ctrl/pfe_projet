@@ -22,6 +22,7 @@ entity BusinessPartner : cuid, managed, pme.SoftDelete, pme.Annotatable {
   website     : pme.URL;
   logo        : pme.URL;
   status      : pme.BPStatus default 'PENDING';
+  password    : String(100);
 
   // Address (embedded)
   street      : String(256);

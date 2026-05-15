@@ -28,7 +28,7 @@
     "build": "cds build --production",
     "test": "jest --forceExit",
     "mta:build": "mbt build",
-    "deploy": "mbt build && cf deploy mta_archives/*.mtar"
+    "deploy": "mbt build && cf deploy mta_archives/gestion-pme_1.0.0.mtar"
   },
   "cds": {
     "folders": {

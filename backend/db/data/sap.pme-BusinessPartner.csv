@@ -1,11 +1,11 @@
-ID;bpNumber;bpType;displayName;email;phone;status;street;city;postalCode;wilaya;country
-bp-001;BP-00001;CLIENT_B2B;SARL TechDZ Solutions;contact@techdz.dz;+213 21 55 00 01;ACTIVE;Rue Didouche Mourad 45;Alger;16000;Alger;DZ
-bp-002;BP-00002;CLIENT_B2B;EURL DataFlow Algérie;info@dataflow.dz;+213 21 55 00 02;ACTIVE;Boulevard Mohamed V 12;Oran;31000;Oran;DZ
-bp-003;BP-00003;CLIENT_B2B;SPA MegaBuild Construction;mega@megabuild.dz;+213 21 55 00 03;PENDING;Cité 1er Mai;Constantine;25000;Constantine;DZ
-bp-004;BP-00004;CLIENT_B2C;Ahmed Benali;ahmed.benali@gmail.com;+213 555 10 20 30;ACTIVE;Rue des Frères Bouadou;Alger;16000;Alger;DZ
-bp-005;BP-00005;CLIENT_B2C;Fatima Zohra Kaci;fz.kaci@outlook.com;+213 555 40 50 60;ACTIVE;Hai El Badr;Sétif;19000;Sétif;DZ
-bp-006;BP-00006;FOURNISSEUR;SARL AlgerFournitures Pro;contact@algerfournitures.dz;+213 21 66 00 01;ACTIVE;Zone Industrielle Oued Smar;Alger;16270;Alger;DZ
-bp-007;BP-00007;FOURNISSEUR;EURL ImportTech Maghreb;import@importtech.dz;+213 21 66 00 02;ACTIVE;Port d Oran;Oran;31000;Oran;DZ
-bp-008;BP-00008;FOURNISSEUR;SPA MatériaPrime;info@materiaprime.dz;+213 21 66 00 03;PENDING;ZI Rouiba;Alger;16012;Alger;DZ
-bp-009;BP-00009;CLIENT_B2B;BuildAlgerie SARL;contact@build.dz;+213 21 99 88 77;ACTIVE;Rue Hassiba Ben Bouali;Alger;16000;Alger;DZ
-bp-010;BP-00010;FOURNISSEUR;Telecom Network SPA;noc@telecom.dz;+213 21 44 33 22;ACTIVE;Sidi Abdellah;Alger;16000;Alger;DZ
+ID;bpNumber;bpType;displayName;email;phone;status;street;city;postalCode;wilaya;country;password
+bp-001;BP-00001;CLIENT_B2B;SARL TechDZ Solutions;contact@techdz.dz;+213 21 55 00 01;ACTIVE;Rue Didouche Mourad 45;Alger;16000;Alger;DZ;client
+bp-002;BP-00002;CLIENT_B2B;EURL DataFlow Algérie;info@dataflow.dz;+213 21 55 00 02;ACTIVE;Boulevard Mohamed V 12;Oran;31000;Oran;DZ;client
+bp-003;BP-00003;CLIENT_B2B;SPA MegaBuild Construction;mega@megabuild.dz;+213 21 55 00 03;PENDING;Cité 1er Mai;Constantine;25000;Constantine;DZ;client
+bp-004;BP-00004;CLIENT_B2C;Ahmed Benali;ahmed.benali@gmail.com;+213 555 10 20 30;ACTIVE;Rue des Frères Bouadou;Alger;16000;Alger;DZ;client
+bp-005;BP-00005;CLIENT_B2C;Fatima Zohra Kaci;fz.kaci@outlook.com;+213 555 40 50 60;ACTIVE;Hai El Badr;Sétif;19000;Sétif;DZ;client
+bp-006;BP-00006;FOURNISSEUR;SARL AlgerFournitures Pro;contact@algerfournitures.dz;+213 21 66 00 01;ACTIVE;Zone Industrielle Oued Smar;Alger;16270;Alger;DZ;fournisseur
+bp-007;BP-00007;FOURNISSEUR;EURL ImportTech Maghreb;import@importtech.dz;+213 21 66 00 02;ACTIVE;Port d Oran;Oran;31000;Oran;DZ;fournisseur
+bp-008;BP-00008;FOURNISSEUR;SPA MatériaPrime;info@materiaprime.dz;+213 21 66 00 03;PENDING;ZI Rouiba;Alger;16012;Alger;DZ;fournisseur
+bp-009;BP-00009;CLIENT_B2B;BuildAlgerie SARL;contact@build.dz;+213 21 99 88 77;ACTIVE;Rue Hassiba Ben Bouali;Alger;16000;Alger;DZ;client
+bp-010;BP-00010;FOURNISSEUR;Telecom Network SPA;noc@telecom.dz;+213 21 44 33 22;ACTIVE;Sidi Abdellah;Alger;16000;Alger;DZ;fournisseur
