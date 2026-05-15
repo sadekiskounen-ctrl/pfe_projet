@@ -245,24 +245,34 @@
         let success = false;
         let finalRole = role;
 
-        // 1. Check Demo Users (Package.json)
-        if ((user === 'admin' && pass === 'admin' && role === 'admin') ||
-            (user === 'client' && pass === 'client' && role === 'client') ||
-            (user === 'fournisseur' && pass === 'fournisseur' && role === 'fournisseur')) {
-            success = true;
-        } 
-        // 2. Check Registered Users (LocalStorage for demo simulation)
-        else {
-            const registeredUser = JSON.parse(localStorage.getItem(`user_${user}`));
-            if (registeredUser && registeredUser.password === pass && registeredUser.role === role) {
+        // 1. Check for CUSTOM ADMIN or DEFAULT (Emergency access)
+        if (role === 'admin') {
+            const customAdmin = JSON.parse(localStorage.getItem('admin_profile'));
+            if (user === 'admin' && pass === 'admin') {
+                success = true; // Emergency fallback
+            } else if (customAdmin && user === customAdmin.email && pass === customAdmin.password) {
                 success = true;
-                finalRole = registeredUser.role;
+            }
+        } 
+        
+        // 2. Check Demo / Registered Users if not already successful
+        if (!success) {
+            if ((user === 'client' && pass === 'client' && role === 'client') ||
+                (user === 'fournisseur' && pass === 'fournisseur' && role === 'fournisseur')) {
+                success = true;
+            } else {
+                const registeredUser = JSON.parse(localStorage.getItem(`user_${user}`));
+                if (registeredUser && registeredUser.password === pass && registeredUser.role === role) {
+                    success = true;
+                    finalRole = registeredUser.role;
+                }
             }
         }
 
         if (success) {
-            localStorage.setItem('isLoggedIn', 'true');
-            localStorage.setItem('userRole', finalRole);
+            sessionStorage.setItem('isLoggedIn', 'true');
+            sessionStorage.setItem('userRole', finalRole);
+            sessionStorage.setItem('currentUser', user);
             
             const urlParams = new URLSearchParams(window.location.search);
             const targetApp = urlParams.get('app');

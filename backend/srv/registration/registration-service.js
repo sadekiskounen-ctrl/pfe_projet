@@ -1,78 +1,54 @@
 const cds = require('@sap/cds');
 
-module.exports = class RegistrationService extends cds.ApplicationService {
-    async init() {
-        await super.init();
-        const { SubmitRegistration, RegistrationRequests } = this.entities;
+module.exports = cds.service.impl(async function() {
+    const { RegistrationRequests } = this.entities;
 
-        this.before('CREATE', SubmitRegistration, async (req) => {
-            req.data.status = 'PENDING';
-        });
-
-        this.on('approveRegistration', async (req) => {
-            const { id } = req.data;
-            const tx = cds.tx(req);
-            
-            const request = await tx.run(SELECT.one.from(RegistrationRequests).where({ ID: id }));
-            if (!request) return req.error(404, 'Demande introuvable');
-            if (request.status !== 'PENDING') return req.error(400, 'Demande déjà traitée');
-
-            try {
-                // 1. Création du Business Partner
-                const { BusinessPartner } = cds.entities('sap.pme');
-                // Génération d'un numéro de BP (simplifié pour l'exemple)
-                const bpNumber = 'BP-' + Math.floor(Math.random() * 90000 + 10000);
-                
-                const [bp] = await tx.run(INSERT.into(BusinessPartner).entries({
-                    bpNumber: bpNumber,
-                    bpType: request.type,
-                    displayName: request.companyName,
-                    email: request.email,
-                    phone: request.phone,
-                    password: request.password,
-                    status: 'ACTIVE'
-                }));
-
-                // 2. Création de l'entité CRM ou SRM correspondante
-                if (request.type === 'CLIENT_B2B') {
-                    const { ClientB2B, ClientDocument } = cds.entities('sap.pme.crm');
-                    await tx.run(INSERT.into(ClientB2B).entries({
-                        bp_ID: bp.ID,
-                        companyName: request.companyName,
-                        email: request.email,
-                        phone: request.phone,
-                        status: 'ACTIVE'
-                    }));
-                    // Note: En réalité, on copierait aussi les documents
-                } else if (request.type === 'FOURNISSEUR') {
-                    const { Fournisseur } = cds.entities('sap.pme.srm');
-                    await tx.run(INSERT.into(Fournisseur).entries({
-                        bp_ID: bp.ID,
-                        companyName: request.companyName,
-                        email: request.email,
-                        phone: request.phone,
-                        status: 'ACTIVE',
-                        kycStatus: 'VALIDATED'
-                    }));
-                }
-
-                // 3. Marquer la demande comme approuvée
-                await tx.run(UPDATE(RegistrationRequests).set({ status: 'APPROVED' }).where({ ID: id }));
-
-                // 4. TODO: Notification email à l'utilisateur
-                
-                return `L'inscription de ${request.companyName} a été approuvée et le compte créé.`;
-            } catch (err) {
-                console.error(err);
-                return req.error(500, "Erreur lors de la création du compte : " + err.message);
+    // Gestionnaire personnalisé pour le streaming des médias (PDF)
+    this.on('READ', RegistrationRequests, async (req, next) => {
+        const url = req._.req.url;
+        
+        // Si on demande le contenu binaire ($value)
+        if (url.includes('$value')) {
+            console.log("[Registration] Streaming media content...");
+            // On laisse CAP gérer le stream, mais on s'assure que les headers sont propres
+            const res = await next();
+            if (res && res.value) {
+                // On peut forcer le type si nécessaire, mais CAP le fait via l'annotation @Core.MediaType
+                return res;
             }
+        }
+        return next();
+    });
+
+    // Actions d'approbation et de rejet
+    this.on('approveRegistration', async (req) => {
+        const { id } = req.data;
+        const { BusinessPartner } = cds.entities('sap.pme');
+        
+        const reg = await SELECT.one.from(RegistrationRequests).where({ ID: id });
+        if(!reg) return req.error(404, "Demande introuvable");
+
+        console.log(`[Registration] Approving and creating BP for: ${reg.companyName}`);
+        
+        // Création du Business Partner réel
+        const nextBP = 'BP' + Math.floor(1000 + Math.random() * 9000);
+        await INSERT.into(BusinessPartner).entries({
+            bpNumber: nextBP,
+            displayName: reg.companyName,
+            email: reg.email,
+            phone: reg.phone,
+            bpType: reg.type,
+            status: 'ACTIVE'
         });
 
-        this.on('rejectRegistration', async (req) => {
-            const { id, reason } = req.data;
-            const tx = cds.tx(req);
-            await tx.run(UPDATE(RegistrationRequests).set({ status: 'REJECTED', adminComment: reason }).where({ ID: id }));
-            return "L'inscription a été rejetée.";
-        });
-    }
-}
+        await UPDATE(RegistrationRequests).set({ status: 'APPROVED' }).where({ ID: id });
+        return "Demande approuvée et Business Partner créé";
+    });
+
+    this.on('rejectRegistration', async (req) => {
+        const { id, reason } = req.data;
+        console.log(`[Registration] Rejecting request ${id} for: ${reason}`);
+        await UPDATE(RegistrationRequests).set({ status: 'REJECTED', adminComment: reason }).where({ ID: id });
+        return "Demande rejetée";
+    });
+});

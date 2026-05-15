@@ -1,5 +1,3 @@
-ID;bp_ID;companyName;rc;nif;nis;ai;sector;legalForm;contactName;contactRole;email;phone;street;city;postalCode;wilaya;country;status
-cb2b-001;bp-001;SARL TechDZ Solutions;16/00-1234567B19;001216123456789;16012345678901;16012345;Technologies & IT;SARL;Karim Hadj;Gérant;contact@techdz.dz;+213 21 55 00 01;Rue Didouche Mourad 45;Alger;16000;Alger;DZ;ACTIVE
-cb2b-002;bp-002;EURL DataFlow Algérie;31/00-7654321A19;003117654321098;31076543210987;31076543;Services Numériques;EURL;Lina Boudiaf;Directrice;info@dataflow.dz;+213 21 55 00 02;Boulevard Mohamed V 12;Oran;31000;Oran;DZ;ACTIVE
-cb2b-003;bp-003;SPA MegaBuild Construction;25/00-11223344;002511223344556;25011122334455;25011122;Construction;SPA;Omar Mansouri;PDG;mega@megabuild.dz;+213 21 55 00 03;Cité 1er Mai;Constantine;25000;Constantine;DZ;PENDING
-cb2b-004;bp-009;BuildAlgerie SARL;16/00-99887766;001699887766554;16099887766554;16099887;BTP;SARL;Rachid Amrani;Gérant;contact@build.dz;+213 21 99 88 77;Rue Hassiba Ben Bouali;Alger;16000;Alger;DZ;ACTIVE
+ID;companyName;email;bp_ID;status
+f1f7799d-963a-40af-b8cf-745760e51601;Algiers Tech Solutions;contact@algiers-tech.dz;36f7799d-963a-40af-b8cf-745760e51391;ACTIVE
+f1f7799d-963a-40af-b8cf-745760e51602;Oran Data Service;info@oran-data.dz;36f7799d-963a-40af-b8cf-745760e51392;ACTIVE

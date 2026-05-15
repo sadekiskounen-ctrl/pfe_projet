@@ -7,6 +7,8 @@ namespace sap.pme;
 
 using { sap.pme as pme } from './common';
 using { cuid, managed }   from '@sap/cds/common';
+using { sap.pme.crm } from './crm';
+using { sap.pme.srm } from './srm';
 
 /**
  * BusinessPartner is the leading master data entity.
@@ -24,6 +26,11 @@ entity BusinessPartner : cuid, managed, pme.SoftDelete, pme.Annotatable {
   status      : pme.BPStatus default 'PENDING';
   password    : String(100);
 
+  // Algerian Fiscal Identifiers
+  nif         : String(20);
+  rc          : String(20);
+  ai          : String(20);
+
   // Address (embedded)
   street      : String(256);
   city        : String(128);
@@ -31,8 +38,8 @@ entity BusinessPartner : cuid, managed, pme.SoftDelete, pme.Annotatable {
   wilaya      : String(64);
   country     : String(3) default 'DZ';
 
-  // Navigation
-  clientB2B   : Association to one pme.crm.ClientB2B   on clientB2B.bp   = $self;
-  clientB2C   : Association to one pme.crm.ClientB2C   on clientB2C.bp   = $self;
-  fournisseur : Association to one pme.srm.Fournisseur on fournisseur.bp = $self;
+  // Navigation (Corrected references)
+  clientB2B   : Association to many crm.ClientB2B   on clientB2B.bp   = $self;
+  clientB2C   : Association to many crm.ClientB2C   on clientB2C.bp   = $self;
+  fournisseur : Association to many srm.Fournisseur on fournisseur.bp = $self;
 }

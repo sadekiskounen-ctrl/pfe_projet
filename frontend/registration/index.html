@@ -190,17 +190,21 @@
             </div>
 
             <div class="row">
-                <div class="col-md-6 mb-4">
-                    <label class="form-label">Numéro RC (14 chiffres) *</label>
-                    <input type="text" class="form-control" id="rc" placeholder="Ex: 01234567890123" 
-                           pattern="[0-9]{14}" minlength="14" maxlength="14" required>
-                    <div class="invalid-feedback">Veuillez saisir exactement 14 chiffres.</div>
+                <div class="col-md-4 mb-4">
+                    <label class="form-label">Numéro RC *</label>
+                    <input type="text" class="form-control" id="rc" placeholder="Ex: 00/00-1234567B26" required>
                 </div>
-                <div class="col-md-6 mb-4">
-                    <label class="form-label">NIF (14 chiffres) *</label>
-                    <input type="text" class="form-control" id="nif" placeholder="Ex: 98765432109876" 
-                           pattern="[0-9]{14}" minlength="14" maxlength="14" required>
-                    <div class="invalid-feedback">Veuillez saisir exactement 14 chiffres.</div>
+                <div class="col-md-4 mb-4">
+                    <label class="form-label">NIF (15 chiffres) *</label>
+                    <input type="text" class="form-control" id="nif" placeholder="Ex: 000123456789012" 
+                           pattern="[0-9]{15}" minlength="15" maxlength="15" required>
+                    <div class="invalid-feedback">Veuillez saisir exactement 15 chiffres.</div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <label class="form-label">Article d'Imposition (AI) *</label>
+                    <input type="text" class="form-control" id="ai" placeholder="Ex: 16012345678" 
+                           pattern="[0-9]+" minlength="11" maxlength="11" required>
+                    <div class="invalid-feedback">Veuillez saisir les 11 chiffres de votre AI.</div>
                 </div>
             </div>
 
@@ -259,19 +263,25 @@
             </div>
         </div>
 
-        <!-- ÉTAPE 3: KYC -->
+        <!-- ÉTAPE 3: KYC Algérie -->
         <div id="step3" class="step-content">
-            <h4 class="mb-4">3. Documents (KYC)</h4>
+            <h4 class="mb-4">3. Documents (KYC Algérie)</h4>
             <div class="alert alert-info">
-                Téléchargez vos documents pour validation par notre équipe. Format PDF uniquement.
+                Format PDF uniquement pour les justificatifs fiscaux.
             </div>
 
-            <div class="mb-4">
-                <label class="form-label">Registre de Commerce (PDF) *</label>
-                <input class="form-control" type="file" id="fileRC" accept="application/pdf" required>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Registre de Commerce (RC) *</label>
+                    <input class="form-control" type="file" id="fileRC" accept="application/pdf" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Article d'Imposition (AI) *</label>
+                    <input class="form-control" type="file" id="fileAI" accept="application/pdf" required>
+                </div>
             </div>
             <div class="mb-4">
-                <label class="form-label">RIB (PDF) *</label>
+                <label class="form-label">RIB ou Chèque Barré *</label>
                 <input class="form-control" type="file" id="fileRIB" accept="application/pdf" required>
             </div>
 
@@ -352,34 +362,55 @@
         e.preventDefault();
         
         const btn = document.getElementById('btnSubmit');
-        const originalText = btn.innerText;
+        const originalText = "Soumettre mon dossier";
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Envoi du dossier...';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Soumission en cours...';
 
-        const typeValue = document.querySelector('input[name="regType"]:checked').value;
-        const type = typeValue === 'b2b' ? 'CLIENT_B2B' : 'FOURNISSEUR';
-        
-        const fileRC = document.getElementById('fileRC').files[0];
-        const fileRIB = document.getElementById('fileRIB').files[0];
-
-        const payload = {
-            type: type,
-            companyName: document.getElementById('companyName').value,
-            siret: document.getElementById('rc').value,
-            tvaNumber: document.getElementById('nif').value,
-            email: document.getElementById('email').value,
-            phone: document.getElementById('phone').value,
-            password: document.getElementById('password').value,
-            address: 'Non renseignée',
-            kbis: await toBase64(fileRC),
-            kbisType: 'application/pdf',
-            kbisName: fileRC.name,
-            rib: await toBase64(fileRIB),
-            ribType: 'application/pdf',
-            ribName: fileRIB.name
-        };
+        console.log("Démarrage de la soumission vers HANA Cloud...");
 
         try {
+            const typeValue = document.querySelector('input[name="regType"]:checked').value;
+            const type = typeValue === 'b2b' ? 'CLIENT_B2B' : 'FOURNISSEUR';
+            
+            const fileRC = document.getElementById('fileRC').files[0];
+            const fileRIB = document.getElementById('fileRIB').files[0];
+            const fileAI = document.getElementById('fileAI').files[0];
+
+            if(!fileRC || !fileRIB || !fileAI) {
+                alert("Veuillez joindre tous les documents obligatoires (RC, AI, RIB).");
+                btn.disabled = false;
+                btn.innerText = originalText;
+                return;
+            }
+
+            console.log("Conversion des documents en Base64...");
+            const rcBase64 = await toBase64(fileRC);
+            const ribBase64 = await toBase64(fileRIB);
+            const aiBase64 = await toBase64(fileAI);
+
+            const payload = {
+                type: type,
+                companyName: document.getElementById('companyName').value,
+                rcNumber: document.getElementById('rc').value,
+                nif: document.getElementById('nif').value,
+                ai: document.getElementById('ai').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                password: document.getElementById('password').value,
+                address: 'Algérie',
+                rc: rcBase64,
+                rcType: 'application/pdf',
+                rcName: fileRC.name,
+                rib: ribBase64,
+                ribType: 'application/pdf',
+                ribName: fileRIB.name,
+                aiDoc: aiBase64,
+                aiType: 'application/pdf',
+                aiName: fileAI.name
+            };
+
+            console.log("Envoi du payload à RegistrationService...");
+            
             const response = await fetch('/odata/v4/registration/SubmitRegistration', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -387,27 +418,22 @@
             });
 
             if(response.ok) {
-                // Pour la démo, on stocke aussi en local pour simuler la connexion immédiate
-                localStorage.setItem(`user_${payload.email}`, JSON.stringify({
-                    email: payload.email,
-                    password: payload.password,
-                    role: type === 'CLIENT_B2B' ? 'client' : 'fournisseur'
-                }));
-
+                console.log("Succès ! Inscription enregistrée dans HANA.");
                 document.getElementById('registrationForm').style.display = 'none';
                 document.getElementById('successMsg').style.display = 'block';
                 document.querySelector('.progress-steps').style.display = 'none';
             } else {
                 const err = await response.json();
-                alert('Erreur: ' + (err.error?.message || 'Erreur inconnue'));
+                console.error("Erreur Serveur:", err);
+                alert('Erreur: ' + (err.error?.message || 'Le serveur a rejeté la demande. Vérifiez la taille des PDFs.'));
                 btn.disabled = false;
                 btn.innerText = originalText;
             }
         } catch (error) {
-            console.error(error);
-            alert('Erreur de connexion au serveur');
+            console.error("Erreur de connexion:", error);
+            alert('Erreur technique lors de l\'envoi. Vérifiez votre connexion.');
             btn.disabled = false;
-            btn.innerText = originalText;
+            btn.innerText = "Soumettre mon dossier";
         }
     });
 </script>

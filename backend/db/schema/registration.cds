@@ -21,14 +21,19 @@ entity RegistrationRequest : cuid, managed {
     address     : String(200);
     password    : String(100);
 
-    // KYC B2B & Fournisseur
-    siret       : String(14);
-    tvaNumber   : String(30);
+    // Identifiants fiscaux Algériens
+    rc          : LargeBinary @Core.MediaType: rcType;
+    rcType      : String @Core.IsMediaType;
+    rcName      : String;
+    rcNumber    : String(20); // Ancien RC
 
-    // Documents joints (Stockés en base de données pour la simplicité, type LargeBinary)
-    kbis        : LargeBinary @Core.MediaType: kbisType;
-    kbisType    : String @Core.IsMediaType;
-    kbisName    : String;
+    nif         : String(20); // Numéro Identification Fiscale
+    tvaNumber   : String(30); // NIS ou TVA
+    
+    ai          : String(20); // Article d'Imposition
+    aiDoc       : LargeBinary @Core.MediaType: aiType;
+    aiType      : String @Core.IsMediaType;
+    aiName      : String;
 
     rib         : LargeBinary @Core.MediaType: ribType;
     ribType     : String @Core.IsMediaType;

@@ -1,11 +1,4 @@
-ID;code;name;description;category;type;unit;unitPrice;currency_code;tvaRate;stock;minStock;isActive
-prd-001;PRD-001;Ordinateur Portable HP ProBook;HP ProBook 450 G10 Intel Core i7 16GB RAM 512GB SSD;Informatique;PRODUCT;PIECE;185000.00;DZD;19.00;25;5;true
-prd-002;PRD-002;Imprimante HP LaserJet Pro;Imprimante laser multifonction A4;Informatique;PRODUCT;PIECE;45000.00;DZD;19.00;15;3;true
-prd-003;PRD-003;Écran Dell 27 pouces;Moniteur Dell P2723QE 4K USB-C;Informatique;PRODUCT;PIECE;72000.00;DZD;19.00;20;5;true
-prd-004;PRD-004;Ramette Papier A4;Ramette 500 feuilles 80g;Papeterie;PRODUCT;PIECE;850.00;DZD;19.00;500;100;true
-prd-005;PRD-005;Cartouche Encre HP 305;Cartouche originale HP noir;Papeterie;PRODUCT;PIECE;3500.00;DZD;19.00;50;10;true
-prd-006;PRD-006;Bureau Direction;Bureau direction L160 bois massif;Mobilier;PRODUCT;PIECE;95000.00;DZD;19.00;8;2;true
-prd-007;PRD-007;Chaise Ergonomique;Chaise de bureau ergonomique avec appui-tête;Mobilier;PRODUCT;PIECE;35000.00;DZD;19.00;30;5;true
-prd-008;PRD-008;Développement Web sur mesure;Conception et développement application web;Services IT;SERVICE;HEURE;5000.00;DZD;19.00;0;0;true
-prd-009;PRD-009;Maintenance Informatique;Contrat maintenance parc informatique mensuel;Services IT;SERVICE;MOIS;25000.00;DZD;19.00;0;0;true
-prd-010;PRD-010;Ciment CPJ 42.5;Sac ciment Portland 50kg;Matériaux;PRODUCT;KG;1200.00;DZD;19.00;1000;200;true
+ID;code;name;description;unitPrice;stock
+p1f7799d-963a-40af-b8cf-745760e51801;PRD001;Serveur Cloud Pro;Instance haute performance;45000.00;10
+p1f7799d-963a-40af-b8cf-745760e51802;PRD002;Suite Sécurité;Protection antivirus & firewall;12000.00;50
+p1f7799d-963a-40af-b8cf-745760e51803;PRD003;Support IT 24/7;Maintenance mensuelle;25000.00;99
