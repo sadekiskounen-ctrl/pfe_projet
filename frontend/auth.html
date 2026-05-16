@@ -236,14 +236,50 @@
         }
     }
 
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
+        const errorDiv = document.getElementById('errorMsg');
+        errorDiv.style.display = 'none';
+        errorDiv.innerText = "Identifiants incorrects. Veuillez vérifier vos informations.";
+
         const role = document.getElementById('selectedRole').value;
         const user = document.getElementById('username').value;
         const pass = document.getElementById('password').value;
         
         let success = false;
         let finalRole = role;
+
+        // 0. CHECK STATUS IN BACKEND (For Clients/Suppliers)
+        if (role !== 'admin') {
+            try {
+                const res = await fetch(`/odata/v4/registration/checkStatus(email='${user}')`);
+                const data = await res.json();
+                
+                if (data && data.status === 'BLOCKED') {
+                    errorDiv.innerText = `Accès refusé : Votre compte a été désactivé par l'administrateur. \nMotif : ${data.blockReason || 'Non spécifié'}`;
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                if (data && data.status === 'PENDING') {
+                    errorDiv.innerText = `L'administrateur n'a pas encore validé votre dossier. \nVeuillez patienter jusqu'à la validation pour vous connecter.`;
+                    errorDiv.style.display = 'block';
+                    errorDiv.style.background = '#fff3cd'; // Yellow background for pending
+                    errorDiv.style.color = '#856404';
+                    errorDiv.style.border = '1px solid #ffeeba';
+                    return;
+                }
+
+                if (data && data.status === 'REJECTED') {
+                    errorDiv.innerText = `L'administrateur a refusé votre dossier. \nMotif : ${data.blockReason || 'Dossier non conforme'} \nVeuillez vous inscrire à nouveau et corriger votre dossier.`;
+                    errorDiv.style.display = 'block';
+                    errorDiv.style.background = '#fee2e2'; // Light red for rejection
+                    errorDiv.style.color = '#991b1b';
+                    errorDiv.style.border = '1px solid #fecaca';
+                    return;
+                }
+            } catch (err) { console.error("Status check failed", err); }
+        }
 
         // 1. Check for CUSTOM ADMIN or DEFAULT (Emergency access)
         if (role === 'admin') {
@@ -253,20 +289,30 @@
             } else if (customAdmin && user === customAdmin.email && pass === customAdmin.password) {
                 success = true;
             }
-        } 
-        
-        // 2. Check Demo / Registered Users if not already successful
-        if (!success) {
-            if ((user === 'client' && pass === 'client' && role === 'client') ||
-                (user === 'fournisseur' && pass === 'fournisseur' && role === 'fournisseur')) {
-                success = true;
-            } else {
-                const registeredUser = JSON.parse(localStorage.getItem(`user_${user}`));
-                if (registeredUser && registeredUser.password === pass && registeredUser.role === role) {
-                    success = true;
-                    finalRole = registeredUser.role;
+        } else {
+            // 2. CHECK REAL CREDENTIALS IN DATABASE (For Clients/Suppliers)
+            try {
+                const loginRes = await fetch('/odata/v4/registration/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: user, password: pass })
+                });
+                const loginData = await loginRes.json();
+                
+                if (loginData && loginData.status === 'SUCCESS') {
+                    // Vérifier si le rôle choisi (Client/Fournisseur) correspond au type de BP
+                    const bpType = loginData.blockReason;
+                    if ((role === 'client' && (bpType === 'CLIENT_B2B' || bpType === 'CLIENT_B2C')) ||
+                        (role === 'fournisseur' && bpType === 'FOURNISSEUR')) {
+                        success = true;
+                        finalRole = role;
+                    } else {
+                        errorDiv.innerText = "Accès refusé : Le rôle choisi ne correspond pas à votre compte.";
+                        errorDiv.style.display = 'block';
+                        return;
+                    }
                 }
-            }
+            } catch (err) { console.error("Login fetch failed", err); }
         }
 
         if (success) {
@@ -277,8 +323,8 @@
             const urlParams = new URLSearchParams(window.location.search);
             const targetApp = urlParams.get('app');
             
-            if (targetApp === 'crm') window.location.href = '/crm/clients/webapp/index.html';
-            else if (targetApp === 'srm') window.location.href = '/srm/fournisseurs/webapp/index.html';
+            if (targetApp === 'crm' || finalRole === 'client') window.location.href = '/crm/clients/webapp/index.html';
+            else if (targetApp === 'srm' || finalRole === 'fournisseur') window.location.href = '/srm/fournisseurs/webapp/index.html';
             else if (targetApp === 'admin' || finalRole === 'admin') window.location.href = '/admin/dashboard.html';
             else window.location.href = '/index.html';
         } else {

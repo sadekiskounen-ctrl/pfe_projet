@@ -39,7 +39,7 @@
         header { padding: 1.5rem 3rem; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
         .header-title { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 15px; }
         
-        .period-selector { background: #1e293b; border: 1px solid var(--border); padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; color: var(--accent); cursor: pointer; outline: none; font-family: 'Outfit', sans-serif; }
+        .period-selector { background: #1e293b; border: 1px solid var(--border); padding: 8px 12px; border-radius: 12px; font-size: 0.85rem; color: var(--accent); cursor: pointer; outline: none; font-family: 'Outfit', sans-serif; min-width: 120px; }
         .header-actions { display: flex; align-items: center; gap: 20px; }
         .action-icon { cursor: pointer; font-size: 1.2rem; position: relative; }
         .noti-badge { position: absolute; top: -5px; right: -5px; background: #f87171; color: white; font-size: 0.6rem; padding: 2px 5px; border-radius: 10px; font-weight: 700; }
@@ -69,7 +69,7 @@
         .view-section.active { display: block; }
 
         /* ── Charts ── */
-        .chart-section { background: var(--card-bg); border-radius: 24px; padding: 30px; margin-bottom: 30px; border: 1px solid var(--glass-border); }
+        .chart-section { background: var(--card-bg); border-radius: 24px; padding: 30px; margin-bottom: 30px; border: 1px solid var(--glass-border); min-height: 300px; }
 
         /* ── Top Lists ── */
         .top-lists-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
@@ -97,7 +97,6 @@
         /* MODAL STYLES */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal-content { background: var(--sidebar-bg); border: 1px solid var(--accent); border-radius: 24px; width: 650px; max-width: 90%; overflow: hidden; animation: slideUp 0.3s ease-out; }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .modal-header { padding: 20px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); }
         .close-modal { cursor: pointer; font-size: 1.5rem; color: var(--text-dim); }
         .modal-body { padding: 30px; }
@@ -115,6 +114,27 @@
         .decision-btns { display: flex; gap: 20px; }
         .btn-reject { flex: 1; background: #ef4444; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; }
         .btn-approve { flex: 2; background: var(--accent-green); color: black; border: none; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+
+        /* CUSTOM DIALOG SYSTEM */
+        .dialog-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px);
+            z-index: 9999; display: none; align-items: center; justify-content: center;
+        }
+        .dialog-box {
+            background: #1e293b; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px; padding: 2rem; width: 100%; max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .dialog-box h3 { margin-top: 0; font-size: 1.25rem; color: #f8fafc; margin-bottom: 1rem; }
+        .dialog-box p { color: #94a3b8; font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+        .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .btn-dialog-primary { background: var(--accent); color: black; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        .btn-dialog-secondary { background: rgba(255,255,255,0.05); color: #94a3b8; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; }
+        #dialog-prompt-container textarea {
+            width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; padding: 10px; color: white; margin-bottom: 1.5rem; resize: none;
+        }
     </style>
 </head>
 <body>
@@ -199,9 +219,25 @@
 
             <!-- VIEW: PARTNERS -->
             <div id="partners" class="view-section">
-                <h2 style="margin-bottom: 20px;">Business Partners</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Business Partners</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="filter-type" class="period-selector" onchange="loadPartners(document.getElementById('main-search').value)">
+                            <option value="">Tous les types</option>
+                            <option value="CLIENT_B2B">Clients B2B</option>
+                            <option value="CLIENT_B2C">Clients B2C</option>
+                            <option value="FOURNISSEUR">Fournisseurs</option>
+                        </select>
+                        <select id="filter-status" class="period-selector" onchange="loadPartners(document.getElementById('main-search').value)">
+                            <option value="">Tous les statuts</option>
+                            <option value="ACTIVE">✅ Activés</option>
+                            <option value="BLOCKED">🚫 Désactivés</option>
+                            <option value="PENDING">⏳ En attente</option>
+                        </select>
+                    </div>
+                </div>
                 <table class="custom-table">
-                    <thead><tr><th>ID</th><th>Nom</th><th>Type</th><th>Statut</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Nom</th><th>Type</th><th>Statut</th><th>Actions</th></tr></thead>
                     <tbody id="partners-table-body"></tbody>
                 </table>
             </div>
@@ -288,19 +324,129 @@
                     </div>
                 </div>
             </div>
+            <!-- MODAL: DETAILS PARTENAIRE -->
+            <div id="details-modal" class="modal-overlay">
+                <div class="modal-content" style="max-width: 500px;">
+                    <div class="modal-header">
+                        <h3>Détails Partenaire : <span id="det-name">---</span></h3>
+                        <span class="close-modal" onclick="closeDetails()">×</span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="info-grid">
+                            <div class="info-group">
+                                <label>Numéro BP</label>
+                                <p id="det-bp">---</p>
+                            </div>
+                            <div class="info-group">
+                                <label>Type</label>
+                                <p id="det-type">---</p>
+                            </div>
+                            <div class="info-group">
+                                <label>Email</label>
+                                <p id="det-email">---</p>
+                            </div>
+                            <div class="info-group">
+                                <label>Téléphone</label>
+                                <p id="det-phone">---</p>
+                            </div>
+                            <div class="info-group">
+                                <label>RC (Registre)</label>
+                                <p id="det-rc">---</p>
+                            </div>
+                            <div class="info-group">
+                                <label>NIF (Fiscal)</label>
+                                <p id="det-nif">---</p>
+                            </div>
+                            <div class="info-group">
+                                <label>AI (Article)</label>
+                                <p id="det-ai">---</p>
+                            </div>
+                            <div class="info-group">
+                                <label>Statut Actuel</label>
+                                <p id="det-status">---</p>
+                                <input type="hidden" id="det-bp-id">
+                            </div>
+                        </div>
+                        <div class="docs-section">
+                            <h4>📄 Documents Justificatifs</h4>
+                            <div class="docs-grid">
+                                <button class="btn-doc" onclick="viewPartnerDoc('rcDoc')">📂 Voir RC</button>
+                                <button class="btn-doc" onclick="viewPartnerDoc('aiDoc')">📑 Voir AI</button>
+                                <button class="btn-doc" onclick="viewPartnerDoc('ribDoc')">🏦 Voir RIB</button>
+                            </div>
+                        </div>
+                        <div id="det-reason-box" style="display:none; padding:15px; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:10px; margin-top:10px;">
+                            <label style="font-size:0.75rem; color:#ef4444; text-transform:uppercase;">Motif de blocage :</label>
+                            <p id="det-reason" style="color:white; font-weight:600; margin-top:5px;"></p>
+                        </div>
+                        <button class="btn-dialog-secondary" onclick="closeDetails()" style="width: 100%; margin-top: 20px;">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CUSTOM DIALOG HTML -->
+    <div id="custom-dialog-overlay" class="dialog-overlay">
+        <div class="dialog-box">
+            <h3 id="dialog-title">Notification</h3>
+            <p id="dialog-message"></p>
+            <div id="dialog-prompt-container" style="display: none;">
+                <textarea id="dialog-input" rows="3" placeholder="Saisissez votre réponse ici..."></textarea>
+            </div>
+            <div class="dialog-actions">
+                <button id="dialog-cancel" class="btn-dialog-secondary">Annuler</button>
+                <button id="dialog-confirm" class="btn-dialog-primary">Continuer</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- SÉCURITÉ : Vérification de la session ---
-        if (sessionStorage.getItem('isLoggedIn') !== 'true' || sessionStorage.getItem('userRole') !== 'admin') {
-            window.location.href = '/auth.html?app=admin';
-        }
+        // --- DIALOG SYSTEM ---
+        const Dialog = {
+            overlay: document.getElementById('custom-dialog-overlay'),
+            title: document.getElementById('dialog-title'),
+            message: document.getElementById('dialog-message'),
+            inputCont: document.getElementById('dialog-prompt-container'),
+            input: document.getElementById('dialog-input'),
+            btnCancel: document.getElementById('dialog-cancel'),
+            btnConfirm: document.getElementById('dialog-confirm'),
+            
+            show: function(type, title, msg) {
+                return new Promise((resolve) => {
+                    this.title.innerText = title;
+                    this.message.innerText = msg;
+                    this.inputCont.style.display = type === 'prompt' ? 'block' : 'none';
+                    this.btnCancel.style.display = type === 'alert' ? 'none' : 'block';
+                    this.overlay.style.display = 'flex';
+                    this.input.value = '';
+
+                    this.btnConfirm.onclick = () => {
+                        const val = this.input.value.trim();
+                        if (type === 'prompt' && !val) {
+                            this.input.style.border = '1px solid #ef4444';
+                            return; // Ne ferme pas si vide
+                        }
+                        this.overlay.style.display = 'none';
+                        resolve(type === 'prompt' ? val : true);
+                    };
+                    this.btnCancel.onclick = () => {
+                        this.overlay.style.display = 'none';
+                        resolve(type === 'prompt' ? null : false);
+                    };
+                });
+            },
+            alert: (msg) => Dialog.show('alert', 'Notification', msg),
+            confirm: (msg) => Dialog.show('confirm', 'Confirmation', msg),
+            prompt: (msg) => Dialog.show('prompt', 'Saisie requise', msg)
+        };
 
         // NAVIGATION
         function switchView(viewId, el) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
+            const target = document.getElementById(viewId);
+            if(target) target.classList.add('active');
+            
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             if(el) el.classList.add('active');
             
@@ -311,34 +457,57 @@
 
         // INIT & PERIODS (DYNAMIQUE)
         function setupUI() {
-            const yearSel = document.getElementById('period-year');
-            const monthSel = document.getElementById('period-month');
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonth = now.getMonth() + 1;
+            try {
+                const yearSel = document.getElementById('period-year');
+                const monthSel = document.getElementById('period-month');
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth() + 1;
 
-            yearSel.innerHTML = '';
-            for(let i = 0; i < 10; i++) {
-                const y = currentYear - i;
-                yearSel.innerHTML += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
-            }
-
-            function updateMonths() {
-                const selectedYear = parseInt(yearSel.value);
-                const maxMonth = (selectedYear === currentYear) ? currentMonth : 12;
-                const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
-                let html = '';
-                for(let i = 0; i < maxMonth; i++) {
-                    const mValue = i + 1;
-                    html += `<option value="${mValue}" ${mValue === maxMonth ? 'selected' : ''}>${monthNames[i]}</option>`;
+                yearSel.innerHTML = '';
+                for(let i = 0; i < 5; i++) {
+                    const y = currentYear - i;
+                    yearSel.innerHTML += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
                 }
-                monthSel.innerHTML = html;
-                loadStats();
-            }
 
-            yearSel.onchange = updateMonths;
-            monthSel.onchange = loadStats;
-            updateMonths();
+                const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+                
+                function updateMonths() {
+                    const selectedYear = parseInt(yearSel.value);
+                    const maxMonth = (selectedYear === currentYear) ? currentMonth : 12;
+                    const prevVal = monthSel.value;
+                    
+                    monthSel.innerHTML = monthNames
+                        .slice(0, maxMonth)
+                        .map((name, i) => `<option value="${i+1}" ${(i+1 == prevVal || (!prevVal && i+1 === currentMonth)) ? 'selected' : ''}>${name}</option>`)
+                        .join('');
+                    loadStats();
+                }
+
+                yearSel.onchange = updateMonths;
+                monthSel.onchange = loadStats;
+                
+                updateMonths(); // Initial load
+
+                // FIX: SEARCH BAR
+                const searchInput = document.getElementById('main-search');
+                searchInput.oninput = (e) => {
+                    const val = e.target.value;
+                    let activeView = document.querySelector('.view-section.active').id;
+                    
+                    // Si on cherche depuis le dashboard, on bascule sur les partenaires
+                    if (activeView === 'overview' && val.length > 0) {
+                        switchView('partners', document.querySelectorAll('.nav-item')[1]);
+                        activeView = 'partners';
+                    }
+
+                    console.log(`[Search] Searching for "${val}" in ${activeView}`);
+                    if (activeView === 'partners') loadPartners(val);
+                    if (activeView === 'registrations') loadRegistrations(val);
+                };
+            } catch (e) {
+                console.error("UI Setup Error", e);
+            }
         }
 
         // REAL DATA FETCH
@@ -382,15 +551,21 @@
             try {
                 const resC = await fetch('/odata/v4/analytics/getTopClients()');
                 const c = await resC.json();
-                document.getElementById('top-clients-list').innerHTML = c.value.map(i => `
-                    <div class="list-item"><div class="item-info"><span class="rank">${i.rank}.</span><span class="name">${i.name}</span></div><span class="value">${new Intl.NumberFormat().format(i.value)} DA</span></div>
-                `).join('');
+                const listC = document.getElementById('top-clients-list');
+                if(c.value) {
+                    listC.innerHTML = c.value.map(i => `
+                        <div class="list-item"><div class="item-info"><span class="rank">${i.rank}.</span><span class="name">${i.name}</span></div><span class="value">${new Intl.NumberFormat().format(i.value)} DA</span></div>
+                    `).join('');
+                }
 
                 const resS = await fetch('/odata/v4/analytics/getTopSuppliers()');
                 const s = await resS.json();
-                document.getElementById('top-suppliers-list').innerHTML = s.value.map(i => `
-                    <div class="list-item"><div class="item-info"><span class="rank">${i.rank}.</span><span class="name">${i.name}</span></div><span class="value">⭐ ${i.value.toFixed(1)}</span></div>
-                `).join('');
+                const listS = document.getElementById('top-suppliers-list');
+                if(s.value) {
+                    listS.innerHTML = s.value.map(i => `
+                        <div class="list-item"><div class="item-info"><span class="rank">${i.rank}.</span><span class="name">${i.name}</span></div><span class="value">⭐ ${i.value.toFixed(1)}</span></div>
+                    `).join('');
+                }
             } catch(e) {}
         }
 
@@ -406,52 +581,110 @@
             }
         }
 
-        async function loadPartners() {
+        async function loadPartners(search = '') {
             try {
-                const res = await fetch('/odata/v4/admin/BusinessPartners');
+                const type = document.getElementById('filter-type').value;
+                const status = document.getElementById('filter-status').value;
+                let url = '/odata/v4/admin/BusinessPartners';
+                const filters = [];
+                if (search) filters.push(`startswith(tolower(displayName),'${search.toLowerCase()}')`);
+                if (type) filters.push(`bpType eq '${type}'`);
+                if (status) filters.push(`status eq '${status}'`);
+                if (filters.length > 0) url += `?$filter=${filters.join(' and ')}`;
+
+                const res = await fetch(url);
                 const data = await res.json();
-                document.getElementById('partners-table-body').innerHTML = data.value.map(bp => `
-                    <tr><td>${bp.bpNumber}</td><td>${bp.displayName}</td><td>${bp.bpType}</td><td>${bp.status}</td></tr>
-                `).join('');
-            } catch(e) {}
+                const tbody = document.getElementById('partners-table-body');
+                if (data.value && data.value.length > 0) {
+                    tbody.innerHTML = data.value.map(bp => {
+                        const typeLabel = bp.bpType === 'FOURNISSEUR' ? 'Fournisseur' : (bp.bpType === 'CLIENT_B2B' ? 'Client B2B' : 'Client B2C');
+                        return `
+                        <tr>
+                            <td><code>${bp.bpNumber}</code></td>
+                            <td><strong>${bp.displayName}</strong></td>
+                            <td><span style="font-size:0.8rem; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05);">${typeLabel}</span></td>
+                            <td><span style="color: ${bp.status === 'ACTIVE' ? '#4ade80' : bp.status === 'BLOCKED' ? '#f87171' : '#fb923c'}">${bp.status}</span></td>
+                            <td style="display: flex; gap: 5px;">
+                                <button class="btn-action" style="background: var(--accent); color: black;" onclick="openDetailsModal('${bp.ID}')">Détails</button>
+                                ${bp.status !== 'BLOCKED' ? `<button class="btn-action" style="background: #f87171; color: white;" onclick="deactivateBP('${bp.ID}', '${bp.displayName}')">Bloquer</button>` : ''}
+                                ${bp.status === 'BLOCKED' ? `<button class="btn-action" style="background: #4ade80; color: black;" onclick="activateBP('${bp.ID}')">Débloquer</button>` : ''}
+                                ${bp.status === 'PENDING' ? `<button class="btn-action" style="background: #4ade80; color: black; margin-left: 5px;" onclick="activateBP('${bp.ID}')">Activer</button>` : ''}
+                                <button class="btn-action" style="background: #334155; color: #f87171; margin-left: 5px; border: 1px solid #f87171;" title="Supprimer" onclick="deleteBP('${bp.ID}', '${bp.displayName}')">🗑️</button>
+                            </td>
+                        </tr>`;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--text-dim);">Aucun partenaire trouvé</td></tr>';
+                }
+            } catch(e) { console.error("Partners Error", e); }
         }
 
-        // NOTIFICATIONS LOGIC
-        function toggleNoti(event) {
-            if(event) event.stopPropagation();
-            const drop = document.getElementById('noti-dropdown');
-            drop.style.display = drop.style.display === 'flex' ? 'none' : 'flex';
+        async function deactivateBP(id, name) {
+            const reason = await Dialog.prompt(`Désactiver "${name}" ?\nMotif obligatoire :`);
+            if (!reason) return;
+            try {
+                const res = await fetch('/odata/v4/admin/blockBusinessPartner', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bpId: id, reason: reason })
+                });
+                if (res.ok) { await Dialog.alert("Désactivé."); loadPartners(); }
+            } catch (e) {}
         }
 
-        window.onclick = function(event) {
-            if (!event.target.closest('.action-icon')) {
-                document.getElementById('noti-dropdown').style.display = 'none';
+        async function activateBP(id) {
+            try {
+                const res = await fetch('/odata/v4/admin/activateBusinessPartner', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bpId: id })
+                });
+                if (res.ok) { await Dialog.alert("Activé."); loadPartners(); }
+            } catch (e) {}
+        }
+
+        async function deleteBP(id, name) {
+            if (await Dialog.confirm(`Voulez-vous vraiment supprimer définitivement "${name}" ?`)) {
+                try {
+                    const res = await fetch(`/odata/v4/admin/BusinessPartners('${id}')`, { method: 'DELETE' });
+                    if (res.ok) { 
+                        await Dialog.alert("Partenaire supprimé."); 
+                        loadPartners(); 
+                        loadStats(); 
+                    }
+                } catch (e) { Dialog.alert("Erreur lors de la suppression."); }
             }
         }
 
-        let currentExamId = null;
-
-        async function loadRegistrations() {
+        async function loadRegistrations(search = '') {
             try {
-                const res = await fetch('/odata/v4/registration/RegistrationRequests');
+                let url = '/odata/v4/registration/RegistrationRequests';
+                if (search) url += `?$filter=startswith(tolower(companyName),'${search.toLowerCase()}')`;
+                const res = await fetch(url);
                 const data = await res.json();
-                const pending = data.value.filter(r => r.status === 'PENDING');
+                const pending = (data.value || []).filter(r => r.status === 'PENDING');
                 document.getElementById('noti-count').innerText = pending.length;
-                const notiList = document.getElementById('noti-list');
-                if(pending.length === 0) {
-                    notiList.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-dim); font-size: 0.8rem;">Aucune nouvelle inscription</div>';
-                } else {
-                    notiList.innerHTML = pending.map(r => `
-                        <div class="noti-item" onclick="openExamModal('${r.ID}')">
-                            <div class="noti-item-title">🚀 Nouvelle demande : ${r.companyName}</div>
-                            <div class="noti-item-time">Type: ${r.type}</div>
-                        </div>
-                    `).join('');
-                }
-                document.getElementById('registrations-table-body').innerHTML = pending.map(r => `
-                    <tr><td><strong>${r.companyName}</strong></td><td>${r.email}</td><td>${r.type}</td><td><button class="btn-action" onclick="openExamModal('${r.ID}')">Examiner</button></td></tr>
-                `).join('');
-            } catch(e) { console.error("Registrations Error", e); }
+
+                const list = document.getElementById('noti-list');
+                list.innerHTML = pending.length ? pending.map(r => `
+                    <div class="noti-item" onclick="openExamModal('${r.ID}')">
+                        <div class="noti-item-title">🚀 ${r.companyName}</div>
+                        <div class="noti-item-time">${r.type}</div>
+                    </div>`).join('') : '<div style="padding:15px; font-size:0.8rem; color:var(--text-dim);">Aucune demande</div>';
+
+                const tbody = document.getElementById('registrations-table-body');
+                tbody.innerHTML = pending.length ? pending.map(r => {
+                    const btnLabel = r.isReentry ? 'Re-examiner' : 'Examiner';
+                    const btnStyle = r.isReentry ? 'background: #fb923c; color: black;' : '';
+                    return `
+                    <tr>
+                        <td><strong>${r.companyName}</strong> ${r.isReentry ? '<span style="font-size:0.7rem; background:#fb923c; color:black; padding:2px 6px; border-radius:10px; margin-left:5px;">RE-INSCRIPTION</span>' : ''}</td>
+                        <td>${r.email}</td>
+                        <td>${r.type}</td>
+                        <td><button class="btn-action" style="${btnStyle}" onclick="openExamModal('${r.ID}')">${btnLabel}</button></td>
+                    </tr>
+                `}).join('') : '<tr><td colspan="4" style="text-align:center; padding:20px;">Aucun dossier en attente</td></tr>';
+            } catch(e) {}
         }
 
         async function openExamModal(id) {
@@ -466,74 +699,75 @@
                 document.getElementById('exam-nif').innerText = r.nif || 'N/A';
                 document.getElementById('exam-ai').innerText = r.ai || 'N/A';
                 document.getElementById('exam-modal').style.display = 'flex';
-            } catch(e) { alert("Erreur lors du chargement du dossier"); }
+            } catch(e) { await Dialog.alert("Erreur de chargement."); }
         }
 
-        function closeModal() {
-            document.getElementById('exam-modal').style.display = 'none';
-            document.getElementById('exam-comment').value = '';
+        function closeModal() { document.getElementById('exam-modal').style.display = 'none'; }
+        
+        async function openDetailsModal(id) {
+            try {
+                const res = await fetch(`/odata/v4/admin/BusinessPartners('${id}')`);
+                const bp = await res.json();
+                document.getElementById('det-name').innerText = bp.displayName;
+                document.getElementById('det-bp').innerText = bp.bpNumber;
+                document.getElementById('det-type').innerText = bp.bpType;
+                document.getElementById('det-email').innerText = bp.email;
+                document.getElementById('det-phone').innerText = bp.phone || 'N/A';
+                document.getElementById('det-rc').innerText = bp.rc || 'N/A';
+                document.getElementById('det-nif').innerText = bp.nif || 'N/A';
+                document.getElementById('det-ai').innerText = bp.ai || 'N/A';
+                document.getElementById('det-status').innerText = bp.status;
+                document.getElementById('det-bp-id').value = id;
+                
+                const reasonBox = document.getElementById('det-reason-box');
+                if (bp.status === 'BLOCKED' && bp.blockReason) {
+                    reasonBox.style.display = 'block';
+                    document.getElementById('det-reason').innerText = bp.blockReason;
+                } else {
+                    reasonBox.style.display = 'none';
+                }
+                
+                document.getElementById('details-modal').style.display = 'flex';
+            } catch(e) { Dialog.alert("Erreur lors de la récupération des détails."); }
+        }
+        function closeDetails() { document.getElementById('details-modal').style.display = 'none'; }
+        
+        function viewPartnerDoc(type) { 
+            const id = document.getElementById('det-bp-id').value;
+            window.open(`/odata/v4/admin/BusinessPartners('${id}')/${type}/$value`, '_blank'); 
         }
 
-        function viewDoc(type) {
-            // Ajout de guillemets autour de l'ID pour OData
-            window.open(`/odata/v4/registration/RegistrationRequests('${currentExamId}')/${type}/$value`, '_blank');
-        }
+        function viewDoc(type) { window.open(`/odata/v4/registration/RegistrationRequests('${currentExamId}')/${type}/$value`, '_blank'); }
 
         async function submitDecision(status) {
             const reason = document.getElementById('exam-comment').value;
-            if(status === 'REJECTED' && !reason) {
-                alert("Veuillez saisir un motif pour le rejet.");
-                return;
-            }
+            if(status === 'REJECTED' && !reason) { await Dialog.alert("Motif obligatoire."); return; }
             const action = status === 'APPROVED' ? 'approveRegistration' : 'rejectRegistration';
-            const body = status === 'APPROVED' ? { id: currentExamId } : { id: currentExamId, reason: reason };
             try {
                 const res = await fetch(`/odata/v4/registration/${action}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(body)
+                    body: JSON.stringify(status === 'APPROVED' ? { id: currentExamId } : { id: currentExamId, reason: reason })
                 });
-                if(res.ok) {
-                    alert(status === 'APPROVED' ? "Inscription approuvée avec succès !" : "Inscription rejetée.");
-                    closeModal();
-                    loadRegistrations();
-                    loadStats();
-                } else { alert("Erreur lors de la soumission."); }
-            } catch(e) { console.error("Decision Error", e); }
+                if(res.ok) { await Dialog.alert("Succès !"); closeModal(); loadRegistrations(); loadStats(); }
+            } catch(e) {}
         }
+
+        function toggleNoti(e) { e.stopPropagation(); const d = document.getElementById('noti-dropdown'); d.style.display = d.style.display === 'flex' ? 'none' : 'flex'; }
+        window.onclick = (e) => { if(!e.target.closest('.action-icon')) document.getElementById('noti-dropdown').style.display = 'none'; };
 
         function saveProfile() {
-            const user = document.getElementById('admin-user').value;
-            const email = document.getElementById('admin-email').value;
-            const pass = document.getElementById('admin-password').value;
-
-            if(!user || !email || !pass) {
-                alert("Tous les champs (Nom, Email, Mot de passe) sont obligatoires pour la sécurité.");
-                return;
-            }
-
-            const profile = { username: user, email: email, password: pass };
-            localStorage.setItem('admin_profile', JSON.stringify(profile));
-            
-            alert("Profil mis à jour ! Veuillez utiliser ces nouveaux identifiants à votre prochaine connexion.");
+            const p = { username: document.getElementById('admin-user').value, email: document.getElementById('admin-email').value, password: document.getElementById('admin-password').value };
+            localStorage.setItem('admin_profile', JSON.stringify(p));
+            Dialog.alert("Profil mis à jour !");
         }
 
-        // Charger le profil au démarrage
         function initProfile() {
-            const profile = JSON.parse(localStorage.getItem('admin_profile'));
-            if(profile) {
-                document.getElementById('admin-user').value = profile.username;
-                document.getElementById('admin-email').value = profile.email;
-                document.getElementById('admin-password').value = profile.password;
-            }
+            const p = JSON.parse(localStorage.getItem('admin_profile'));
+            if(p) { document.getElementById('admin-user').value = p.username; document.getElementById('admin-email').value = p.email; }
         }
 
-        function logout() {
-            if(confirm("Voulez-vous vraiment vous déconnecter ?")) {
-                sessionStorage.clear(); // Efface la session active
-                window.location.href = '/index.html'; // Redirection vers l'accueil
-            }
-        }
+        async function logout() { if(await Dialog.confirm("Déconnexion ?")) { sessionStorage.clear(); window.location.href = '/index.html'; } }
 
         document.addEventListener('DOMContentLoaded', () => {
             setupUI();

@@ -24,6 +24,7 @@ entity BusinessPartner : cuid, managed, pme.SoftDelete, pme.Annotatable {
   website     : pme.URL;
   logo        : pme.URL;
   status      : pme.BPStatus default 'PENDING';
+  blockReason : String(512); // Motif de blocage/désactivation
   password    : String(100);
 
   // Algerian Fiscal Identifiers
@@ -37,6 +38,14 @@ entity BusinessPartner : cuid, managed, pme.SoftDelete, pme.Annotatable {
   postalCode  : String(10);
   wilaya      : String(64);
   country     : String(3) default 'DZ';
+
+  // Documents Médias
+  rcDoc       : LargeBinary @Core.MediaType: rcType;
+  rcType      : String  @Core.IsMediaType: true;
+  aiDoc       : LargeBinary @Core.MediaType: aiType;
+  aiType      : String  @Core.IsMediaType: true;
+  ribDoc      : LargeBinary @Core.MediaType: ribType;
+  ribType     : String  @Core.IsMediaType: true;
 
   // Navigation (Corrected references)
   clientB2B   : Association to many crm.ClientB2B   on clientB2B.bp   = $self;

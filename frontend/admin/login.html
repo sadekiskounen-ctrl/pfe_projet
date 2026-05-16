@@ -103,6 +103,7 @@
     <h1>Connectez-vous</h1>
     
     <form id="loginForm">
+        <div id="errorMsg" style="color: #ff4d4d; background: rgba(255, 77, 77, 0.1); padding: 10px; border-radius: 4px; margin-bottom: 1rem; display: none; font-size: 0.85rem; border: 1px solid rgba(255, 77, 77, 0.2);"></div>
         <div class="form-group">
             <label>Utilisateur</label>
             <input type="text" id="username" placeholder="admin" required>
@@ -123,11 +124,14 @@
 <script>
     document.getElementById('loginForm').addEventListener('submit', function(e) {
         e.preventDefault();
+        const errorDiv = document.getElementById('errorMsg');
+        errorDiv.style.display = 'none';
         const user = document.getElementById('username').value;
         if(user === 'admin') {
             window.location.href = 'dashboard.html?user=admin';
         } else {
-            alert('Utilisateur non autorisé pour ce rôle.');
+            errorDiv.innerText = 'Utilisateur non autorisé pour ce rôle.';
+            errorDiv.style.display = 'block';
         }
     });
 </script>

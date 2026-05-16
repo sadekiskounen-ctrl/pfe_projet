@@ -1,386 +1,612 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inscription — Gestion PME</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
     <style>
-        :root {
-            --sap-blue: #0070f2;
-            --sap-blue-dark: #0040b0;
-            --bg: #f4f7f6;
-            --card-bg: #ffffff;
-            --text: #1d2733;
-            --border: #e0e5ee;
+      :root {
+        --sap-blue: #0070f2;
+        --sap-blue-dark: #0040b0;
+        --bg: #f4f7f6;
+        --card-bg: #ffffff;
+        --text: #1d2733;
+        --border: #e0e5ee;
+      }
+
+      body {
+        background-color: var(--bg);
+        font-family: "Inter", sans-serif;
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+      }
+
+      .wizard-container {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 800px;
+        border: 1px solid var(--border);
+      }
+
+      /* Progress Bar */
+      .progress-steps {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        position: relative;
+      }
+
+      .progress-steps::before {
+        content: "";
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--border);
+        z-index: 1;
+      }
+
+      .step-indicator {
+        width: 42px;
+        height: 42px;
+        background: white;
+        border: 2px solid var(--border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: var(--border);
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s;
+      }
+
+      .step-indicator.active {
+        border-color: var(--sap-blue);
+        color: var(--sap-blue);
+        box-shadow: 0 0 0 4px rgba(0, 112, 242, 0.1);
+      }
+
+      .step-indicator.completed {
+        background: var(--sap-blue);
+        border-color: var(--sap-blue);
+        color: white;
+      }
+
+      .step-label {
+        position: absolute;
+        top: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+        left: 50%;
+        transform: translateX(-50%);
+        color: var(--border);
+      }
+
+      .step-indicator.active .step-label {
+        color: var(--sap-blue);
+      }
+
+      /* Form Steps */
+      .step-content {
+        display: none;
+      }
+      .step-content.active {
+        display: block;
+        animation: slideUp 0.4s ease-out;
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
         }
-
-        body {
-            background-color: var(--bg);
-            font-family: 'Inter', sans-serif;
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
+        to {
+          opacity: 1;
+          transform: translateY(0);
         }
+      }
 
-        .wizard-container {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.08);
-            width: 100%;
-            max-width: 800px;
-            border: 1px solid var(--border);
-        }
+      .form-label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+      }
+      .form-control {
+        border-radius: 10px;
+        padding: 12px 16px;
+        border: 1.5px solid var(--border);
+        transition: all 0.2s;
+      }
+      .form-control:focus {
+        border-color: var(--sap-blue);
+        box-shadow: 0 0 0 3px rgba(0, 112, 242, 0.1);
+      }
 
-        /* Progress Bar */
-        .progress-steps {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 40px;
-            position: relative;
-        }
+      .btn-primary {
+        background: var(--sap-blue);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+      }
+      .btn-primary:disabled {
+        background: #a0aec0;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+      .btn-primary:hover {
+        background: var(--sap-blue-dark);
+      }
+      .btn-secondary {
+        background: #e2e8f0;
+        color: var(--text);
+        border: none;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+      }
+      .btn-secondary:hover {
+        background: #cbd5e1;
+      }
 
-        .progress-steps::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--border);
-            z-index: 1;
-        }
+      .invalid-feedback {
+        font-size: 0.8rem;
+      }
 
-        .step-indicator {
-            width: 42px;
-            height: 42px;
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: var(--border);
-            position: relative;
-            z-index: 2;
-            transition: all 0.3s;
-        }
+      .card-type-selector {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+      }
 
-        .step-indicator.active {
-            border-color: var(--sap-blue);
-            color: var(--sap-blue);
-            box-shadow: 0 0 0 4px rgba(0, 112, 242, 0.1);
-        }
+      .card-type {
+        flex: 1;
+        padding: 20px;
+        border: 2px solid var(--border);
+        border-radius: 15px;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s;
+      }
 
-        .step-indicator.completed {
-            background: var(--sap-blue);
-            border-color: var(--sap-blue);
-            color: white;
-        }
+      .card-type.active {
+        border-color: var(--sap-blue);
+        background: rgba(0, 112, 242, 0.04);
+      }
 
-        .step-label {
-            position: absolute;
-            top: 50px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-            left: 50%;
-            transform: translateX(-50%);
-            color: var(--border);
-        }
-
-        .step-indicator.active .step-label { color: var(--sap-blue); }
-
-        /* Form Steps */
-        .step-content { display: none; }
-        .step-content.active { display: block; animation: slideUp 0.4s ease-out; }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .form-label { font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; }
-        .form-control {
-            border-radius: 10px;
-            padding: 12px 16px;
-            border: 1.5px solid var(--border);
-            transition: all 0.2s;
-        }
-        .form-control:focus {
-            border-color: var(--sap-blue);
-            box-shadow: 0 0 0 3px rgba(0, 112, 242, 0.1);
-        }
-
-        .btn-primary { background: var(--sap-blue); border: none; padding: 12px 30px; border-radius: 10px; font-weight: 600; }
-        .btn-primary:disabled {
-            background: #a0aec0;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        .btn-primary:hover { background: var(--sap-blue-dark); }
-        .btn-secondary { background: #e2e8f0; color: var(--text); border: none; padding: 12px 30px; border-radius: 10px; font-weight: 600; }
-        .btn-secondary:hover { background: #cbd5e1; }
-
-        .invalid-feedback { font-size: 0.8rem; }
-
-        .card-type-selector {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .card-type {
-            flex: 1;
-            padding: 20px;
-            border: 2px solid var(--border);
-            border-radius: 15px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .card-type.active {
-            border-color: var(--sap-blue);
-            background: rgba(0, 112, 242, 0.04);
-        }
-
-        .card-type input { display: none; }
+      .card-type input {
+        display: none;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
+    <div class="wizard-container">
+      <div class="progress-steps">
+        <div class="step-indicator active" id="ind1">
+          1 <span class="step-label">Société</span>
+        </div>
+        <div class="step-indicator" id="ind2">
+          2 <span class="step-label">Contact</span>
+        </div>
+        <div class="step-indicator" id="ind3">
+          3 <span class="step-label">Documents</span>
+        </div>
+      </div>
 
-<div class="wizard-container">
-    <div class="progress-steps">
-        <div class="step-indicator active" id="ind1">1 <span class="step-label">Société</span></div>
-        <div class="step-indicator" id="ind2">2 <span class="step-label">Contact</span></div>
-        <div class="step-indicator" id="ind3">3 <span class="step-label">Documents</span></div>
-    </div>
-
-    <form id="registrationForm" class="needs-validation" novalidate>
+      <form id="registrationForm" class="needs-validation" novalidate>
         <!-- ÉTAPE 1: Société -->
         <div id="step1" class="step-content active">
-            <h4 class="mb-4">1. Identité de l'entreprise</h4>
-            
-            <div class="card-type-selector">
-                <div class="card-type active" onclick="setRegType('b2b', this)">
-                    <input type="radio" name="regType" value="b2b" checked>
-                    <strong>Client B2B</strong>
-                    <p class="small text-muted mb-0">Accès au catalogue et commandes</p>
-                </div>
-                <div class="card-type" onclick="setRegType('supplier', this)">
-                    <input type="radio" name="regType" value="supplier">
-                    <strong>Fournisseur</strong>
-                    <p class="small text-muted mb-0">Gestion des ventes et RFQ</p>
-                </div>
-            </div>
+          <h4 class="mb-4">1. Identité de l'entreprise</h4>
 
-            <div class="mb-4">
-                <label class="form-label">Raison Sociale *</label>
-                <input type="text" class="form-control" id="companyName" placeholder="Ex: SARL PME ALGERIE" required>
+          <div class="card-type-selector">
+            <div class="card-type active" onclick="setRegType('b2b', this)">
+              <input type="radio" name="regType" value="b2b" checked />
+              <strong>Client B2B</strong>
+              <p class="small text-muted mb-0">
+                Accès au catalogue et commandes
+              </p>
             </div>
+            <div class="card-type" onclick="setRegType('fournisseur', this)">
+              <input type="radio" name="regType" value="fournisseur" />
+              <strong>Fournisseur</strong>
+              <p class="small text-muted mb-0">Gestion des ventes et RFQ</p>
+            </div>
+          </div>
 
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <label class="form-label">Numéro RC *</label>
-                    <input type="text" class="form-control" id="rc" placeholder="Ex: 00/00-1234567B26" required>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <label class="form-label">NIF (15 chiffres) *</label>
-                    <input type="text" class="form-control" id="nif" placeholder="Ex: 000123456789012" 
-                           pattern="[0-9]{15}" minlength="15" maxlength="15" required>
-                    <div class="invalid-feedback">Veuillez saisir exactement 15 chiffres.</div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <label class="form-label">Article d'Imposition (AI) *</label>
-                    <input type="text" class="form-control" id="ai" placeholder="Ex: 16012345678" 
-                           pattern="[0-9]+" minlength="11" maxlength="11" required>
-                    <div class="invalid-feedback">Veuillez saisir les 11 chiffres de votre AI.</div>
-                </div>
+          <div class="mb-4">
+            <label class="form-label">Raison Sociale *</label>
+            <input
+              type="text"
+              class="form-control"
+              id="companyName"
+              placeholder="Ex: SARL PME ALGERIE"
+              required
+            />
+            <div id="companyError" class="invalid-feedback">
+              Cette société est déjà enregistrée.
             </div>
+          </div>
 
-            <div class="mb-4">
-                <label class="form-label">Secteur d'activité *</label>
-                <select class="form-control" id="sector" required>
-                    <option value="" selected disabled>Choisir un secteur...</option>
-                    <option>Informatique & Tech</option>
-                    <option>Industrie & Manufacture</option>
-                    <option>BTP & Construction</option>
-                    <option>Commerce & Distribution</option>
-                    <option>Autre</option>
-                </select>
+          <div class="row">
+            <div class="col-md-4 mb-4">
+              <label class="form-label">Numéro RC *</label>
+              <input
+                type="text"
+                class="form-control"
+                id="rc"
+                placeholder="Ex: 00/00-1234567B26"
+                required
+              />
             </div>
+            <div class="col-md-4 mb-4">
+              <label class="form-label">NIF (15 chiffres) *</label>
+              <input
+                type="text"
+                class="form-control"
+                id="nif"
+                placeholder="Ex: 000123456789012"
+                pattern="[0-9]{15}"
+                minlength="15"
+                maxlength="15"
+                required
+              />
+              <div class="invalid-feedback">
+                Veuillez saisir exactement 15 chiffres.
+              </div>
+            </div>
+            <div class="col-md-4 mb-4">
+              <label class="form-label">Article d'Imposition (AI) *</label>
+              <input
+                type="text"
+                class="form-control"
+                id="ai"
+                placeholder="Ex: 16012345678"
+                pattern="[0-9]+"
+                minlength="11"
+                maxlength="11"
+                required
+              />
+              <div class="invalid-feedback">
+                Veuillez saisir les 11 chiffres de votre AI.
+              </div>
+            </div>
+          </div>
 
-            <div class="d-flex justify-content-end mt-4">
-                <button type="button" class="btn btn-primary" onclick="validateAndNext(2)">Suivant</button>
-            </div>
+          <div class="mb-4">
+            <label class="form-label">Secteur d'activité *</label>
+            <select class="form-control" id="sector" required>
+              <option value="" selected disabled>Choisir un secteur...</option>
+              <option>Informatique & Tech</option>
+              <option>Industrie & Manufacture</option>
+              <option>BTP & Construction</option>
+              <option>Commerce & Distribution</option>
+              <option>Autre</option>
+            </select>
+          </div>
+
+          <div class="d-flex justify-content-end mt-4">
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="validateAndNext(2)"
+            >
+              Suivant
+            </button>
+          </div>
         </div>
 
         <!-- ÉTAPE 2: Contact & Sécurité -->
         <div id="step2" class="step-content">
-            <h4 class="mb-4">2. Contact & Sécurité</h4>
-            
-            <div class="mb-4">
-                <label class="form-label">Nom complet du responsable *</label>
-                <input type="text" class="form-control" id="contactName" placeholder="Nom et Prénom" required>
-            </div>
+          <h4 class="mb-4">2. Contact & Sécurité</h4>
 
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <label class="form-label">Email professionnel *</label>
-                    <input type="email" class="form-control" id="email" placeholder="email@entreprise.com" required>
-                </div>
-                <div class="col-md-6 mb-4">
-                    <label class="form-label">Téléphone *</label>
-                    <input type="tel" class="form-control" id="phone" placeholder="05XX XX XX XX" required>
-                </div>
-            </div>
+          <div class="mb-4">
+            <label class="form-label">Nom complet du responsable *</label>
+            <input
+              type="text"
+              class="form-control"
+              id="contactName"
+              placeholder="Nom et Prénom"
+              required
+            />
+          </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-4">
-                    <label class="form-label">Mot de passe *</label>
-                    <input type="password" class="form-control" id="password" minlength="8" placeholder="Minimum 8 caractères" required>
-                </div>
-                <div class="col-md-6 mb-4">
-                    <label class="form-label">Confirmer le mot de passe *</label>
-                    <input type="password" class="form-control" id="confirmPassword" required>
-                    <div class="invalid-feedback" id="passError">Les mots de passe ne correspondent pas.</div>
-                </div>
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label class="form-label">Email professionnel *</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                placeholder="email@entreprise.com"
+                required
+              />
+              <div id="emailError" class="invalid-feedback">
+                Cet email est déjà utilisé.
+              </div>
             </div>
+            <div class="col-md-6 mb-4">
+              <label class="form-label">Téléphone *</label>
+              <input
+                type="tel"
+                class="form-control"
+                id="phone"
+                placeholder="05XX XX XX XX"
+                required
+              />
+            </div>
+          </div>
 
-            <div class="d-flex justify-content-between mt-4">
-                <button type="button" class="btn btn-secondary" onclick="goToStep(1)">Précédent</button>
-                <button type="button" class="btn btn-primary" onclick="validateAndNext(3)">Suivant</button>
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label class="form-label">Mot de passe *</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                minlength="8"
+                placeholder="Minimum 8 caractères"
+                required
+              />
             </div>
+            <div class="col-md-6 mb-4">
+              <label class="form-label">Confirmer le mot de passe *</label>
+              <input
+                type="password"
+                class="form-control"
+                id="confirmPassword"
+                required
+              />
+              <div class="invalid-feedback" id="passError">
+                Les mots de passe ne correspondent pas.
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between mt-4">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="goToStep(1)"
+            >
+              Précédent
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="validateAndNext(3)"
+            >
+              Suivant
+            </button>
+          </div>
         </div>
 
         <!-- ÉTAPE 3: KYC Algérie -->
         <div id="step3" class="step-content">
-            <h4 class="mb-4">3. Documents (KYC Algérie)</h4>
-            <div class="alert alert-info">
-                Format PDF uniquement pour les justificatifs fiscaux.
-            </div>
+          <h4 class="mb-4">3. Documents (KYC Algérie)</h4>
+          <div class="alert alert-info">
+            Format PDF uniquement pour les justificatifs fiscaux.
+          </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Registre de Commerce (RC) *</label>
-                    <input class="form-control" type="file" id="fileRC" accept="application/pdf" required>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Article d'Imposition (AI) *</label>
-                    <input class="form-control" type="file" id="fileAI" accept="application/pdf" required>
-                </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Registre de Commerce (RC) *</label>
+              <input
+                class="form-control"
+                type="file"
+                id="fileRC"
+                accept="application/pdf"
+                required
+              />
             </div>
-            <div class="mb-4">
-                <label class="form-label">RIB ou Chèque Barré *</label>
-                <input class="form-control" type="file" id="fileRIB" accept="application/pdf" required>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Article d'Imposition (AI) *</label>
+              <input
+                class="form-control"
+                type="file"
+                id="fileAI"
+                accept="application/pdf"
+                required
+              />
             </div>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">RIB ou Chèque Barré *</label>
+            <input
+              class="form-control"
+              type="file"
+              id="fileRIB"
+              accept="application/pdf"
+              required
+            />
+          </div>
 
-            <div class="d-flex justify-content-between mt-4">
-                <button type="button" class="btn btn-secondary" onclick="goToStep(2)">Précédent</button>
-                <button type="submit" class="btn btn-primary" id="btnSubmit">Soumettre mon dossier</button>
-            </div>
+          <div class="d-flex justify-content-between mt-4">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              onclick="goToStep(2)"
+            >
+              Précédent
+            </button>
+            <button type="submit" class="btn btn-primary" id="btnSubmit">
+              Soumettre mon dossier
+            </button>
+          </div>
         </div>
-    </form>
+      </form>
 
-    <div id="successMsg" class="text-center mt-4" style="display: none;">
+      <div id="successMsg" class="text-center mt-4" style="display: none">
         <div class="display-1 text-success mb-4">✅</div>
         <h3>Dossier transmis avec succès !</h3>
-        <p class="text-muted">Notre équipe va examiner vos documents. Vous recevrez un email de confirmation dès validation de votre compte.</p>
-        <a href="/auth.html" class="btn btn-primary mt-3">Retour à la connexion</a>
+        <p class="text-muted">
+          Notre équipe va examiner vos documents. Vous recevrez un email de
+          confirmation dès validation de votre compte.
+        </p>
+        <a href="/auth.html" class="btn btn-primary mt-3"
+          >Retour à la connexion</a
+        >
+      </div>
     </div>
-</div>
 
-<script>
-    function setRegType(type, element) {
-        document.querySelectorAll('.card-type').forEach(c => c.classList.remove('active'));
-        element.classList.add('active');
-        element.querySelector('input').checked = true;
-    }
+    <script>
+      function setRegType(type, element) {
+        document
+          .querySelectorAll(".card-type")
+          .forEach((c) => c.classList.remove("active"));
+        element.classList.add("active");
+        element.querySelector("input").checked = true;
+      }
 
-    function validateAndNext(step) {
-        const currentStepEl = document.querySelector('.step-content.active');
-        const inputs = currentStepEl.querySelectorAll('input, select');
+      async function validateAndNext(step) {
+        const currentStepEl = document.querySelector(".step-content.active");
+        const inputs = currentStepEl.querySelectorAll("input, select");
         let valid = true;
 
-        inputs.forEach(input => {
-            if (!input.checkValidity()) {
-                input.classList.add('is-invalid');
-                valid = false;
-            } else {
-                input.classList.remove('is-invalid');
-            }
+        inputs.forEach((input) => {
+          if (!input.checkValidity()) {
+            input.classList.add("is-invalid");
+            valid = false;
+          } else {
+            input.classList.remove("is-invalid");
+          }
         });
 
-        // Validation spécifique mot de passe à l'étape 2
         if (step === 3) {
-            const pass = document.getElementById('password').value;
-            const confirm = document.getElementById('confirmPassword').value;
-            if (pass !== confirm) {
-                document.getElementById('confirmPassword').classList.add('is-invalid');
-                document.getElementById('passError').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('passError').style.display = 'none';
-            }
+          const pass = document.getElementById("password").value;
+          const confirm = document.getElementById("confirmPassword").value;
+          if (pass !== confirm) {
+            document
+              .getElementById("confirmPassword")
+              .classList.add("is-invalid");
+            document.getElementById("passError").style.display = "block";
+            valid = false;
+          } else {
+            document.getElementById("passError").style.display = "none";
+          }
         }
 
-        if (valid) {
-            goToStep(step);
-        }
-    }
+        if (!valid) return;
 
-    function goToStep(step) {
-        document.querySelectorAll('.step-content').forEach(s => s.classList.remove('active'));
-        document.getElementById('step' + step).classList.add('active');
-        
-        // Update indicators
-        document.querySelectorAll('.step-indicator').forEach((ind, idx) => {
-            ind.classList.remove('active', 'completed');
-            if (idx + 1 < step) ind.classList.add('completed');
-            if (idx + 1 === step) ind.classList.add('active');
-        });
-    }
-
-    const toBase64 = file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = error => reject(error);
-    });
-
-    document.getElementById('registrationForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const btn = document.getElementById('btnSubmit');
-        const originalText = "Soumettre mon dossier";
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Soumission en cours...';
-
-        console.log("Démarrage de la soumission vers HANA Cloud...");
+        // --- CONTRÔLE SERVEUR ---
+        const regTypeRaw = document.querySelector(
+          'input[name="regType"]:checked',
+        ).value;
+        const type = regTypeRaw === "b2b" ? "CLIENT_B2B" : "FOURNISSEUR";
+        const companyName = document.getElementById("companyName").value;
+        const email = document.getElementById("email").value;
 
         try {
-            const typeValue = document.querySelector('input[name="regType"]:checked').value;
-            const type = typeValue === 'b2b' ? 'CLIENT_B2B' : 'FOURNISSEUR';
-            
-            const fileRC = document.getElementById('fileRC').files[0];
-            const fileRIB = document.getElementById('fileRIB').files[0];
-            const fileAI = document.getElementById('fileAI').files[0];
+          let checkUrl = "";
+          if (step === 2) {
+            // Sortie étape 1
+            checkUrl = `/odata/v4/registration/checkAvailability(companyName='${encodeURIComponent(companyName)}',type='${type}',email='')`;
+          } else if (step === 3) {
+            // Sortie étape 2
+            checkUrl = `/odata/v4/registration/checkAvailability(email='${encodeURIComponent(email)}',companyName='',type='')`;
+          }
 
-            if(!fileRC || !fileRIB || !fileAI) {
-                alert("Veuillez joindre tous les documents obligatoires (RC, AI, RIB).");
-                btn.disabled = false;
-                btn.innerText = originalText;
-                return;
+          if (checkUrl) {
+            const res = await fetch(checkUrl);
+            const raw = await res.json();
+            const data = raw.value || raw;
+            if (data && data.status === "CONFLICT") {
+              if (step === 2) {
+                const input = document.getElementById("companyName");
+                const error = document.getElementById("companyError");
+                input.classList.add("is-invalid");
+                error.innerText = data.blockReason;
+                error.style.display = "block";
+              } else {
+                const input = document.getElementById("email");
+                const error = document.getElementById("emailError");
+                input.classList.add("is-invalid");
+                error.innerText = data.blockReason;
+                error.style.display = "block";
+              }
+              return;
+            }
+          }
+          goToStep(step);
+        } catch (e) {
+          console.error("Check error:", e);
+          goToStep(step);
+        }
+      }
+
+      function goToStep(step) {
+        document
+          .querySelectorAll(".step-content")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById("step" + step).classList.add("active");
+
+        // Update indicators
+        document.querySelectorAll(".step-indicator").forEach((ind, idx) => {
+          ind.classList.remove("active", "completed");
+          if (idx + 1 < step) ind.classList.add("completed");
+          if (idx + 1 === step) ind.classList.add("active");
+        });
+      }
+
+      const toBase64 = (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result.split(",")[1]);
+          reader.onerror = (error) => reject(error);
+        });
+
+      document
+        .getElementById("registrationForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const btn = document.getElementById("btnSubmit");
+          const originalText = "Soumettre mon dossier";
+          btn.disabled = true;
+          btn.innerHTML =
+            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Soumission en cours...';
+
+          console.log("Démarrage de la soumission vers HANA Cloud...");
+
+          try {
+            const typeValue = document.querySelector(
+              'input[name="regType"]:checked',
+            ).value;
+            const type = typeValue === "b2b" ? "CLIENT_B2B" : "FOURNISSEUR";
+
+            const fileRC = document.getElementById("fileRC").files[0];
+            const fileRIB = document.getElementById("fileRIB").files[0];
+            const fileAI = document.getElementById("fileAI").files[0];
+
+            if (!fileRC || !fileRIB || !fileAI) {
+              alert(
+                "Veuillez joindre tous les documents obligatoires (RC, AI, RIB).",
+              );
+              btn.disabled = false;
+              btn.innerText = originalText;
+              return;
             }
 
             console.log("Conversion des documents en Base64...");
@@ -389,53 +615,63 @@
             const aiBase64 = await toBase64(fileAI);
 
             const payload = {
-                type: type,
-                companyName: document.getElementById('companyName').value,
-                rcNumber: document.getElementById('rc').value,
-                nif: document.getElementById('nif').value,
-                ai: document.getElementById('ai').value,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                password: document.getElementById('password').value,
-                address: 'Algérie',
-                rc: rcBase64,
-                rcType: 'application/pdf',
-                rcName: fileRC.name,
-                rib: ribBase64,
-                ribType: 'application/pdf',
-                ribName: fileRIB.name,
-                aiDoc: aiBase64,
-                aiType: 'application/pdf',
-                aiName: fileAI.name
+              type: type,
+              companyName: document.getElementById("companyName").value,
+              rcNumber: document.getElementById("rc").value,
+              nif: document.getElementById("nif").value,
+              ai: document.getElementById("ai").value,
+              email: document.getElementById("email").value,
+              phone: document.getElementById("phone").value,
+              password: document.getElementById("password").value,
+              address: "Algérie",
+              rc: rcBase64,
+              rcType: "application/pdf",
+              rcName: fileRC.name,
+              rib: ribBase64,
+              ribType: "application/pdf",
+              ribName: fileRIB.name,
+              aiDoc: aiBase64,
+              aiType: "application/pdf",
+              aiName: fileAI.name,
             };
 
             console.log("Envoi du payload à RegistrationService...");
-            
-            const response = await fetch('/odata/v4/registration/SubmitRegistration', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
 
-            if(response.ok) {
-                console.log("Succès ! Inscription enregistrée dans HANA.");
-                document.getElementById('registrationForm').style.display = 'none';
-                document.getElementById('successMsg').style.display = 'block';
-                document.querySelector('.progress-steps').style.display = 'none';
+            const response = await fetch(
+              "/odata/v4/registration/SubmitRegistration",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              },
+            );
+
+            if (response.ok) {
+              console.log("Succès ! Inscription enregistrée dans HANA.");
+              document.getElementById("registrationForm").style.display =
+                "none";
+              document.getElementById("successMsg").style.display = "block";
+              document.querySelector(".progress-steps").style.display = "none";
             } else {
-                const err = await response.json();
-                console.error("Erreur Serveur:", err);
-                alert('Erreur: ' + (err.error?.message || 'Le serveur a rejeté la demande. Vérifiez la taille des PDFs.'));
-                btn.disabled = false;
-                btn.innerText = originalText;
+              const err = await response.json();
+              console.error("Erreur Serveur:", err);
+              alert(
+                "Erreur: " +
+                  (err.error?.message ||
+                    "Le serveur a rejeté la demande. Vérifiez la taille des PDFs."),
+              );
+              btn.disabled = false;
+              btn.innerText = originalText;
             }
-        } catch (error) {
+          } catch (error) {
             console.error("Erreur de connexion:", error);
-            alert('Erreur technique lors de l\'envoi. Vérifiez votre connexion.');
+            alert(
+              "Erreur technique lors de l'envoi. Vérifiez votre connexion.",
+            );
             btn.disabled = false;
             btn.innerText = "Soumettre mon dossier";
-        }
-    });
-</script>
-</body>
+          }
+        });
+    </script>
+  </body>
 </html>

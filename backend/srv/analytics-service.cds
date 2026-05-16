@@ -1,6 +1,7 @@
-using { sap.pme as pme } from '../db/index';
+
 
 @readonly
+@auth: 'none'
 service AnalyticsService @(path: '/odata/v4/analytics') {
 
     type DashboardStats {

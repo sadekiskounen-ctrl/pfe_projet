@@ -10,6 +10,16 @@ module.exports = class AdminService extends cds.ApplicationService {
   async init() {
     const { BusinessPartners, Notifications, AuditLogs } = this.entities;
 
+    // ── Stream PDF media content ──
+    this.on('READ', BusinessPartners, async (req, next) => {
+      const url = req._.req.url;
+      if (url.includes('$value')) {
+        console.log("[Admin] Streaming partner document...");
+        return next();
+      }
+      return next();
+    });
+
     // ── Action: Activate Business Partner ──
     this.on('activateBusinessPartner', async (req) => {
       const { bpId } = req.data;
@@ -21,7 +31,7 @@ module.exports = class AdminService extends cds.ApplicationService {
     // ── Action: Block Business Partner ──
     this.on('blockBusinessPartner', async (req) => {
       const { bpId, reason } = req.data;
-      await UPDATE(BusinessPartners).set({ status: 'BLOCKED' }).where({ ID: bpId });
+      await UPDATE(BusinessPartners).set({ status: 'BLOCKED', blockReason: reason }).where({ ID: bpId });
       await this._logAudit(req, 'STATUS_CHANGE', 'BusinessPartner', bpId, `Blocked: ${reason}`);
       return SELECT.one.from(BusinessPartners, bpId);
     });

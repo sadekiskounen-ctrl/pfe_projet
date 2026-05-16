@@ -1,315 +1,371 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portail PME — Launchpad Intelligent</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-    :root {
-      --primary: #0070f2;
-      --primary-dark: #0056b3;
-      --accent: #6366f1;
-      --success: #107e3e;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #1e293b;
-      --text-muted: #64748b;
-      --glass: rgba(255, 255, 255, 0.8);
-      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-      --shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portail PME — Launchpad Intelligent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Inter:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #0070f2;
+        --primary-dark: #0056b3;
+        --accent: #6366f1;
+        --success: #107e3e;
+        --bg: #f8fafc;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --glass: rgba(255, 255, 255, 0.8);
+        --shadow:
+          0 10px 25px -5px rgba(0, 0, 0, 0.05),
+          0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        --shadow-hover:
+          0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--bg);
-      color: var(--text-main);
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--bg);
+        color: var(--text-main);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
 
-    h1, h2, h3 { font-family: 'Outfit', sans-serif; }
+      h1,
+      h2,
+      h3 {
+        font-family: "Outfit", sans-serif;
+      }
 
-    /* ─── Animated Background ─── */
-    .bg-blobs {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: -1;
-      filter: blur(80px);
-      opacity: 0.4;
-    }
-    .blob {
-      position: absolute;
-      border-radius: 50%;
-      background: var(--primary);
-    }
-    .blob-1 { width: 400px; height: 400px; top: -100px; right: -100px; background: #0070f2; }
-    .blob-2 { width: 300px; height: 300px; bottom: -50px; left: -50px; background: #6366f1; }
+      /* ─── Animated Background ─── */
+      .bg-blobs {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        filter: blur(80px);
+        opacity: 0.4;
+      }
+      .blob {
+        position: absolute;
+        border-radius: 50%;
+        background: var(--primary);
+      }
+      .blob-1 {
+        width: 400px;
+        height: 400px;
+        top: -100px;
+        right: -100px;
+        background: #0070f2;
+      }
+      .blob-2 {
+        width: 300px;
+        height: 300px;
+        bottom: -50px;
+        left: -50px;
+        background: #6366f1;
+      }
 
-    /* ─── Navbar ─── */
-    nav {
-      height: 70px;
-      padding: 0 5%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--glass);
-      backdrop-filter: blur(10px);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      border-bottom: 1px solid rgba(255,255,255,0.3);
-    }
+      /* ─── Navbar ─── */
+      nav {
+        height: 70px;
+        padding: 0 5%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--glass);
+        backdrop-filter: blur(10px);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      font-size: 1.3rem;
-      color: var(--primary);
-      text-decoration: none;
-    }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: 1.3rem;
+        color: var(--primary);
+        text-decoration: none;
+      }
 
-    /* ─── Hero Section ─── */
-    .hero {
-      padding: 80px 5% 40px;
-      text-align: center;
-      max-width: 900px;
-      margin: 0 auto;
-    }
+      /* ─── Hero Section ─── */
+      .hero {
+        padding: 80px 5% 40px;
+        text-align: center;
+        max-width: 900px;
+        margin: 0 auto;
+      }
 
-    .hero h1 {
-      font-size: 3.5rem;
-      font-weight: 800;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, #1e293b 0%, #0070f2 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -1px;
-    }
+      .hero h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #1e293b 0%, #0070f2 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -1px;
+      }
 
-    .hero p {
-      font-size: 1.2rem;
-      color: var(--text-muted);
-      margin-bottom: 40px;
-    }
+      .hero p {
+        font-size: 1.2rem;
+        color: var(--text-muted);
+        margin-bottom: 40px;
+      }
 
-    /* ─── Grid Layout ─── */
-    .portal-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 30px;
-      padding: 20px 5% 80px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+      /* ─── Grid Layout ─── */
+      .portal-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 30px;
+        padding: 20px 5% 80px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-    /* ─── Card Design ─── */
-    .portal-card {
-      background: var(--card-bg);
-      border-radius: 24px;
-      padding: 40px;
-      text-decoration: none;
-      color: inherit;
-      display: flex;
-      flex-direction: column;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      border: 1px solid rgba(0,0,0,0.03);
-      box-shadow: var(--shadow);
-      position: relative;
-      overflow: hidden;
-    }
+      /* ─── Card Design ─── */
+      .portal-card {
+        background: var(--card-bg);
+        border-radius: 24px;
+        padding: 40px;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid rgba(0, 0, 0, 0.03);
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
 
-    .portal-card::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 100px;
-      height: 100px;
-      background: radial-gradient(circle at top right, rgba(0,112,242,0.1), transparent 70%);
-      transition: all 0.4s;
-    }
+      .portal-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(
+          circle at top right,
+          rgba(0, 112, 242, 0.1),
+          transparent 70%
+        );
+        transition: all 0.4s;
+      }
 
-    .portal-card:hover {
-      transform: translateY(-10px);
-      box-shadow: var(--shadow-hover);
-      border-color: var(--primary);
-    }
+      .portal-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--shadow-hover);
+        border-color: var(--primary);
+      }
 
-    .portal-card:hover::after {
-      width: 150px;
-      height: 150px;
-    }
+      .portal-card:hover::after {
+        width: 150px;
+        height: 150px;
+      }
 
-    .card-icon {
-      font-size: 3rem;
-      margin-bottom: 25px;
-      display: block;
-    }
+      .card-icon {
+        font-size: 3rem;
+        margin-bottom: 25px;
+        display: block;
+      }
 
-    .card-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 12px;
-      color: var(--text-main);
-    }
+      .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: var(--text-main);
+      }
 
-    .card-desc {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      margin-bottom: 30px;
-      flex-grow: 1;
-    }
+      .card-desc {
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        margin-bottom: 30px;
+        flex-grow: 1;
+      }
 
-    .card-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      color: var(--primary);
-      font-size: 0.95rem;
-      transition: gap 0.2s;
-    }
+      .card-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: var(--primary);
+        font-size: 0.95rem;
+        transition: gap 0.2s;
+      }
 
-    .portal-card:hover .card-btn {
-      gap: 15px;
-    }
+      .portal-card:hover .card-btn {
+        gap: 15px;
+      }
 
-    /* ─── Specific Styles ─── */
-    .card-admin { border-top: 6px solid #a78bfa; }
-    .card-partners { border-top: 6px solid #6366f1; }
-    .card-new { border-top: 6px solid #4ade80; }
+      /* ─── Specific Styles ─── */
+      .card-admin {
+        border-top: 6px solid #a78bfa;
+      }
+      .card-partners {
+        border-top: 6px solid #6366f1;
+      }
+      .card-new {
+        border-top: 6px solid #4ade80;
+      }
 
-    .badge-secure {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: #f1f5f9;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 15px;
-    }
+      .badge-secure {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #f1f5f9;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 15px;
+      }
 
-    /* ─── Footer ─── */
-    footer {
-      padding: 60px 5%;
-      text-align: center;
-      background: #1e293b;
-      color: #94a3b8;
-    }
+      /* ─── Footer ─── */
+      footer {
+        padding: 60px 5%;
+        text-align: center;
+        background: #1e293b;
+        color: #94a3b8;
+      }
 
-    .footer-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+      .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
 
-    .footer-logo {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #fff;
-    }
+      .footer-logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+      }
 
-    .footer-links {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      font-size: 0.9rem;
-    }
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        font-size: 0.9rem;
+      }
 
-    .footer-links a {
-      color: #94a3b8;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
+      .footer-links a {
+        color: #94a3b8;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
 
-    .footer-links a:hover { color: #fff; }
+      .footer-links a:hover {
+        color: #fff;
+      }
 
-    @media (max-width: 768px) {
-      .hero h1 { font-size: 2.5rem; }
-      .portal-grid { grid-template-columns: 1fr; }
-    }
-  </style>
-</head>
-<body>
-
-<div class="bg-blobs">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-</div>
-
-<nav>
-  <a href="#" class="logo">
-    <span>🏢 Gestion PME</span>
-  </a>
-  <div class="nav-right">
-    <span style="font-size: 0.85rem; color: var(--text-muted);">PFE UMMTO • 2025</span>
-  </div>
-</nav>
-
-<div class="hero">
-  <h1>Votre Business, sans limites.</h1>
-  <p>Une plateforme unifiée pour gérer vos clients, vos fournisseurs et votre performance, propulsée par SAP BTP.</p>
-</div>
-
-<div class="portal-grid">
-  <!-- ADMINISTRATION -->
-  <a href="/auth.html?app=admin" class="portal-card card-admin">
-    <div class="badge-secure">🔒 Accès Sécurisé</div>
-    <span class="card-icon">⚙️</span>
-    <h3 class="card-title">Console Admin</h3>
-    <p class="card-desc">Gérez les utilisateurs, approuvez les inscriptions et surveillez les KPIs en temps réel.</p>
-    <div class="card-btn">Entrer dans la console <span>→</span></div>
-  </a>
-
-  <!-- PARTENAIRES EXISTANTS -->
-  <a href="/auth.html" class="portal-card card-partners">
-    <div class="badge-secure">👥 Espace Client / Fournisseur</div>
-    <span class="card-icon">💼</span>
-    <h3 class="card-title">Portail Business</h3>
-    <p class="card-desc">Connectez-vous à votre espace SRM ou CRM pour gérer vos commandes et vos documents.</p>
-    <div class="card-btn">Se connecter <span>→</span></div>
-  </a>
-
-  <!-- NOUVEAUX -->
-  <a href="/registration/index.html" class="portal-card card-new">
-    <div class="badge-secure">🚀 Nouveau Partenaire</div>
-    <span class="card-icon">✨</span>
-    <h3 class="card-title">Devenir Partenaire</h3>
-    <p class="card-desc">Vous n'êtes pas encore inscrit ? Rejoignez notre écosystème PME en quelques clics.</p>
-    <div class="card-btn">S'inscrire maintenant <span>→</span></div>
-  </a>
-</div>
-
-<footer>
-  <div class="footer-content">
-    <div class="footer-logo">🏢 Gestion PME</div>
-    <div class="footer-links">
-      <a href="#">Support</a>
-      <a href="#">Confidentialité</a>
-      <a href="#">Documentation API</a>
+      @media (max-width: 768px) {
+        .hero h1 {
+          font-size: 2.5rem;
+        }
+        .portal-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-blobs">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
     </div>
-    <p>© 2026 SAP PME Solution — Tous droits réservés.</p>
-  </div>
-</footer>
 
-<script>
-  // On pourrait ajouter ici une détection si l'utilisateur est déjà connecté
-  console.log("Launchpad prêt.");
-</script>
+    <nav>
+      <a href="#" class="logo">
+        <span>🏢 Gestion PME</span>
+      </a>
+      <div class="nav-right">
+        <span style="font-size: 0.85rem; color: var(--text-muted)"
+          >PFE UMMTO • 2025</span
+        >
+      </div>
+    </nav>
 
-</body>
+    <div class="hero">
+      <h1>Votre Business, sans limites.</h1>
+      <p>
+        Une plateforme unifiée pour gérer vos clients, vos fournisseurs et votre
+        performance, propulsée par SAP BTP.
+      </p>
+    </div>
+
+    <div class="portal-grid">
+      <!-- ADMINISTRATION -->
+      <a href="/auth.html?app=admin" class="portal-card card-admin">
+        <div class="badge-secure">🔒 Accès Sécurisé</div>
+        <span class="card-icon">⚙️</span>
+        <h3 class="card-title">Console Admin</h3>
+        <p class="card-desc">
+          Gérez les utilisateurs, approuvez les inscriptions et surveillez les
+          KPIs en temps réel.
+        </p>
+        <div class="card-btn">Entrer dans la console <span>→</span></div>
+      </a>
+
+      <!-- PARTENAIRES EXISTANTS -->
+      <a href="/auth.html" class="portal-card card-partners">
+        <div class="badge-secure">👥 Espace Client / Fournisseur</div>
+        <span class="card-icon">💼</span>
+        <h3 class="card-title">Portail Business</h3>
+        <p class="card-desc">
+          Connectez-vous à votre espace SRM ou CRM pour gérer vos commandes et
+          vos documents.
+        </p>
+        <div class="card-btn">Se connecter <span>→</span></div>
+      </a>
+
+      <!-- NOUVEAUX -->
+      <a href="/registration/index.html" class="portal-card card-new">
+        <div class="badge-secure">🚀 Nouveau Partenaire</div>
+        <span class="card-icon">✨</span>
+        <h3 class="card-title">Devenir Partenaire</h3>
+        <p class="card-desc">
+          Vous n'êtes pas encore inscrit ? Rejoignez notre écosystème PME en
+          quelques clics.
+        </p>
+        <div class="card-btn">S'inscrire maintenant <span>→</span></div>
+      </a>
+    </div>
+
+    <footer>
+      <div class="footer-content">
+        <div class="footer-logo">🏢 Gestion PME</div>
+        <div class="footer-links">
+          <a href="#">Support</a>
+          <a href="#">Confidentialité</a>
+          <a href="#">Documentation API</a>
+        </div>
+        <p>© 2026 SAP PME Solution — Tous droits réservés.</p>
+      </div>
+    </footer>
+
+    <script>
+      // On pourrait ajouter ici une détection si l'utilisateur est déjà connecté
+      console.log("Launchpad prêt.");
+    </script>
+  </body>
 </html>

@@ -7,9 +7,9 @@ on:
     branches: [main]
 
 env:
-  NODE_VERSION: '20.x'
-  CF_API: 'https://api.cf.us10-001.hana.ondemand.com'
-  CF_ORG: 'ffbe6148trial'
+  NODE_VERSION: "20.x"
+  CF_API: "https://api.cf.us10-001.hana.ondemand.com"
+  CF_ORG: "ffbe6148trial"
 
 jobs:
   # ── Job 1: Build & Test ──────────────────────────────────────
@@ -25,7 +25,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -52,7 +52,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -92,7 +92,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci

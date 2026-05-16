@@ -2,7 +2,6 @@ namespace pme.registration;
 
 using { cuid, managed } from '@sap/cds/common';
 
-@assert.unique: { email: [ email ] }
 entity RegistrationRequest : cuid, managed {
     type        : String(20) enum {
         CLIENT_B2B = 'CLIENT_B2B';
@@ -13,6 +12,8 @@ entity RegistrationRequest : cuid, managed {
         APPROVED = 'APPROVED';
         REJECTED = 'REJECTED';
     } default 'PENDING';
+
+    isReentry   : Boolean default false; // Flag pour les ré-inscriptions après rejet
 
     // Infos communes
     companyName : String(100);
