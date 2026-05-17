@@ -135,6 +135,7 @@ module.exports = cds.service.impl(async function () {
         "ribType",
         "ribNumber",
         "sector",
+        "address",
         "status",
       )
       .where({ ID: id });
@@ -180,6 +181,7 @@ module.exports = cds.service.impl(async function () {
         ai: reg.ai,
         ribNumber: reg.ribNumber,
         sector: reg.sector,
+        wilaya: reg.address,
         // Transfert des médias
         rcDoc: reg.rc,
         rcType: reg.rcType,
@@ -239,41 +241,45 @@ module.exports = cds.service.impl(async function () {
     const { email, companyName, type, rcNumber, nif, ai, ribNumber, phone } = req.data;
     const { BusinessPartner } = cds.entities("sap.pme");
 
-    if (companyName && type) {
-      const bpName = await SELECT.one.from(BusinessPartner).where({ displayName: companyName, bpType: type });
-      const regName = await SELECT.one.from(RegistrationRequests).where({ companyName, type, status: "PENDING" });
-      if (bpName || regName) return { status: "CONFLICT", blockReason: `La société "${companyName}" est déjà enregistrée comme ${type}.` };
-    }
+    const isClient = type === 'CLIENT_B2B' || type === 'CLIENT_B2C';
+    const typeLabel = isClient ? 'Client' : 'Fournisseur';
 
-    if (rcNumber && type) {
-      const bpRC = await SELECT.one.from(BusinessPartner).where({ rc: rcNumber, bpType: type });
-      const regRC = await SELECT.one.from(RegistrationRequests).where({ rcNumber, type, status: "PENDING" });
-      if (bpRC || regRC) return { status: "CONFLICT", blockReason: `Le Registre de Commerce (RC) "${rcNumber}" est déjà pris pour ce rôle.` };
-    }
+    // Helper fonction pour vérifier l'unicité
+    const checkDuplicate = async (fieldBP, fieldReg, value, errorMsg) => {
+        if (!value) return null;
 
-    if (nif && type) {
-      const bpNIF = await SELECT.one.from(BusinessPartner).where({ nif, bpType: type });
-      const regNIF = await SELECT.one.from(RegistrationRequests).where({ nif, type, status: "PENDING" });
-      if (bpNIF || regNIF) return { status: "CONFLICT", blockReason: `Le NIF "${nif}" est déjà pris pour ce rôle.` };
-    }
+        let bp, reg;
+        if (isClient) {
+            bp = await SELECT.one.from(BusinessPartner).where({ [fieldBP]: value }).and(`bpType = 'CLIENT_B2B' or bpType = 'CLIENT_B2C'`);
+            reg = await SELECT.one.from(RegistrationRequests).where({ [fieldReg]: value, status: 'PENDING' }).and(`type = 'CLIENT_B2B' or type = 'CLIENT_B2C'`);
+        } else {
+            bp = await SELECT.one.from(BusinessPartner).where({ [fieldBP]: value, bpType: 'FOURNISSEUR' });
+            reg = await SELECT.one.from(RegistrationRequests).where({ [fieldReg]: value, type: 'FOURNISSEUR', status: 'PENDING' });
+        }
 
-    if (ai && type) {
-      const bpAI = await SELECT.one.from(BusinessPartner).where({ ai, bpType: type });
-      const regAI = await SELECT.one.from(RegistrationRequests).where({ ai, type, status: "PENDING" });
-      if (bpAI || regAI) return { status: "CONFLICT", blockReason: `L'Article d'Imposition "${ai}" est déjà pris pour ce rôle.` };
-    }
+        if (bp || reg) return { status: "CONFLICT", blockReason: errorMsg };
+        return null;
+    };
 
-    if (ribNumber && type) {
-      const bpRIB = await SELECT.one.from(BusinessPartner).where({ ribNumber, bpType: type });
-      const regRIB = await SELECT.one.from(RegistrationRequests).where({ ribNumber, type, status: "PENDING" });
-      if (bpRIB || regRIB) return { status: "CONFLICT", blockReason: `Le RIB "${ribNumber}" est déjà pris pour ce rôle.` };
-    }
+    let error;
+    
+    error = await checkDuplicate('displayName', 'companyName', companyName, `La société "${companyName}" est déjà enregistrée comme ${typeLabel}.`);
+    if (error) return error;
 
-    if (phone && type) {
-      const bpPhone = await SELECT.one.from(BusinessPartner).where({ phone, bpType: type });
-      const regPhone = await SELECT.one.from(RegistrationRequests).where({ phone, type, status: "PENDING" });
-      if (bpPhone || regPhone) return { status: "CONFLICT", blockReason: `Le Téléphone "${phone}" est déjà pris pour ce rôle.` };
-    }
+    error = await checkDuplicate('rc', 'rcNumber', rcNumber, `Le Registre de Commerce (RC) "${rcNumber}" est déjà pris pour ce rôle.`);
+    if (error) return error;
+
+    error = await checkDuplicate('nif', 'nif', nif, `Le NIF "${nif}" est déjà pris pour ce rôle.`);
+    if (error) return error;
+
+    error = await checkDuplicate('ai', 'ai', ai, `L'Article d'Imposition "${ai}" est déjà pris pour ce rôle.`);
+    if (error) return error;
+
+    error = await checkDuplicate('ribNumber', 'ribNumber', ribNumber, `Le RIB "${ribNumber}" est déjà pris pour ce rôle.`);
+    if (error) return error;
+
+    error = await checkDuplicate('phone', 'phone', phone, `Le Téléphone "${phone}" est déjà pris pour ce rôle.`);
+    if (error) return error;
 
     if (email) {
       const bp = await SELECT.one.from(BusinessPartner).where("lower(email) =", email.toLowerCase());

@@ -230,7 +230,14 @@
               <input type="radio" name="regType" value="b2b" checked />
               <strong>Client B2B</strong>
               <p class="small text-muted mb-0">
-                Accès au catalogue et commandes
+                Entreprise (+5 employés) — Accès catalogue & commandes
+              </p>
+            </div>
+            <div class="card-type" onclick="setRegType('b2c', this)">
+              <input type="radio" name="regType" value="b2c" />
+              <strong>Client B2C</strong>
+              <p class="small text-muted mb-0">
+                Petite entreprise (≤5 employés) — Accès portail simplifié
               </p>
             </div>
             <div class="card-type" onclick="setRegType('fournisseur', this)">
@@ -287,8 +294,36 @@
                 </div>
           </div>
 
-          <div class="mb-4">
-            <label class="form-label">Secteur d'activité *</label>
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label class="form-label">Wilaya *</label>
+              <select class="form-select" id="wilaya" name="wilaya" required>
+                <option value="" selected disabled>Choisir une wilaya...</option>
+                <option value="Adrar">01 - Adrar</option><option value="Chlef">02 - Chlef</option><option value="Laghouat">03 - Laghouat</option>
+                <option value="Oum El Bouaghi">04 - Oum El Bouaghi</option><option value="Batna">05 - Batna</option><option value="Béjaïa">06 - Béjaïa</option>
+                <option value="Biskra">07 - Biskra</option><option value="Béchar">08 - Béchar</option><option value="Blida">09 - Blida</option>
+                <option value="Bouira">10 - Bouira</option><option value="Tamanrasset">11 - Tamanrasset</option><option value="Tébessa">12 - Tébessa</option>
+                <option value="Tlemcen">13 - Tlemcen</option><option value="Tiaret">14 - Tiaret</option><option value="Tizi Ouzou">15 - Tizi Ouzou</option>
+                <option value="Alger">16 - Alger</option><option value="Djelfa">17 - Djelfa</option><option value="Jijel">18 - Jijel</option>
+                <option value="Sétif">19 - Sétif</option><option value="Saïda">20 - Saïda</option><option value="Skikda">21 - Skikda</option>
+                <option value="Sidi Bel Abbès">22 - Sidi Bel Abbès</option><option value="Annaba">23 - Annaba</option><option value="Guelma">24 - Guelma</option>
+                <option value="Constantine">25 - Constantine</option><option value="Médéa">26 - Médéa</option><option value="Mostaganem">27 - Mostaganem</option>
+                <option value="M'Sila">28 - M'Sila</option><option value="Mascara">29 - Mascara</option><option value="Ouargla">30 - Ouargla</option>
+                <option value="Oran">31 - Oran</option><option value="El Bayadh">32 - El Bayadh</option><option value="Illizi">33 - Illizi</option>
+                <option value="Bordj Bou Arreridj">34 - Bordj Bou Arreridj</option><option value="Boumerdès">35 - Boumerdès</option><option value="El Tarf">36 - El Tarf</option>
+                <option value="Tindouf">37 - Tindouf</option><option value="Tissemsilt">38 - Tissemsilt</option><option value="El Oued">39 - El Oued</option>
+                <option value="Khenchela">40 - Khenchela</option><option value="Souk Ahras">41 - Souk Ahras</option><option value="Tipaza">42 - Tipaza</option>
+                <option value="Mila">43 - Mila</option><option value="Aïn Defla">44 - Aïn Defla</option><option value="Naâma">45 - Naâma</option>
+                <option value="Aïn Témouchent">46 - Aïn Témouchent</option><option value="Ghardaïa">47 - Ghardaïa</option><option value="Relizane">48 - Relizane</option>
+                <option value="Timimoun">49 - Timimoun</option><option value="Bordj Badji Mokhtar">50 - Bordj Badji Mokhtar</option>
+                <option value="Ouled Djellal">51 - Ouled Djellal</option><option value="Béni Abbès">52 - Béni Abbès</option>
+                <option value="In Salah">53 - In Salah</option><option value="In Guezzam">54 - In Guezzam</option><option value="Touggourt">55 - Touggourt</option>
+                <option value="Djanet">56 - Djanet</option><option value="El M'Ghair">57 - El M'Ghair</option><option value="El Meniaa">58 - El Meniaa</option>
+              </select>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+              <label class="form-label">Secteur d'activité *</label>
             <select class="form-select" id="sector" onchange="toggleCustomSector()" required>
               <option value="" selected disabled>Choisir un secteur...</option>
               <option value="Informatique & Tech">Informatique & Tech</option>
@@ -296,7 +331,8 @@
               <option value="BTP & Construction">BTP & Construction</option>
               <option value="Commerce & Distribution">Commerce & Distribution</option>
               <option value="Autre">Autre</option>
-            </select>
+              </select>
+            </div>
           </div>
 
           <div class="mb-4" id="customSectorGroup" style="display: none;">
@@ -484,13 +520,16 @@
 
         // Réinitialiser l'état visuel
         input.classList.remove("is-invalid");
-        if (errorDiv) errorDiv.textContent = "";
+        if (errorDiv) {
+            errorDiv.textContent = "";
+            errorDiv.style.display = "none";
+        }
 
         if (!value) return; // Ne rien faire si le champ est vide
 
         // Construire les paramètres selon le champ
         const typeValue = document.querySelector('input[name="regType"]:checked')?.value;
-        const type = typeValue === "b2b" ? "CLIENT_B2B" : "FOURNISSEUR";
+        const type = typeValue === "b2b" ? "CLIENT_B2B" : typeValue === "b2c" ? "CLIENT_B2C" : "FOURNISSEUR";
 
         let params = `type='${type}',companyName='',email='',rcNumber='',nif='',ai='',ribNumber='',phone=''`;
         
@@ -548,7 +587,13 @@
         let valid = true;
 
         inputs.forEach((input) => {
+          const errorDiv = document.getElementById(input.id + "Error");
+          const hasConflict = errorDiv && errorDiv.style.display === "block";
+
           if (!input.checkValidity()) {
+            input.classList.add("is-invalid");
+            valid = false;
+          } else if (hasConflict) {
             input.classList.add("is-invalid");
             valid = false;
           } else {
@@ -580,7 +625,7 @@
 
           try {
             const typeValue = document.querySelector('input[name="regType"]:checked').value;
-            const type = typeValue === "b2b" ? "CLIENT_B2B" : "FOURNISSEUR";
+            const type = typeValue === "b2b" ? "CLIENT_B2B" : typeValue === "b2c" ? "CLIENT_B2C" : "FOURNISSEUR";
             const companyName = document.getElementById("companyName").value;
             const rcNumber = document.getElementById("rc").value;
             const nif = document.getElementById("nif").value;
@@ -613,7 +658,7 @@
 
           try {
             const typeValue = document.querySelector('input[name="regType"]:checked').value;
-            const type = typeValue === "b2b" ? "CLIENT_B2B" : "FOURNISSEUR";
+            const type = typeValue === "b2b" ? "CLIENT_B2B" : typeValue === "b2c" ? "CLIENT_B2C" : "FOURNISSEUR";
             const email = document.getElementById("email").value;
             const phone = document.getElementById("phone").value;
             
@@ -639,7 +684,7 @@
         const regTypeRaw = document.querySelector(
           'input[name="regType"]:checked',
         ).value;
-        const type = regTypeRaw === "b2b" ? "CLIENT_B2B" : "FOURNISSEUR";
+        const type = regTypeRaw === "b2b" ? "CLIENT_B2B" : regTypeRaw === "b2c" ? "CLIENT_B2C" : "FOURNISSEUR";
         const companyName = document.getElementById("companyName").value;
         const email = document.getElementById("email").value;
 
@@ -720,7 +765,7 @@
             const typeValue = document.querySelector(
               'input[name="regType"]:checked',
             ).value;
-            const type = typeValue === "b2b" ? "CLIENT_B2B" : "FOURNISSEUR";
+            const type = typeValue === "b2b" ? "CLIENT_B2B" : typeValue === "b2c" ? "CLIENT_B2C" : "FOURNISSEUR";
 
             const fileRC = document.getElementById("fileRC").files[0];
             const fileRIB = document.getElementById("fileRIB").files[0];
@@ -752,7 +797,7 @@
               email: document.getElementById("email").value,
               phone: document.getElementById("phone").value,
               password: document.getElementById("password").value,
-              address: "Algérie",
+              address: document.getElementById("wilaya").value,
               sector: document.getElementById("sector").value === "Autre" ? document.getElementById("customSector").value : document.getElementById("sector").value,
               rc: rcBase64,
               rcType: "application/pdf",

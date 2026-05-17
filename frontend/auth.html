@@ -319,10 +319,15 @@
                     }
 
                     success = true;
+                    // Store the exact BP type for portal routing
+                    sessionStorage.setItem('bpType', dbType);
+
                     if (dbType === 'FOURNISSEUR') {
                         finalRole = 'fournisseur';
-                    } else if (dbType === 'CLIENT_B2B' || dbType === 'CLIENT_B2C') {
-                        finalRole = 'client';
+                    } else if (dbType === 'CLIENT_B2B') {
+                        finalRole = 'client_b2b';
+                    } else if (dbType === 'CLIENT_B2C') {
+                        finalRole = 'client_b2c';
                     } else {
                         finalRole = role;
                     }
@@ -342,7 +347,8 @@
             const urlParams = new URLSearchParams(window.location.search);
             const targetApp = urlParams.get('app');
             
-            if (targetApp === 'crm' || finalRole === 'client') window.location.href = '/crm/index.html';
+            if (finalRole === 'client_b2b') window.location.href = '/crm/index.html';
+            else if (finalRole === 'client_b2c') window.location.href = '/crm/clients/webapp/index.html';
             else if (targetApp === 'srm' || finalRole === 'fournisseur') window.location.href = '/srm/index.html';
             else if (targetApp === 'admin' || finalRole === 'admin') window.location.href = '/admin/dashboard.html';
             else window.location.href = '/index.html';

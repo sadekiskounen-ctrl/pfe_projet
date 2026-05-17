@@ -1,4 +1,18 @@
 const cds = require('@sap/cds');
+
+async function testQuery() {
+    const db = await cds.connect.to('db');
+    const { BusinessPartner } = db.entities('sap.pme');
+
+    const value = '1234567';
+    // Test if .and() with string condition works
+    const result = await SELECT.one.from(BusinessPartner).where({ rc: value }).and(`bpType = 'CLIENT_B2B' or bpType = 'CLIENT_B2C'`);
+    console.log("Query result:", result);
+    return result;
+}
+
+testQuery().catch(console.error).then(() => process.exit(0));
+
 (async () => {
     try {
         const db = await cds.connect.to('db');

@@ -12,8 +12,8 @@ module.exports = class AdminService extends cds.ApplicationService {
 
     // ── Stream PDF media content ──
     this.on('READ', BusinessPartners, async (req, next) => {
-      const url = req._.req.url;
-      if (url.includes('$value')) {
+      const url = req._?.req?.url;
+      if (url && url.includes('$value')) {
         console.log("[Admin] Streaming partner document...");
         return next();
       }

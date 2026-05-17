@@ -8,7 +8,8 @@ service AnalyticsService @(path: '/odata/v4/analytics') {
         totalRevenue: Decimal(15,2);
         marginPercent: Decimal(5,2);
         activeClients: Integer;
-        dso: Integer;
+        encoursClients: Decimal(15,2);
+        delaisFournisseurs: Integer;
         pendingRegistrations: Integer;
     }
 
@@ -26,5 +27,6 @@ service AnalyticsService @(path: '/odata/v4/analytics') {
     function getGlobalStats(month: String, year: String) returns DashboardStats;
     function getTopClients() returns many TopItem;
     function getTopSuppliers() returns many TopItem;
+    function getTopProducts() returns many TopItem;
     function getDailyRevenue(month: String, year: String) returns many DailyTrend;
 }

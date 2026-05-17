@@ -144,6 +144,8 @@
             width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
             border-radius: 10px; padding: 10px; color: white; margin-bottom: 1.5rem; resize: none;
         }
+        .btn-filter { background: transparent; border: 1px solid var(--border); color: var(--text-dim); padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 0.9rem;}
+        .btn-filter.active, .btn-filter:hover { background: var(--accent); color: black; border-color: var(--accent); font-weight: 600; }
     </style>
 </head>
 <body>
@@ -154,9 +156,11 @@
             <span class="brand-name">PME CLOUD</span>
         </div>
         <nav class="nav-menu">
-            <div class="nav-item active" onclick="switchView('overview', this)"><span>📊</span> Dashboard</div>
-            <div class="nav-item" onclick="switchView('partners', this)"><span>👥</span> Partners</div>
+            <div class="nav-item" onclick="switchView('overview', this)"><span>📊</span> Dashboard</div>
+            <div class="nav-item" onclick="switchView('partners', this)"><span>👥</span> Clients</div>
+            <div class="nav-item" onclick="switchView('suppliers', this)"><span>🚚</span> Fournisseurs</div>
             <div class="nav-item" onclick="switchView('registrations', this)"><span>📝</span> Inscriptions</div>
+            <div class="nav-item" onclick="switchView('catalogue', this)"><span>📦</span> Catalogue</div>
             <div class="nav-item" onclick="switchView('settings', this)"><span>⚙️</span> Paramètres</div>
             <div class="nav-item logout-item" onclick="logout()" style="margin-top: 20px; color: #f87171;"><span>🚪</span> Déconnexion</div>
         </nav>
@@ -194,16 +198,16 @@
                         <div class="kpi-value" id="kpi-revenue">0 DA</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-label">Marge Réelle</div>
-                        <div class="kpi-value" id="kpi-margin">0 %</div>
+                        <div class="kpi-label">Encours Clients</div>
+                        <div class="kpi-value" id="kpi-encours">0 DA</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-label">Clients Actifs</div>
                         <div class="kpi-value" id="kpi-clients">0</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-label">DSO (Jours)</div>
-                        <div class="kpi-value" id="kpi-dso">0</div>
+                        <div class="kpi-label">Délais Fournisseurs (Moy.)</div>
+                        <div class="kpi-value" id="kpi-delais">0 j</div>
                     </div>
                 </div>
 
@@ -212,13 +216,17 @@
                     <canvas id="mainChart" height="100"></canvas>
                 </div>
 
-                <div class="top-lists-grid">
+                <div class="top-lists-grid" style="grid-template-columns: repeat(3, 1fr);">
                     <div class="top-card">
                         <div style="font-weight: 600; color: var(--accent); margin-bottom: 20px;">🏆 TOP 5 CLIENTS</div>
                         <div id="top-clients-list"></div>
                     </div>
                     <div class="top-card">
-                        <div style="font-weight: 600; color: var(--accent-green); margin-bottom: 20px;">📦 TOP 5 FOURNISSEURS</div>
+                        <div style="font-weight: 600; color: var(--accent-orange); margin-bottom: 20px;">📦 TOP 5 PRODUITS</div>
+                        <div id="top-products-list"></div>
+                    </div>
+                    <div class="top-card">
+                        <div style="font-weight: 600; color: var(--accent-green); margin-bottom: 20px;">🏭 TOP 5 FOURNISSEURS</div>
                         <div id="top-suppliers-list"></div>
                     </div>
                 </div>
@@ -226,28 +234,259 @@
                 <div class="alerts-container" id="alerts-list"></div>
             </div>
 
-            <!-- VIEW: PARTNERS -->
-            <div id="partners" class="view-section">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2>Business Partners</h2>
-                    <div style="display: flex; gap: 10px;">
-                        <select id="filter-type" class="period-selector" onchange="loadPartners(document.getElementById('main-search').value)">
+            <!-- VIEW: CATALOGUE -->
+            <div id="catalogue" class="view-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2 style="font-size:1.5rem; font-weight:700;">📦 Gestion du Catalogue Produits</h2>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="cat-filter-type" class="period-selector" onchange="loadCatalogue()">
                             <option value="">Tous les types</option>
-                            <option value="CLIENT_B2B">Clients B2B</option>
-                            <option value="CLIENT_B2C">Clients B2C</option>
-                            <option value="FOURNISSEUR">Fournisseurs</option>
+                            <option value="PRODUCT">Produits</option>
+                            <option value="SERVICE">Services</option>
                         </select>
-                        <select id="filter-status" class="period-selector" onchange="loadPartners(document.getElementById('main-search').value)">
+                        <select id="cat-filter-status" class="period-selector" onchange="loadCatalogue()">
                             <option value="">Tous les statuts</option>
-                            <option value="ACTIVE">✅ Activés</option>
-                            <option value="BLOCKED">🚫 Désactivés</option>
-                            <option value="PENDING">⏳ En attente</option>
+                            <option value="true">✅ Actifs</option>
+                            <option value="false">🔴 Inactifs</option>
                         </select>
+                        <button class="btn-action" onclick="openProductModal()" style="display:flex; align-items:center; gap:8px; padding: 10px 20px; border-radius:12px;">
+                            ＋ Nouveau Produit
+                        </button>
                     </div>
                 </div>
+
+                <!-- KPI Stats Catalogue -->
+                <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:16px; margin-bottom:25px;">
+                    <div class="kpi-card" style="border-left: 3px solid var(--accent);">
+                        <div class="kpi-label">Total Produits</div>
+                        <div class="kpi-value" id="cat-total" style="font-size:1.5rem;">0</div>
+                    </div>
+                    <div class="kpi-card" style="border-left: 3px solid var(--accent-green);">
+                        <div class="kpi-label">Actifs</div>
+                        <div class="kpi-value" id="cat-active" style="font-size:1.5rem; color:var(--accent-green);">0</div>
+                    </div>
+                    <div class="kpi-card" style="border-left: 3px solid #f87171;">
+                        <div class="kpi-label">Inactifs</div>
+                        <div class="kpi-value" id="cat-inactive" style="font-size:1.5rem; color:#f87171;">0</div>
+                    </div>
+                    <div class="kpi-card" style="border-left: 3px solid var(--accent-orange);">
+                        <div class="kpi-label">Stock Faible (&lt; min)</div>
+                        <div class="kpi-value" id="cat-lowstock" style="font-size:1.5rem; color:var(--accent-orange);">0</div>
+                    </div>
+                </div>
+
+                <!-- Tableau Produits -->
+                <div style="background: var(--card-bg); border-radius:20px; border: 1px solid var(--glass-border); overflow:hidden;">
+                    <table class="custom-table" id="catalogue-table">
+                        <thead>
+                            <tr>
+                                <th>SKU / Code</th>
+                                <th>Nom du Produit</th>
+                                <th>Catégorie</th>
+                                <th>Type</th>
+                                <th>Prix HT (DA)</th>
+                                <th>Stock</th>
+                                <th>TVA</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="catalogue-tbody">
+                            <tr><td colspan="9" style="text-align:center; padding:40px; color:var(--text-dim);">⏳ Chargement...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- MODAL: PRODUIT CRUD -->
+            <div id="product-modal" class="modal-overlay" style="display:none; align-items:center; justify-content:center;">
+                <div class="modal-content" style="width:720px; max-height:90vh; overflow-y:auto;">
+                    <div class="modal-header">
+                        <h3 id="product-modal-title">📦 Nouveau Produit</h3>
+                        <span class="close-modal" onclick="closeProductModal()">×</span>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="prod-id">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                            <div>
+                                <label style="display:block; font-size:0.8rem; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">SKU / Code *</label>
+                                <input type="text" id="prod-code" class="period-selector" placeholder="Ex: PROD-001" style="width:100%; height:42px; padding:0 12px; border-radius:10px;" required>
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.8rem; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Nom du Produit *</label>
+                                <input type="text" id="prod-name" class="period-selector" placeholder="Nom commercial" style="width:100%; height:42px; padding:0 12px; border-radius:10px;" required>
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.8rem; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Catégorie</label>
+                                <input type="text" id="prod-category" class="period-selector" placeholder="Ex: Informatique" style="width:100%; height:42px; padding:0 12px; border-radius:10px;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.8rem; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Type</label>
+                                <select id="prod-type" class="period-selector" style="width:100%; height:42px; padding:0 12px; border-radius:10px;">
+                                    <option value="PRODUCT">Produit</option>
+                                    <option value="SERVICE">Service</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.8rem; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Prix HT (DA) *</label>
+                                <input type="number" id="prod-price" class="period-selector" placeholder="0.00" min="0" step="0.01" style="width:100%; height:42px; padding:0 12px; border-radius:10px;" required>
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.8rem; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Stock actuel</label>
+                                <input type="number" id="prod-stock" class="period-selector" placeholder="0" min="0" style="width:100%; height:42px; padding:0 12px; border-radius:10px;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.8rem; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Stock Minimum</label>
+                                <input type="number" id="prod-minstock" class="period-selector" placeholder="0" min="0" style="width:100%; height:42px; padding:0 12px; border-radius:10px;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.8rem; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Taux TVA (%)</label>
+                                <input type="number" id="prod-tva" class="period-selector" value="19" min="0" max="100" step="0.01" style="width:100%; height:42px; padding:0 12px; border-radius:10px;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.8rem; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Unité</label>
+                                <select id="prod-unit" class="period-selector" style="width:100%; height:42px; padding:0 12px; border-radius:10px;">
+                                    <option value="PIECE">Pièce</option>
+                                    <option value="KG">Kilogramme</option>
+                                    <option value="LITRE">Litre</option>
+                                    <option value="HEURE">Heure</option>
+                                    <option value="FORFAIT">Forfait</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; font-size:0.8rem; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Statut</label>
+                                <select id="prod-active" class="period-selector" style="width:100%; height:42px; padding:0 12px; border-radius:10px;">
+                                    <option value="true">✅ Actif</option>
+                                    <option value="false">🔴 Inactif</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div style="margin-top:20px;">
+                            <label style="display:block; font-size:0.8rem; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;">Description</label>
+                            <textarea id="prod-description" rows="3" placeholder="Description du produit ou service..." style="width:100%; background:rgba(0,0,0,0.2); border:1px solid var(--border); border-radius:10px; padding:12px; color:white; font-family:inherit; resize:none;"></textarea>
+                        </div>
+                        <div id="prod-error" style="display:none; margin-top:15px; padding:12px; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:10px; color:#f87171; font-size:0.9rem;"></div>
+                        <div style="display:flex; gap:15px; margin-top:25px;">
+                            <button class="btn-dialog-secondary" onclick="closeProductModal()" style="flex:1; padding:14px; border-radius:12px; font-size:1rem;">Annuler</button>
+                            <button class="btn-action" onclick="saveProduct()" id="prod-save-btn" style="flex:2; padding:14px; border-radius:12px; font-size:1rem; font-weight:700;">💾 Enregistrer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW: CLIENTS -->
+            <div id="partners" class="view-section">
+                <h2 style="display:flex; align-items:center; gap:10px; margin-bottom: 20px; font-weight:700;">👥 SECTION CLIENTS (B2B / B2C)</h2>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px solid var(--glass-border); padding: 15px; border-radius: 12px; background: rgba(0,0,0,0.2);">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button class="btn-filter active" id="btn-filter-all" onclick="setClientTypeFilter('')">Tous</button>
+                        <button class="btn-filter" id="btn-filter-b2b" onclick="setClientTypeFilter('CLIENT_B2B')">B2B</button>
+                        <button class="btn-filter" id="btn-filter-b2c" onclick="setClientTypeFilter('CLIENT_B2C')">B2C</button>
+                        
+                        <div class="search-container" style="margin-left: 15px; background: transparent; border: 1px solid var(--border); width: 200px;">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="search-input" placeholder="Rechercher..." id="client-search" oninput="loadPartners()" style="background: transparent; color: white;">
+                        </div>
+                        
+                        <select id="filter-wilaya" class="period-selector" onchange="loadPartners()">
+                            <option value="">Filtrer par wilaya</option>
+                            <option value="Adrar">01 - Adrar</option><option value="Chlef">02 - Chlef</option><option value="Laghouat">03 - Laghouat</option>
+                            <option value="Oum El Bouaghi">04 - Oum El Bouaghi</option><option value="Batna">05 - Batna</option><option value="Béjaïa">06 - Béjaïa</option>
+                            <option value="Biskra">07 - Biskra</option><option value="Béchar">08 - Béchar</option><option value="Blida">09 - Blida</option>
+                            <option value="Bouira">10 - Bouira</option><option value="Tamanrasset">11 - Tamanrasset</option><option value="Tébessa">12 - Tébessa</option>
+                            <option value="Tlemcen">13 - Tlemcen</option><option value="Tiaret">14 - Tiaret</option><option value="Tizi Ouzou">15 - Tizi Ouzou</option>
+                            <option value="Alger">16 - Alger</option><option value="Djelfa">17 - Djelfa</option><option value="Jijel">18 - Jijel</option>
+                            <option value="Sétif">19 - Sétif</option><option value="Saïda">20 - Saïda</option><option value="Skikda">21 - Skikda</option>
+                            <option value="Sidi Bel Abbès">22 - Sidi Bel Abbès</option><option value="Annaba">23 - Annaba</option><option value="Guelma">24 - Guelma</option>
+                            <option value="Constantine">25 - Constantine</option><option value="Médéa">26 - Médéa</option><option value="Mostaganem">27 - Mostaganem</option>
+                            <option value="M'Sila">28 - M'Sila</option><option value="Mascara">29 - Mascara</option><option value="Ouargla">30 - Ouargla</option>
+                            <option value="Oran">31 - Oran</option><option value="El Bayadh">32 - El Bayadh</option><option value="Illizi">33 - Illizi</option>
+                            <option value="Bordj Bou Arreridj">34 - Bordj Bou Arreridj</option><option value="Boumerdès">35 - Boumerdès</option><option value="El Tarf">36 - El Tarf</option>
+                            <option value="Tindouf">37 - Tindouf</option><option value="Tissemsilt">38 - Tissemsilt</option><option value="El Oued">39 - El Oued</option>
+                            <option value="Khenchela">40 - Khenchela</option><option value="Souk Ahras">41 - Souk Ahras</option><option value="Tipaza">42 - Tipaza</option>
+                            <option value="Mila">43 - Mila</option><option value="Aïn Defla">44 - Aïn Defla</option><option value="Naâma">45 - Naâma</option>
+                            <option value="Aïn Témouchent">46 - Aïn Témouchent</option><option value="Ghardaïa">47 - Ghardaïa</option><option value="Relizane">48 - Relizane</option>
+                            <option value="Timimoun">49 - Timimoun</option><option value="Bordj Badji Mokhtar">50 - Bordj Badji Mokhtar</option>
+                            <option value="Ouled Djellal">51 - Ouled Djellal</option><option value="Béni Abbès">52 - Béni Abbès</option>
+                            <option value="In Salah">53 - In Salah</option><option value="In Guezzam">54 - In Guezzam</option><option value="Touggourt">55 - Touggourt</option>
+                            <option value="Djanet">56 - Djanet</option><option value="El M'Ghair">57 - El M'Ghair</option><option value="El Meniaa">58 - El Meniaa</option>
+                        </select>
+                    </div>
+                    <button class="btn-action" style="display:flex; align-items:center; gap:8px;" onclick="window.open('/registration/index.html', '_blank')">＋ Nouveau</button>
+                </div>
+
                 <table class="custom-table">
-                    <thead><tr><th>ID</th><th>Nom</th><th>Type</th><th>Statut</th><th>Actions</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Raison sociale / Nom</th>
+                            <th>Wilaya</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
                     <tbody id="partners-table-body"></tbody>
+                </table>
+            </div>
+
+            <!-- VIEW: SUPPLIERS -->
+            <div id="suppliers" class="view-section">
+                <h2 style="display:flex; align-items:center; gap:10px; margin-bottom: 20px; font-weight:700;">🚚 SECTION FOURNISSEURS</h2>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px solid var(--glass-border); padding: 15px; border-radius: 12px; background: rgba(0,0,0,0.2);">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <div class="search-container" style="margin-left: 0; background: transparent; border: 1px solid var(--border); width: 250px;">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" class="search-input" placeholder="Rechercher..." id="supplier-search" oninput="loadSuppliers()" style="background: transparent; color: white;">
+                        </div>
+                        
+                        <select id="filter-wilaya-supplier" class="period-selector" onchange="loadSuppliers()">
+                            <option value="">Filtrer par wilaya</option>
+                            <option value="Adrar">01 - Adrar</option><option value="Chlef">02 - Chlef</option><option value="Laghouat">03 - Laghouat</option>
+                            <option value="Oum El Bouaghi">04 - Oum El Bouaghi</option><option value="Batna">05 - Batna</option><option value="Béjaïa">06 - Béjaïa</option>
+                            <option value="Biskra">07 - Biskra</option><option value="Béchar">08 - Béchar</option><option value="Blida">09 - Blida</option>
+                            <option value="Bouira">10 - Bouira</option><option value="Tamanrasset">11 - Tamanrasset</option><option value="Tébessa">12 - Tébessa</option>
+                            <option value="Tlemcen">13 - Tlemcen</option><option value="Tiaret">14 - Tiaret</option><option value="Tizi Ouzou">15 - Tizi Ouzou</option>
+                            <option value="Alger">16 - Alger</option><option value="Djelfa">17 - Djelfa</option><option value="Jijel">18 - Jijel</option>
+                            <option value="Sétif">19 - Sétif</option><option value="Saïda">20 - Saïda</option><option value="Skikda">21 - Skikda</option>
+                            <option value="Sidi Bel Abbès">22 - Sidi Bel Abbès</option><option value="Annaba">23 - Annaba</option><option value="Guelma">24 - Guelma</option>
+                            <option value="Constantine">25 - Constantine</option><option value="Médéa">26 - Médéa</option><option value="Mostaganem">27 - Mostaganem</option>
+                            <option value="M'Sila">28 - M'Sila</option><option value="Mascara">29 - Mascara</option><option value="Ouargla">30 - Ouargla</option>
+                            <option value="Oran">31 - Oran</option><option value="El Bayadh">32 - El Bayadh</option><option value="Illizi">33 - Illizi</option>
+                            <option value="Bordj Bou Arreridj">34 - Bordj Bou Arreridj</option><option value="Boumerdès">35 - Boumerdès</option><option value="El Tarf">36 - El Tarf</option>
+                            <option value="Tindouf">37 - Tindouf</option><option value="Tissemsilt">38 - Tissemsilt</option><option value="El Oued">39 - El Oued</option>
+                            <option value="Khenchela">40 - Khenchela</option><option value="Souk Ahras">41 - Souk Ahras</option><option value="Tipaza">42 - Tipaza</option>
+                            <option value="Mila">43 - Mila</option><option value="Aïn Defla">44 - Aïn Defla</option><option value="Naâma">45 - Naâma</option>
+                            <option value="Aïn Témouchent">46 - Aïn Témouchent</option><option value="Ghardaïa">47 - Ghardaïa</option><option value="Relizane">48 - Relizane</option>
+                            <option value="Timimoun">49 - Timimoun</option><option value="Bordj Badji Mokhtar">50 - Bordj Badji Mokhtar</option>
+                            <option value="Ouled Djellal">51 - Ouled Djellal</option><option value="Béni Abbès">52 - Béni Abbès</option>
+                            <option value="In Salah">53 - In Salah</option><option value="In Guezzam">54 - In Guezzam</option><option value="Touggourt">55 - Touggourt</option>
+                            <option value="Djanet">56 - Djanet</option><option value="El M'Ghair">57 - El M'Ghair</option><option value="El Meniaa">58 - El Meniaa</option>
+                        </select>
+                        <select id="filter-notation" class="period-selector" onchange="loadSuppliers()">
+                            <option value="">Filtrer par notation</option>
+                            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                            <option value="4">⭐⭐⭐⭐ (4)</option>
+                            <option value="3">⭐⭐⭐ (3)</option>
+                            <option value="2">⭐⭐ (2)</option>
+                            <option value="1">⭐ (1)</option>
+                        </select>
+                    </div>
+                    <button class="btn-action" style="display:flex; align-items:center; gap:8px;" onclick="window.open('/registration/index.html', '_blank')">＋ Ajouter fournisseur</button>
+                </div>
+
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Raison sociale</th>
+                            <th>Wilaya</th>
+                            <th>Notation</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="suppliers-table-body"></tbody>
                 </table>
             </div>
 
@@ -471,7 +710,9 @@
             
             if(viewId === 'overview') loadStats();
             if(viewId === 'partners') loadPartners();
+            if(viewId === 'suppliers') loadSuppliers();
             if(viewId === 'registrations') loadRegistrations();
+            if(viewId === 'catalogue') loadCatalogue();
         }
 
         // INIT & PERIODS (DYNAMIQUE)
@@ -507,6 +748,13 @@
                 monthSel.onchange = loadStats;
                 
                 updateMonths(); // Initial load
+                
+                // Actualisation en temps réel toutes les 15 secondes
+                setInterval(() => {
+                    if (document.querySelector('.view-section.active').id === 'overview') {
+                        loadStats();
+                    }
+                }, 15000);
 
                 // FIX: SEARCH BAR
                 const searchInput = document.getElementById('main-search');
@@ -514,7 +762,7 @@
                     const val = e.target.value;
                     let activeView = document.querySelector('.view-section.active').id;
                     
-                    // Si on cherche depuis le dashboard, on bascule sur les partenaires
+                    // Si on cherche depuis le dashboard, on bascule sur les partenaires ou fournisseurs
                     if (activeView === 'overview' && val.length > 0) {
                         switchView('partners', document.querySelectorAll('.nav-item')[1]);
                         activeView = 'partners';
@@ -522,6 +770,7 @@
 
                     console.log(`[Search] Searching for "${val}" in ${activeView}`);
                     if (activeView === 'partners') loadPartners(val);
+                    if (activeView === 'suppliers') loadSuppliers(val);
                     if (activeView === 'registrations') loadRegistrations(val);
                 };
             } catch (e) {
@@ -539,9 +788,9 @@
                 const s = raw.value ? raw.value : raw;
 
                 document.getElementById('kpi-revenue').innerText = new Intl.NumberFormat().format(s.totalRevenue || 0) + ' DA';
-                document.getElementById('kpi-margin').innerText = (s.marginPercent || 0) + ' %';
+                document.getElementById('kpi-encours').innerText = new Intl.NumberFormat().format(s.encoursClients || 0) + ' DA';
                 document.getElementById('kpi-clients').innerText = s.activeClients || 0;
-                document.getElementById('kpi-dso').innerText = s.dso || 0;
+                document.getElementById('kpi-delais').innerText = (s.delaisFournisseurs || 0) + ' j';
 
                 loadChart(m, y);
                 loadTops();
@@ -561,7 +810,20 @@
                         labels: data.value.map(d => d.day),
                         datasets: [{ label: 'CA', data: data.value.map(d => d.value), backgroundColor: '#38bdf8', borderRadius: 5 }]
                     },
-                    options: { responsive: true, plugins: { legend: false }, scales: { y: { ticks: { color: '#94a3b8' } }, x: { ticks: { color: '#94a3b8' } } } }
+                    options: { 
+                        responsive: true, 
+                        plugins: { legend: false }, 
+                        scales: { 
+                            y: { 
+                                title: { display: true, text: 'Chiffre d\'affaires (DA)', color: '#94a3b8' },
+                                ticks: { color: '#94a3b8' } 
+                            }, 
+                            x: { 
+                                title: { display: true, text: 'Jours du mois', color: '#94a3b8' },
+                                ticks: { color: '#94a3b8' } 
+                            } 
+                        } 
+                    }
                 });
             } catch(e) {}
         }
@@ -582,7 +844,16 @@
                 const listS = document.getElementById('top-suppliers-list');
                 if(s.value) {
                     listS.innerHTML = s.value.map(i => `
-                        <div class="list-item"><div class="item-info"><span class="rank">${i.rank}.</span><span class="name">${i.name}</span></div><span class="value">⭐ ${i.value.toFixed(1)}</span></div>
+                        <div class="list-item"><div class="item-info"><span class="rank">${i.rank}.</span><span class="name">${i.name}</span></div><span class="value">${new Intl.NumberFormat().format(i.value)} DA</span></div>
+                    `).join('');
+                }
+
+                const resP = await fetch('/odata/v4/analytics/getTopProducts()');
+                const p = await resP.json();
+                const listP = document.getElementById('top-products-list');
+                if(p.value) {
+                    listP.innerHTML = p.value.map(i => `
+                        <div class="list-item"><div class="item-info"><span class="rank">${i.rank}.</span><span class="name">${i.name}</span></div><span class="value">${new Intl.NumberFormat().format(i.value)} DA</span></div>
                     `).join('');
                 }
             } catch(e) {}
@@ -600,15 +871,34 @@
             }
         }
 
-        async function loadPartners(search = '') {
+        let currentClientFilter = '';
+        function setClientTypeFilter(type) {
+            currentClientFilter = type;
+            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            if(type === '') document.getElementById('btn-filter-all').classList.add('active');
+            if(type === 'CLIENT_B2B') document.getElementById('btn-filter-b2b').classList.add('active');
+            if(type === 'CLIENT_B2C') document.getElementById('btn-filter-b2c').classList.add('active');
+            loadPartners();
+        }
+
+        async function loadPartners(mainSearch = '') {
             try {
-                const type = document.getElementById('filter-type').value;
-                const status = document.getElementById('filter-status').value;
+                const search = mainSearch || document.getElementById('client-search').value;
+                const wilaya = document.getElementById('filter-wilaya').value;
+                
                 let url = '/odata/v4/admin/BusinessPartners';
                 const filters = [];
-                if (search) filters.push(`startswith(tolower(displayName),'${search.toLowerCase()}')`);
-                if (type) filters.push(`bpType eq '${type}'`);
-                if (status) filters.push(`status eq '${status}'`);
+                
+                // Exclure les fournisseurs de cette liste par défaut
+                if (currentClientFilter) {
+                    filters.push(`bpType eq '${currentClientFilter}'`);
+                } else {
+                    filters.push(`(bpType eq 'CLIENT_B2B' or bpType eq 'CLIENT_B2C')`);
+                }
+
+                if (search) filters.push(`(startswith(tolower(displayName),'${search.toLowerCase()}') or startswith(tolower(rc),'${search.toLowerCase()}') or startswith(tolower(nif),'${search.toLowerCase()}'))`);
+                if (wilaya) filters.push(`startswith(tolower(wilaya),'${wilaya.toLowerCase()}')`);
+
                 if (filters.length > 0) url += `?$filter=${filters.join(' and ')}`;
 
                 const res = await fetch(url);
@@ -616,30 +906,103 @@
                 const tbody = document.getElementById('partners-table-body');
                 if (data.value && data.value.length > 0) {
                     tbody.innerHTML = data.value.map(bp => {
-                        const typeLabel = bp.bpType === 'FOURNISSEUR' ? 'Fournisseur' : (bp.bpType === 'CLIENT_B2B' ? 'Client B2B' : 'Client B2C');
+                        const typeLabel = bp.bpType === 'CLIENT_B2B' ? 'B2B' : 'B2C';
+                        const statusHtml = bp.status === 'ACTIVE' 
+                            ? `<span style="color: #4ade80;">✅ ACTIF</span>`
+                            : `<span style="color: #f87171;">❌ Bloqué</span>`;
+
+                        const actionBtn = bp.status === 'ACTIVE'
+                            ? `<button class="btn-action" style="background: #ef4444; color: white;" onclick="deactivateBP('${bp.ID}', '${bp.displayName}')">Bloquer</button>`
+                            : `<button class="btn-action" style="background: #22c55e; color: black;" onclick="activateBP('${bp.ID}')">Activer</button>`;
+                                
                         return `
                         <tr>
-                            <td><code>${bp.bpNumber}</code></td>
-                            <td><strong>${bp.displayName}</strong></td>
-                            <td><span style="font-size:0.8rem; padding: 2px 8px; border-radius: 10px; background: rgba(255,255,255,0.05);">${typeLabel}</span></td>
-                            <td><span style="color: ${bp.status === 'ACTIVE' ? '#4ade80' : bp.status === 'BLOCKED' ? '#f87171' : '#fb923c'}">${bp.status}</span></td>
+                            <td><strong>${typeLabel}</strong></td>
+                            <td>${bp.displayName}</td>
+                            <td>${bp.wilaya || '-'}</td>
+                            <td>${statusHtml}</td>
                             <td style="display: flex; gap: 5px;">
-                                <button class="btn-action" style="background: var(--accent); color: black;" onclick="openDetailsModal('${bp.ID}')">Détails</button>
-                                ${bp.status !== 'BLOCKED' ? `<button class="btn-action" style="background: #f87171; color: white;" onclick="deactivateBP('${bp.ID}', '${bp.displayName}')">Bloquer</button>` : ''}
-                                ${bp.status === 'BLOCKED' ? `<button class="btn-action" style="background: #4ade80; color: black;" onclick="activateBP('${bp.ID}')">Débloquer</button>` : ''}
-                                ${bp.status === 'PENDING' ? `<button class="btn-action" style="background: #4ade80; color: black; margin-left: 5px;" onclick="activateBP('${bp.ID}')">Activer</button>` : ''}
-                                <button class="btn-action" style="background: #334155; color: #f87171; margin-left: 5px; border: 1px solid #f87171;" title="Supprimer" onclick="deleteBP('${bp.ID}', '${bp.displayName}')">🗑️</button>
+                                <button class="btn-action" style="background: var(--accent); color: black;" onclick="openDetailsModal('${bp.ID}')">Voir</button>
+                                ${actionBtn}
+                                <button class="btn-action" style="background: #334155; color: #f87171; margin-left: 5px; border: 1px solid #f87171;" title="Supprimer" onclick="deleteBP('${bp.ID}', '${bp.displayName}')">❌</button>
                             </td>
                         </tr>`;
                     }).join('');
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--text-dim);">Aucun partenaire trouvé</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding: 20px; color: var(--text-dim);">Aucun client trouvé</td></tr>';
                 }
-            } catch(e) { console.error("Partners Error", e); }
+            } catch(e) { console.error("Clients Error", e); }
+        }
+
+        async function loadSuppliers(mainSearch = '') {
+            try {
+                const search = mainSearch || document.getElementById('supplier-search').value;
+                const notation = document.getElementById('filter-notation').value;
+                const wilaya = document.getElementById('filter-wilaya-supplier').value;
+                
+                let url = '/odata/v4/admin/BusinessPartners?$filter=bpType eq \'FOURNISSEUR\'';
+                if (search) url += ` and (startswith(tolower(displayName),'${search.toLowerCase()}') or startswith(tolower(rc),'${search.toLowerCase()}') or startswith(tolower(nif),'${search.toLowerCase()}'))`;
+                if (wilaya) url += ` and startswith(tolower(wilaya),'${wilaya.toLowerCase()}')`;
+                if (notation) url += ` and rating eq ${notation}`;
+
+                const res = await fetch(url);
+                const data = await res.json();
+                const tbody = document.getElementById('suppliers-table-body');
+                if (data.value && data.value.length > 0) {
+                    tbody.innerHTML = data.value.map(bp => {
+                        const statusHtml = bp.status === 'ACTIVE' 
+                            ? `<span style="color: #4ade80;">✅ ACTIF</span>`
+                            : `<span style="color: #f87171;">❌ Bloqué</span>`;
+
+                        const actionBtn = bp.status === 'ACTIVE'
+                            ? `<button class="btn-action" style="background: #ef4444; color: white;" onclick="deactivateBP('${bp.ID}', '${bp.displayName}')">Bloquer</button>`
+                            : `<button class="btn-action" style="background: #22c55e; color: black;" onclick="activateBP('${bp.ID}')">Activer</button>`;
+                                
+                        // Dynamic interactive rating (1 to 5 stars)
+                        const rating = bp.rating || 3;
+                        let starsHtml = '';
+                        for (let i = 1; i <= 5; i++) {
+                            starsHtml += `<span style="cursor:pointer; color:${i <= rating ? '#eab308' : 'var(--border)'}; font-size:1.2rem; margin-right:2px;" onclick="rateSupplier('${bp.ID}', ${i})" title="Noter ${i} étoile(s)">★</span>`;
+                        }
+
+                        return `
+                        <tr>
+                            <td><strong>${bp.displayName}</strong></td>
+                            <td>${bp.wilaya || '-'}</td>
+                            <td>${starsHtml}</td>
+                            <td>${statusHtml}</td>
+                            <td style="display: flex; gap: 5px;">
+                                <button class="btn-action" style="background: var(--accent); color: black;" onclick="openDetailsModal('${bp.ID}')">Voir</button>
+                                ${actionBtn}
+                                <button class="btn-action" style="background: #334155; color: #f87171; margin-left: 5px; border: 1px solid #f87171;" title="Supprimer" onclick="deleteBP('${bp.ID}', '${bp.displayName}')">❌</button>
+                            </td>
+                        </tr>`;
+                    }).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 20px; color: var(--text-dim);">Aucun fournisseur trouvé</td></tr>';
+                }
+            } catch(e) { console.error("Suppliers Error", e); }
+        }
+
+        async function rateSupplier(id, newRating) {
+            try {
+                const res = await fetch(`/odata/v4/admin/BusinessPartners(${id})`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rating: newRating })
+                });
+                if (res.ok) {
+                    loadSuppliers();
+                } else {
+                    Dialog.alert("Erreur lors de la notation.");
+                }
+            } catch(e) { 
+                console.error("Error rating supplier", e); 
+            }
         }
 
         async function deactivateBP(id, name) {
-            const reason = await Dialog.prompt(`Désactiver "${name}" ?\nMotif obligatoire :`);
+            const reason = await Dialog.prompt(`Bloquer le compte de "${name}" ?\nMotif du blocage (Obligatoire) :`);
             if (!reason) return;
             try {
                 const res = await fetch('/odata/v4/admin/blockBusinessPartner', {
@@ -647,7 +1010,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ bpId: id, reason: reason })
                 });
-                if (res.ok) { await Dialog.alert("Désactivé."); loadPartners(); }
+                if (res.ok) { 
+                    await Dialog.alert("Compte bloqué."); 
+                    const activeView = document.querySelector('.view-section.active').id;
+                    if (activeView === 'partners') loadPartners();
+                    if (activeView === 'suppliers') loadSuppliers();
+                }
             } catch (e) {}
         }
 
@@ -658,17 +1026,24 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ bpId: id })
                 });
-                if (res.ok) { await Dialog.alert("Activé."); loadPartners(); }
+                if (res.ok) { 
+                    await Dialog.alert("Compte activé."); 
+                    const activeView = document.querySelector('.view-section.active').id;
+                    if (activeView === 'partners') loadPartners();
+                    if (activeView === 'suppliers') loadSuppliers();
+                }
             } catch (e) {}
         }
 
         async function deleteBP(id, name) {
             if (await Dialog.confirm(`Voulez-vous vraiment supprimer définitivement "${name}" ?`)) {
                 try {
-                    const res = await fetch(`/odata/v4/admin/BusinessPartners('${id}')`, { method: 'DELETE' });
+                    const res = await fetch(`/odata/v4/admin/BusinessPartners(${id})`, { method: 'DELETE' });
                     if (res.ok) { 
                         await Dialog.alert("Partenaire supprimé."); 
-                        loadPartners(); 
+                        const activeView = document.querySelector('.view-section.active').id;
+                        if (activeView === 'partners') loadPartners();
+                        if (activeView === 'suppliers') loadSuppliers();
                         loadStats(); 
                     }
                 } catch (e) { Dialog.alert("Erreur lors de la suppression."); }
@@ -685,21 +1060,24 @@
                 document.getElementById('noti-count').innerText = pending.length;
 
                 const list = document.getElementById('noti-list');
-                list.innerHTML = pending.length ? pending.map(r => `
+                list.innerHTML = pending.length ? pending.map(r => {
+                    const typeLabel = r.type === 'FOURNISSEUR' ? 'Fournisseur' : (r.type === 'CLIENT_B2B' ? 'Client B2B' : 'Client B2C');
+                    return `
                     <div class="noti-item" onclick="openExamModal('${r.ID}')">
                         <div class="noti-item-title">🚀 ${r.companyName}</div>
-                        <div class="noti-item-time">${r.type}</div>
-                    </div>`).join('') : '<div style="padding:15px; font-size:0.8rem; color:var(--text-dim);">Aucune demande</div>';
+                        <div class="noti-item-time">${typeLabel}</div>
+                    </div>`}).join('') : '<div style="padding:15px; font-size:0.8rem; color:var(--text-dim);">Aucune demande</div>';
 
                 const tbody = document.getElementById('registrations-table-body');
                 tbody.innerHTML = pending.length ? pending.map(r => {
+                    const typeLabel = r.type === 'FOURNISSEUR' ? 'Fournisseur' : (r.type === 'CLIENT_B2B' ? 'Client B2B' : 'Client B2C');
                     const btnLabel = r.isReentry ? 'Re-examiner' : 'Examiner';
                     const btnStyle = r.isReentry ? 'background: #fb923c; color: black;' : '';
                     return `
                     <tr>
                         <td><strong>${r.companyName}</strong> ${r.isReentry ? '<span style="font-size:0.7rem; background:#fb923c; color:black; padding:2px 6px; border-radius:10px; margin-left:5px;">RE-INSCRIPTION</span>' : ''}</td>
                         <td>${r.email}</td>
-                        <td>${r.type}</td>
+                        <td>${typeLabel}</td>
                         <td><button class="btn-action" style="${btnStyle}" onclick="openExamModal('${r.ID}')">${btnLabel}</button></td>
                     </tr>
                 `}).join('') : '<tr><td colspan="4" style="text-align:center; padding:20px;">Aucun dossier en attente</td></tr>';
@@ -709,10 +1087,11 @@
         async function openExamModal(id) {
             currentExamId = id;
             try {
-                const res = await fetch(`/odata/v4/registration/RegistrationRequests('${id}')`);
+                const res = await fetch(`/odata/v4/registration/RegistrationRequests(${id})`);
                 const r = await res.json();
+                const typeLabel = r.type === 'FOURNISSEUR' ? 'Fournisseur' : (r.type === 'CLIENT_B2B' ? 'Client B2B' : 'Client B2C');
                 document.getElementById('exam-company').innerText = r.companyName;
-                document.getElementById('exam-type').innerText = r.type;
+                document.getElementById('exam-type').innerText = typeLabel;
                 document.getElementById('exam-email').innerText = r.email;
                 document.getElementById('exam-rc').innerText = r.rcNumber || 'N/A';
                 document.getElementById('exam-nif').innerText = r.nif || 'N/A';
@@ -726,11 +1105,12 @@
         
         async function openDetailsModal(id) {
             try {
-                const res = await fetch(`/odata/v4/admin/BusinessPartners('${id}')`);
+                const res = await fetch(`/odata/v4/admin/BusinessPartners(${id})`);
                 const bp = await res.json();
+                const typeLabel = bp.bpType === 'FOURNISSEUR' ? 'Fournisseur' : (bp.bpType === 'CLIENT_B2B' ? 'Client B2B' : 'Client B2C');
                 document.getElementById('det-name').innerText = bp.displayName;
                 document.getElementById('det-bp').innerText = bp.bpNumber;
-                document.getElementById('det-type').innerText = bp.bpType;
+                document.getElementById('det-type').innerText = typeLabel;
                 document.getElementById('det-email').innerText = bp.email;
                 document.getElementById('det-phone').innerText = bp.phone || 'N/A';
                 document.getElementById('det-rc').innerText = bp.rc || 'N/A';
@@ -755,10 +1135,10 @@
         
         function viewPartnerDoc(type) { 
             const id = document.getElementById('det-bp-id').value;
-            window.open(`/odata/v4/admin/BusinessPartners('${id}')/${type}/$value`, '_blank'); 
+            window.open(`/odata/v4/admin/BusinessPartners(${id})/${type}/$value`, '_blank'); 
         }
 
-        function viewDoc(type) { window.open(`/odata/v4/registration/RegistrationRequests('${currentExamId}')/${type}/$value`, '_blank'); }
+        function viewDoc(type) { window.open(`/odata/v4/registration/RegistrationRequests(${currentExamId})/${type}/$value`, '_blank'); }
 
         async function submitDecision(status) {
             const reason = document.getElementById('exam-comment').value;
@@ -795,6 +1175,225 @@
             loadRegistrations();
             initProfile();
         });
+        // ============================================================
+        // CATALOGUE — CRUD Produits
+        // ============================================================
+        const CAT_BASE = '/odata/v4/admin/Produits';
+        const adminHeaders = { 'Content-Type': 'application/json', 'Authorization': 'Basic ' + btoa('admin:admin') };
+
+        async function loadCatalogue() {
+            const typeFilter = document.getElementById('cat-filter-type').value;
+            const statusFilter = document.getElementById('cat-filter-status').value;
+            
+            let filters = [];
+            if (typeFilter) filters.push(`type eq '${typeFilter}'`);
+            if (statusFilter !== '') filters.push(`isActive eq ${statusFilter}`);
+            
+            let url = CAT_BASE + '?$orderby=name';
+            if (filters.length) url += '&$filter=' + filters.join(' and ');
+
+            try {
+                const res = await fetch(url, { headers: adminHeaders });
+                const data = await res.json();
+                const products = data.value || [];
+                renderCatalogueTable(products);
+                updateCatalogueKPIs(products);
+            } catch(e) {
+                document.getElementById('catalogue-tbody').innerHTML = `<tr><td colspan="9" style="text-align:center;padding:40px;color:#f87171;">❌ Erreur de chargement : ${e.message}</td></tr>`;
+            }
+        }
+
+        function renderCatalogueTable(products) {
+            const tbody = document.getElementById('catalogue-tbody');
+            if (!products.length) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--text-dim);">📭 Aucun produit trouvé. Cliquez sur "+ Nouveau Produit" pour commencer.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = products.map(p => {
+                const isLow = p.stock !== null && p.minStock !== null && p.stock < p.minStock;
+                const stockColor = isLow ? '#f87171' : 'var(--accent-green)';
+                const statusBadge = p.isActive 
+                    ? '<span style="background:rgba(74,222,128,0.15); color:var(--accent-green); padding:4px 12px; border-radius:20px; font-size:0.8rem; font-weight:600;">✅ Actif</span>'
+                    : '<span style="background:rgba(248,113,113,0.15); color:#f87171; padding:4px 12px; border-radius:20px; font-size:0.8rem; font-weight:600;">🔴 Inactif</span>';
+                const typeBadge = p.type === 'SERVICE'
+                    ? '<span style="background:rgba(251,146,60,0.15); color:var(--accent-orange); padding:3px 10px; border-radius:20px; font-size:0.75rem;">Service</span>'
+                    : '<span style="background:rgba(56,189,248,0.15); color:var(--accent); padding:3px 10px; border-radius:20px; font-size:0.75rem;">Produit</span>';
+                
+                return `<tr>
+                    <td><span style="font-family:monospace; color:var(--accent); font-weight:600;">${p.code || '—'}</span></td>
+                    <td style="font-weight:600;">${p.name}</td>
+                    <td style="color:var(--text-dim);">${p.category || '—'}</td>
+                    <td>${typeBadge}</td>
+                    <td style="font-family:monospace; font-weight:700; color:var(--accent-orange);">${(p.unitPrice || 0).toLocaleString('fr-DZ')} DA</td>
+                    <td style="font-family:monospace; color:${stockColor}; font-weight:600;">${p.stock ?? '—'}${isLow ? ' ⚠️' : ''}</td>
+                    <td style="color:var(--text-dim);">${p.tvaRate ?? 19}%</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <div style="display:flex; gap:6px;">
+                            <button onclick="editProduct('${p.ID}')" style="background:rgba(56,189,248,0.15); color:var(--accent); border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem; font-weight:600;">✏️ Modifier</button>
+                            <button onclick="toggleProductStatus('${p.ID}', ${p.isActive})" style="background:rgba(251,146,60,0.15); color:var(--accent-orange); border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem; font-weight:600;">${p.isActive ? '🔴 Désactiver' : '✅ Activer'}</button>
+                            <button onclick="deleteProduct('${p.ID}', '${p.name}')" style="background:rgba(239,68,68,0.15); color:#f87171; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:0.8rem; font-weight:600;">🗑️</button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function updateCatalogueKPIs(products) {
+            document.getElementById('cat-total').textContent = products.length;
+            document.getElementById('cat-active').textContent = products.filter(p => p.isActive).length;
+            document.getElementById('cat-inactive').textContent = products.filter(p => !p.isActive).length;
+            document.getElementById('cat-lowstock').textContent = products.filter(p => p.stock !== null && p.minStock !== null && p.stock < p.minStock).length;
+        }
+
+        function openProductModal(product = null) {
+            document.getElementById('prod-id').value = '';
+            document.getElementById('prod-code').value = '';
+            document.getElementById('prod-name').value = '';
+            document.getElementById('prod-category').value = '';
+            document.getElementById('prod-type').value = 'PRODUCT';
+            document.getElementById('prod-price').value = '';
+            document.getElementById('prod-stock').value = '0';
+            document.getElementById('prod-minstock').value = '0';
+            document.getElementById('prod-tva').value = '19';
+            document.getElementById('prod-unit').value = 'PIECE';
+            document.getElementById('prod-active').value = 'true';
+            document.getElementById('prod-description').value = '';
+            document.getElementById('prod-error').style.display = 'none';
+            document.getElementById('product-modal-title').textContent = '📦 Nouveau Produit';
+            document.getElementById('prod-save-btn').textContent = '💾 Créer le Produit';
+
+            if (product) {
+                document.getElementById('product-modal-title').textContent = '✏️ Modifier le Produit';
+                document.getElementById('prod-save-btn').textContent = '💾 Enregistrer les modifications';
+                document.getElementById('prod-id').value = product.ID;
+                document.getElementById('prod-code').value = product.code || '';
+                document.getElementById('prod-name').value = product.name || '';
+                document.getElementById('prod-category').value = product.category || '';
+                document.getElementById('prod-type').value = product.type || 'PRODUCT';
+                document.getElementById('prod-price').value = product.unitPrice || '';
+                document.getElementById('prod-stock').value = product.stock ?? 0;
+                document.getElementById('prod-minstock').value = product.minStock ?? 0;
+                document.getElementById('prod-tva').value = product.tvaRate ?? 19;
+                document.getElementById('prod-unit').value = product.unit || 'PIECE';
+                document.getElementById('prod-active').value = String(product.isActive !== false);
+                document.getElementById('prod-description').value = product.description || '';
+            }
+
+            document.getElementById('product-modal').style.display = 'flex';
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').style.display = 'none';
+        }
+
+        async function editProduct(id) {
+            try {
+                const res = await fetch(`${CAT_BASE}(${id})`, { headers: adminHeaders });
+                const product = await res.json();
+                openProductModal(product);
+            } catch(e) {
+                alert('Erreur lors du chargement du produit.');
+            }
+        }
+
+        async function saveProduct() {
+            const id = document.getElementById('prod-id').value;
+            const code = document.getElementById('prod-code').value.trim();
+            const name = document.getElementById('prod-name').value.trim();
+            const price = parseFloat(document.getElementById('prod-price').value);
+            const errDiv = document.getElementById('prod-error');
+            errDiv.style.display = 'none';
+
+            if (!code || !name || isNaN(price)) {
+                errDiv.textContent = '⚠️ Veuillez renseigner le Code/SKU, le Nom et le Prix HT.';
+                errDiv.style.display = 'block';
+                return;
+            }
+
+            const payload = {
+                code,
+                name,
+                category: document.getElementById('prod-category').value.trim() || null,
+                type: document.getElementById('prod-type').value,
+                unitPrice: price,
+                stock: parseInt(document.getElementById('prod-stock').value) || 0,
+                minStock: parseInt(document.getElementById('prod-minstock').value) || 0,
+                tvaRate: parseFloat(document.getElementById('prod-tva').value) || 19,
+                unit: document.getElementById('prod-unit').value,
+                isActive: document.getElementById('prod-active').value === 'true',
+                description: document.getElementById('prod-description').value.trim() || null
+            };
+
+            const btn = document.getElementById('prod-save-btn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Enregistrement...';
+
+            try {
+                let res;
+                if (id) {
+                    // UPDATE
+                    res = await fetch(`${CAT_BASE}(${id})`, {
+                        method: 'PATCH',
+                        headers: adminHeaders,
+                        body: JSON.stringify(payload)
+                    });
+                } else {
+                    // CREATE
+                    res = await fetch(CAT_BASE, {
+                        method: 'POST',
+                        headers: adminHeaders,
+                        body: JSON.stringify(payload)
+                    });
+                }
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err?.error?.message || `Erreur HTTP ${res.status}`);
+                }
+
+                closeProductModal();
+                await loadCatalogue();
+            } catch(e) {
+                errDiv.textContent = '❌ ' + e.message;
+                errDiv.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = id ? '💾 Enregistrer les modifications' : '💾 Créer le Produit';
+            }
+        }
+
+        async function toggleProductStatus(id, currentStatus) {
+            const action = currentStatus ? 'désactiver' : 'activer';
+            if (!await Dialog.confirm(`Voulez-vous ${action} ce produit ?`)) return;
+
+            try {
+                await fetch(`${CAT_BASE}(${id})`, {
+                    method: 'PATCH',
+                    headers: adminHeaders,
+                    body: JSON.stringify({ isActive: !currentStatus })
+                });
+                await loadCatalogue();
+            } catch(e) {
+                alert('Erreur : ' + e.message);
+            }
+        }
+
+        async function deleteProduct(id, name) {
+            if (!await Dialog.confirm(`Supprimer définitivement le produit "${name}" ?\n\nCette action est irréversible.`)) return;
+
+            try {
+                const res = await fetch(`${CAT_BASE}(${id})`, {
+                    method: 'DELETE',
+                    headers: adminHeaders
+                });
+                if (!res.ok && res.status !== 204) throw new Error(`Erreur HTTP ${res.status}`);
+                await loadCatalogue();
+            } catch(e) {
+                alert('Erreur lors de la suppression : ' + e.message);
+            }
+        }
+
     </script>
 </body>
 </html>

@@ -1,9 +1,8 @@
 const cds = require('@sap/cds');
 
 module.exports = cds.service.impl(async function() {
-    // On utilise les vrais namespaces définis dans vos fichiers CDS
-    // Accès aux entités globales via cds.entities
     const FactureClient = 'sap.pme.doc.FactureClient';
+    const FactureClientItem = 'sap.pme.doc.FactureClientItem';
     const BonCommandeFournisseur = 'sap.pme.doc.BonCommandeFournisseur';
     const BusinessPartner = 'sap.pme.BusinessPartner';
     const RegistrationRequest = 'pme.registration.RegistrationRequest';
@@ -16,19 +15,40 @@ module.exports = cds.service.impl(async function() {
         const endDate = `${year}-${month.padStart(2, '0')}-${lastDay}`;
         
         try {
-            // Requête SQL directe pour HANA
-            const revenue = await SELECT.from(FactureClient)
-                .columns('sum(totalTTC) as total')
-                .where(`date >= '${startDate}' AND date <= '${endDate}'`);
+            // CA et Encours Client
+            const factures = await SELECT.from(FactureClient).where(`date >= '${startDate}' AND date <= '${endDate}'`);
+            let totalRevenue = 0;
+            let encoursClients = 0;
+            
+            factures.forEach(f => {
+                totalRevenue += (f.totalTTC || 0);
+                encoursClients += (f.remainingAmount || 0);
+            });
+            
+            // Délais Fournisseurs (Moyenne des jours entre date de commande et livraison)
+            const commandes = await SELECT.from(BonCommandeFournisseur).where(`date >= '${startDate}' AND date <= '${endDate}'`);
+            let totalDays = 0;
+            let validOrders = 0;
+            
+            commandes.forEach(c => {
+                if (c.date && c.deliveryDate) {
+                    const diffTime = Math.abs(new Date(c.deliveryDate) - new Date(c.date));
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    totalDays += diffDays;
+                    validOrders++;
+                }
+            });
+            const delaisFournisseurs = validOrders > 0 ? Math.round(totalDays / validOrders) : 0;
             
             const clients = await SELECT.from(BusinessPartner).where({ status: 'ACTIVE' });
             const pending = await SELECT.from(RegistrationRequest).where({ status: 'PENDING' });
 
             return {
-                totalRevenue: revenue[0].total || 0,
-                marginPercent: 32.0,
+                totalRevenue: totalRevenue,
+                marginPercent: 32.0, // KPI fictif (à remplacer si besoin)
                 activeClients: clients.length,
-                dso: 28,
+                encoursClients: encoursClients,
+                delaisFournisseurs: delaisFournisseurs,
                 pendingRegistrations: pending.length
             };
         } catch (e) {
@@ -60,7 +80,21 @@ module.exports = cds.service.impl(async function() {
             .limit(5);
         return (top || []).map((item, index) => ({
             name: item.name || 'Fournisseur Inconnu',
-            value: item.value ? 4.5 : 0, 
+            value: item.value || 0, 
+            rank: index + 1
+        }));
+    });
+
+    // --- TOP PRODUITS ---
+    this.on('getTopProducts', async (req) => {
+        const top = await SELECT.from(FactureClientItem)
+            .columns('product.name as name', 'sum(totalTTC) as value')
+            .groupBy('product.name')
+            .orderBy('sum(totalTTC) desc')
+            .limit(5);
+        return (top || []).map((item, index) => ({
+            name: item.name || 'Produit Inconnu',
+            value: item.value || 0,
             rank: index + 1
         }));
     });

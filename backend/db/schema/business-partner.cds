@@ -27,6 +27,7 @@ entity BusinessPartner : cuid, managed, pme.SoftDelete, pme.Annotatable {
   blockReason : String(512); // Motif de blocage/désactivation
   password    : String(100);
   sector      : String(128); // Secteur d'activité
+  rating      : Integer default 3; // Notation en étoiles (1 à 5)
 
   // Algerian Fiscal Identifiers
   nif         : String(20);
