@@ -1,7 +1,7 @@
 
 
 @readonly
-@auth: 'none'
+@requires: ['Admin', 'Commercial']
 service AnalyticsService @(path: '/odata/v4/analytics') {
 
     type DashboardStats {

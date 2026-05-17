@@ -7,7 +7,7 @@ using { sap.pme.crm as crm }       from '../../db/schema/crm';
 using { sap.pme.doc as doc }        from '../../db/schema/documents';
 
 @path: '/odata/v4/crm'
-@requires: 'authenticated-user'
+@requires: ['Admin', 'Commercial', 'ClientB2B', 'ClientB2C']
 service CRMService {
 
   // ── Clients B2B ──

@@ -21,6 +21,7 @@ entity RegistrationRequest : cuid, managed {
     phone       : String(30);
     address     : String(200);
     password    : String(100);
+    sector      : String(100); // Secteur d'activité
 
     // Identifiants fiscaux Algériens
     rc          : LargeBinary @Core.MediaType: rcType;
@@ -29,6 +30,9 @@ entity RegistrationRequest : cuid, managed {
     rcNumber    : String(20); // Ancien RC
 
     nif         : String(20); // Numéro Identification Fiscale
+    nifDoc      : LargeBinary @Core.MediaType: nifType;
+    nifType     : String @Core.IsMediaType;
+    nifName     : String;
     tvaNumber   : String(30); // NIS ou TVA
     
     ai          : String(20); // Article d'Imposition
@@ -39,6 +43,7 @@ entity RegistrationRequest : cuid, managed {
     rib         : LargeBinary @Core.MediaType: ribType;
     ribType     : String @Core.IsMediaType;
     ribName     : String;
+    ribNumber   : String(30); // Numéro de RIB (20 ou 24 chiffres)
 
     // KYC Spécifique Fournisseur
     urssaf      : LargeBinary @Core.MediaType: urssafType;

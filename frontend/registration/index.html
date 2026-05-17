@@ -203,6 +203,11 @@
   </head>
   <body>
     <div class="wizard-container">
+      <div class="text-center mb-5">
+          <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" style="width: 70px; margin-bottom: 10px;">
+          <h2 class="fw-bold">PME Connect</h2>
+          <p class="text-muted">Portail d'Inscription Partenaires</p>
+      </div>
       <div class="progress-steps">
         <div class="step-indicator active" id="ind1">
           1 <span class="step-label">Société</span>
@@ -243,67 +248,61 @@
               id="companyName"
               placeholder="Ex: SARL PME ALGERIE"
               required
+              onblur="checkFieldConflict('companyName', 'companyNameError')"
             />
-            <div id="companyError" class="invalid-feedback">
-              Cette société est déjà enregistrée.
-            </div>
+            <div id="companyNameError" class="invalid-feedback"></div>
           </div>
 
           <div class="row">
-            <div class="col-md-4 mb-4">
-              <label class="form-label">Numéro RC *</label>
-              <input
-                type="text"
-                class="form-control"
-                id="rc"
-                placeholder="Ex: 00/00-1234567B26"
-                required
-              />
+                <div class="col-md-4 mb-4">
+                    <label class="form-label">Numéro RC *</label>
+                    <input type="text" class="form-control" id="rc" placeholder="Ex: 00/00-1234567B26" 
+                           pattern="[0-9]{2}/[0-9]{2}-[0-9]{7}[A-Z][0-9]{2}" required
+                           onblur="checkFieldConflict('rc', 'rcError')">
+                    <div class="invalid-feedback" id="rcError">Format RC invalide (ex: 00/00-1234567B26).</div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <label class="form-label">NIF (15 chiffres) *</label>
+                    <input type="text" class="form-control" id="nif" placeholder="Ex: 123456789012345" 
+                           pattern="[0-9]{15}" minlength="15" maxlength="15" required
+                           onblur="checkFieldConflict('nif', 'nifError')">
+                    <div class="invalid-feedback" id="nifError">Le NIF doit contenir exactement 15 chiffres.</div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <label class="form-label">Article d'Imposition (AI) *</label>
+                    <input type="text" class="form-control" id="ai" placeholder="Ex: 16012345678" 
+                           pattern="[0-9]{11}" minlength="11" maxlength="11" required
+                           onblur="checkFieldConflict('ai', 'aiError')">
+                    <div class="invalid-feedback" id="aiError">L'AI doit contenir exactement 11 chiffres.</div>
+                </div>
             </div>
-            <div class="col-md-4 mb-4">
-              <label class="form-label">NIF (15 chiffres) *</label>
-              <input
-                type="text"
-                class="form-control"
-                id="nif"
-                placeholder="Ex: 000123456789012"
-                pattern="[0-9]{15}"
-                minlength="15"
-                maxlength="15"
-                required
-              />
-              <div class="invalid-feedback">
-                Veuillez saisir exactement 15 chiffres.
-              </div>
-            </div>
-            <div class="col-md-4 mb-4">
-              <label class="form-label">Article d'Imposition (AI) *</label>
-              <input
-                type="text"
-                class="form-control"
-                id="ai"
-                placeholder="Ex: 16012345678"
-                pattern="[0-9]+"
-                minlength="11"
-                maxlength="11"
-                required
-              />
-              <div class="invalid-feedback">
-                Veuillez saisir les 11 chiffres de votre AI.
-              </div>
-            </div>
+          
+          <div class="row">
+                <div class="col-md-12 mb-4">
+                    <label class="form-label">RIB Bancaire (20 chiffres) *</label>
+                    <input type="text" class="form-control" id="ribNumber" placeholder="Ex: 00799999000000000000" 
+                           pattern="[0-9]{20}" minlength="20" maxlength="20" required
+                           onblur="checkFieldConflict('ribNumber', 'ribError')">
+                    <div class="invalid-feedback" id="ribError">Le RIB doit contenir exactement 20 chiffres.</div>
+                </div>
           </div>
 
           <div class="mb-4">
             <label class="form-label">Secteur d'activité *</label>
-            <select class="form-control" id="sector" required>
+            <select class="form-select" id="sector" onchange="toggleCustomSector()" required>
               <option value="" selected disabled>Choisir un secteur...</option>
-              <option>Informatique & Tech</option>
-              <option>Industrie & Manufacture</option>
-              <option>BTP & Construction</option>
-              <option>Commerce & Distribution</option>
-              <option>Autre</option>
+              <option value="Informatique & Tech">Informatique & Tech</option>
+              <option value="Industrie & Manufacture">Industrie & Manufacture</option>
+              <option value="BTP & Construction">BTP & Construction</option>
+              <option value="Commerce & Distribution">Commerce & Distribution</option>
+              <option value="Autre">Autre</option>
             </select>
+          </div>
+
+          <div class="mb-4" id="customSectorGroup" style="display: none;">
+            <label class="form-label">Précisez votre secteur *</label>
+            <input type="text" class="form-control" id="customSector" placeholder="Votre secteur d'activité">
+            <div class="invalid-feedback">Veuillez préciser votre secteur d'activité.</div>
           </div>
 
           <div class="d-flex justify-content-end mt-4">
@@ -333,29 +332,19 @@
           </div>
 
           <div class="row">
-            <div class="col-md-6 mb-4">
-              <label class="form-label">Email professionnel *</label>
-              <input
-                type="email"
-                class="form-control"
-                id="email"
-                placeholder="email@entreprise.com"
-                required
-              />
-              <div id="emailError" class="invalid-feedback">
-                Cet email est déjà utilisé.
-              </div>
-            </div>
-            <div class="col-md-6 mb-4">
-              <label class="form-label">Téléphone *</label>
-              <input
-                type="tel"
-                class="form-control"
-                id="phone"
-                placeholder="05XX XX XX XX"
-                required
-              />
-            </div>
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Email professionnel *</label>
+                    <input type="email" class="form-control" id="email" placeholder="email@entreprise.com" required
+                           onblur="checkFieldConflict('email', 'emailError')">
+                    <div id="emailError" class="invalid-feedback">Veuillez saisir un email valide.</div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Téléphone (10 chiffres) *</label>
+                    <input type="tel" class="form-control" id="phone" placeholder="Ex: 0550123456" 
+                           pattern="^0[0-9]{9}$" minlength="10" maxlength="10" required
+                           onblur="checkFieldConflict('phone', 'phoneError')">
+                    <div class="invalid-feedback" id="phoneError">Le numéro de téléphone doit comporter exactement 10 chiffres et commencer par un 0.</div>
+                </div>
           </div>
 
           <div class="row">
@@ -421,6 +410,18 @@
               />
             </div>
             <div class="col-md-6 mb-3">
+              <label class="form-label">Numéro d'Identification Fiscale (NIF) *</label>
+              <input
+                class="form-control"
+                type="file"
+                id="fileNIF"
+                accept="application/pdf"
+                required
+              />
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
               <label class="form-label">Article d'Imposition (AI) *</label>
               <input
                 class="form-control"
@@ -430,16 +431,16 @@
                 required
               />
             </div>
-          </div>
-          <div class="mb-4">
-            <label class="form-label">RIB ou Chèque Barré *</label>
-            <input
-              class="form-control"
-              type="file"
-              id="fileRIB"
-              accept="application/pdf"
-              required
-            />
+            <div class="col-md-6 mb-3">
+              <label class="form-label">RIB ou Chèque Barré *</label>
+              <input
+                class="form-control"
+                type="file"
+                id="fileRIB"
+                accept="application/pdf"
+                required
+              />
+            </div>
           </div>
 
           <div class="d-flex justify-content-between mt-4">
@@ -457,6 +458,10 @@
         </div>
       </form>
 
+      <div class="text-center mt-4 pt-3" style="border-top: 1px solid #eee;">
+          <p class="text-muted">Vous avez déjà un compte ? <a href="/auth.html" style="color: #0070f2; font-weight: bold; text-decoration: none;">Connectez-vous ici</a></p>
+      </div>
+
       <div id="successMsg" class="text-center mt-4" style="display: none">
         <div class="display-1 text-success mb-4">✅</div>
         <h3>Dossier transmis avec succès !</h3>
@@ -471,6 +476,64 @@
     </div>
 
     <script>
+      // Vérification inline en temps réel d'un champ contre les données existantes
+      async function checkFieldConflict(fieldId, errorDivId) {
+        const input = document.getElementById(fieldId);
+        const errorDiv = document.getElementById(errorDivId);
+        const value = input.value.trim();
+
+        // Réinitialiser l'état visuel
+        input.classList.remove("is-invalid");
+        if (errorDiv) errorDiv.textContent = "";
+
+        if (!value) return; // Ne rien faire si le champ est vide
+
+        // Construire les paramètres selon le champ
+        const typeValue = document.querySelector('input[name="regType"]:checked')?.value;
+        const type = typeValue === "b2b" ? "CLIENT_B2B" : "FOURNISSEUR";
+
+        let params = `type='${type}',companyName='',email='',rcNumber='',nif='',ai='',ribNumber='',phone=''`;
+        
+        if (fieldId === "companyName") params = `type='${type}',companyName='${encodeURIComponent(value)}',email='',rcNumber='',nif='',ai='',ribNumber='',phone=''`;
+        else if (fieldId === "rc")        params = `type='${type}',companyName='',email='',rcNumber='${encodeURIComponent(value)}',nif='',ai='',ribNumber='',phone=''`;
+        else if (fieldId === "nif")       params = `type='${type}',companyName='',email='',rcNumber='',nif='${encodeURIComponent(value)}',ai='',ribNumber='',phone=''`;
+        else if (fieldId === "ai")        params = `type='${type}',companyName='',email='',rcNumber='',nif='',ai='${encodeURIComponent(value)}',ribNumber='',phone=''`;
+        else if (fieldId === "ribNumber") params = `type='${type}',companyName='',email='',rcNumber='',nif='',ai='',ribNumber='${encodeURIComponent(value)}',phone=''`;
+        else if (fieldId === "email")     params = `type='${type}',companyName='',email='${encodeURIComponent(value)}',rcNumber='',nif='',ai='',ribNumber='',phone=''`;
+        else if (fieldId === "phone")     params = `type='${type}',companyName='',email='',rcNumber='',nif='',ai='',ribNumber='',phone='${encodeURIComponent(value)}'`;
+
+        try {
+          const res = await fetch(`/odata/v4/registration/checkAvailability(${params})`);
+          if (!res.ok) return;
+          const data = await res.json();
+
+          if (data.status === "CONFLICT") {
+            input.classList.add("is-invalid");
+            if (errorDiv) {
+              errorDiv.textContent = data.blockReason;
+              errorDiv.style.display = "block";
+            }
+          }
+        } catch (e) {
+          console.warn("Vérification backend impossible:", e);
+        }
+      }
+
+      function toggleCustomSector() {
+        const sectorSelect = document.getElementById("sector");
+        const customGroup = document.getElementById("customSectorGroup");
+        const customInput = document.getElementById("customSector");
+        
+        if (sectorSelect.value === "Autre") {
+          customGroup.style.display = "block";
+          customInput.required = true;
+        } else {
+          customGroup.style.display = "none";
+          customInput.required = false;
+          customInput.value = "";
+        }
+      }
+
       function setRegType(type, element) {
         document
           .querySelectorAll(".card-type")
@@ -508,6 +571,69 @@
         }
 
         if (!valid) return;
+
+        if (step === 1) {
+          const btn = event.target;
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Vérification...';
+          btn.disabled = true;
+
+          try {
+            const typeValue = document.querySelector('input[name="regType"]:checked').value;
+            const type = typeValue === "b2b" ? "CLIENT_B2B" : "FOURNISSEUR";
+            const companyName = document.getElementById("companyName").value;
+            const rcNumber = document.getElementById("rc").value;
+            const nif = document.getElementById("nif").value;
+            const ai = document.getElementById("ai").value;
+            const ribNumber = document.getElementById("ribNumber").value;
+            
+            const query = `/odata/v4/registration/checkAvailability(type='${type}',companyName='${encodeURIComponent(companyName)}',rcNumber='${encodeURIComponent(rcNumber)}',nif='${encodeURIComponent(nif)}',ai='${encodeURIComponent(ai)}',ribNumber='${encodeURIComponent(ribNumber)}',email='',phone='')`;
+            
+            const res = await fetch(query);
+            const data = await res.json();
+            
+            if (data.status === "CONFLICT") {
+              alert(data.blockReason);
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+              return;
+            }
+          } catch (e) {
+            console.error("Erreur de vérification backend", e);
+          }
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+
+        if (step === 2) {
+          const btn = event.target;
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Vérification...';
+          btn.disabled = true;
+
+          try {
+            const typeValue = document.querySelector('input[name="regType"]:checked').value;
+            const type = typeValue === "b2b" ? "CLIENT_B2B" : "FOURNISSEUR";
+            const email = document.getElementById("email").value;
+            const phone = document.getElementById("phone").value;
+            
+            const query = `/odata/v4/registration/checkAvailability(type='${type}',email='${encodeURIComponent(email)}',phone='${encodeURIComponent(phone)}',companyName='',rcNumber='',nif='',ai='',ribNumber='')`;
+            
+            const res = await fetch(query);
+            const data = await res.json();
+            
+            if (data.status === "CONFLICT") {
+              alert(data.blockReason);
+              btn.innerHTML = originalText;
+              btn.disabled = false;
+              return;
+            }
+          } catch (e) {
+            console.error("Erreur de vérification backend", e);
+          }
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
 
         // --- CONTRÔLE SERVEUR ---
         const regTypeRaw = document.querySelector(
@@ -599,10 +725,11 @@
             const fileRC = document.getElementById("fileRC").files[0];
             const fileRIB = document.getElementById("fileRIB").files[0];
             const fileAI = document.getElementById("fileAI").files[0];
+            const fileNIF = document.getElementById("fileNIF").files[0];
 
-            if (!fileRC || !fileRIB || !fileAI) {
+            if (!fileRC || !fileRIB || !fileAI || !fileNIF) {
               alert(
-                "Veuillez joindre tous les documents obligatoires (RC, AI, RIB).",
+                "Veuillez joindre tous les documents obligatoires (RC, NIF, AI, RIB).",
               );
               btn.disabled = false;
               btn.innerText = originalText;
@@ -613,6 +740,7 @@
             const rcBase64 = await toBase64(fileRC);
             const ribBase64 = await toBase64(fileRIB);
             const aiBase64 = await toBase64(fileAI);
+            const nifBase64 = await toBase64(fileNIF);
 
             const payload = {
               type: type,
@@ -620,10 +748,12 @@
               rcNumber: document.getElementById("rc").value,
               nif: document.getElementById("nif").value,
               ai: document.getElementById("ai").value,
+              ribNumber: document.getElementById("ribNumber").value,
               email: document.getElementById("email").value,
               phone: document.getElementById("phone").value,
               password: document.getElementById("password").value,
               address: "Algérie",
+              sector: document.getElementById("sector").value === "Autre" ? document.getElementById("customSector").value : document.getElementById("sector").value,
               rc: rcBase64,
               rcType: "application/pdf",
               rcName: fileRC.name,
@@ -633,6 +763,9 @@
               aiDoc: aiBase64,
               aiType: "application/pdf",
               aiName: fileAI.name,
+              nifDoc: nifBase64,
+              nifType: "application/pdf",
+              nifName: fileNIF.name,
             };
 
             console.log("Envoi du payload à RegistrationService...");

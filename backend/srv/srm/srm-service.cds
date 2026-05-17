@@ -8,7 +8,7 @@ using { sap.pme.srm as srm }       from '../../db/schema/srm';
 using { sap.pme.doc as doc }        from '../../db/schema/documents';
 
 @path: '/odata/v4/srm'
-@requires: 'authenticated-user'
+@requires: ['Admin', 'Commercial', 'Fournisseur']
 service SRMService {
 
   // ── Fournisseurs ──

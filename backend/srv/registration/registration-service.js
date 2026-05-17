@@ -42,6 +42,53 @@ module.exports = cds.service.impl(async function () {
         await DELETE.from(RegistrationRequests).where({ ID: existing.ID });
       }
     }
+
+    // 3. Vérifier l'unicité absolue des identifiants fiscaux et bancaires (RC, NIF, AI, RIB)
+    const { rcNumber, nif, ai, ribNumber, phone } = req.data;
+
+    console.log(`[DEBUG] Vérification unicité pour: RC=${rcNumber}, NIF=${nif}, Type=${type}`);
+
+    if (rcNumber) {
+      const bpRC = await SELECT.one.from(BusinessPartner).where({ rc: rcNumber, bpType: type });
+      const regRC = await SELECT.one.from(RegistrationRequests).where({ rcNumber, status: "PENDING", type });
+      console.log(`[DEBUG] Check RC: bpRC=${!!bpRC}, regRC=${!!regRC}`);
+      if (bpRC || regRC) {
+        return req.error(400, `Le Registre de Commerce (RC) "${rcNumber}" est déjà enregistré ou en cours d'inscription pour ce rôle.`);
+      }
+    }
+
+    if (nif) {
+      const bpNIF = await SELECT.one.from(BusinessPartner).where({ nif, bpType: type });
+      const regNIF = await SELECT.one.from(RegistrationRequests).where({ nif, status: "PENDING", type });
+      console.log(`[DEBUG] Check NIF: bpNIF=${!!bpNIF}, regNIF=${!!regNIF}`);
+      if (bpNIF || regNIF) {
+        return req.error(400, `Le Numéro d'Identification Fiscale (NIF) "${nif}" est déjà enregistré ou en cours d'inscription pour ce rôle.`);
+      }
+    }
+
+    if (ai) {
+      const bpAI = await SELECT.one.from(BusinessPartner).where({ ai, bpType: type });
+      const regAI = await SELECT.one.from(RegistrationRequests).where({ ai, status: "PENDING", type });
+      if (bpAI || regAI) {
+        return req.error(400, `L'Article d'Imposition (AI) "${ai}" est déjà enregistré ou en cours d'inscription pour ce rôle.`);
+      }
+    }
+
+    if (ribNumber) {
+      const bpRIB = await SELECT.one.from(BusinessPartner).where({ ribNumber, bpType: type });
+      const regRIB = await SELECT.one.from(RegistrationRequests).where({ ribNumber, status: "PENDING", type });
+      if (bpRIB || regRIB) {
+        return req.error(400, `Le RIB bancaire "${ribNumber}" est déjà enregistré ou en cours d'inscription pour ce rôle.`);
+      }
+    }
+
+    if (phone) {
+      const bpPhone = await SELECT.one.from(BusinessPartner).where({ phone, bpType: type });
+      const regPhone = await SELECT.one.from(RegistrationRequests).where({ phone, status: "PENDING", type });
+      if (bpPhone || regPhone) {
+        return req.error(400, `Le numéro de téléphone "${phone}" est déjà enregistré ou en cours d'inscription pour ce rôle.`);
+      }
+    }
   });
 
   // Gestionnaire personnalisé pour le streaming des médias (PDF)
@@ -77,6 +124,8 @@ module.exports = cds.service.impl(async function () {
         "password",
         "rcNumber",
         "nif",
+        "nifDoc",
+        "nifType",
         "ai",
         "rc",
         "rcType",
@@ -84,6 +133,8 @@ module.exports = cds.service.impl(async function () {
         "aiType",
         "rib",
         "ribType",
+        "ribNumber",
+        "sector",
         "status",
       )
       .where({ ID: id });
@@ -127,9 +178,13 @@ module.exports = cds.service.impl(async function () {
         rc: reg.rcNumber,
         nif: reg.nif,
         ai: reg.ai,
+        ribNumber: reg.ribNumber,
+        sector: reg.sector,
         // Transfert des médias
         rcDoc: reg.rc,
         rcType: reg.rcType,
+        nifDoc: reg.nifDoc,
+        nifType: reg.nifType,
         aiDoc: reg.aiDoc,
         aiType: reg.aiType,
         ribDoc: reg.rib,
@@ -161,54 +216,69 @@ module.exports = cds.service.impl(async function () {
 
   this.on("checkStatus", async (req) => {
     const { email } = req.data;
+    console.log(`[StatusCheck] Vérification pour: ${email}`);
     const { BusinessPartner } = cds.entities("sap.pme");
 
-    // 1. Chercher d'abord s'il est déjà un Business Partner (Compte validé)
-    const bp = await SELECT.one.from(BusinessPartner).where({ email: email });
+    const bp = await SELECT.one.from(BusinessPartner).where("lower(email) =", email.toLowerCase());
     if (bp) {
+      console.log(`[StatusCheck] Trouvé dans BusinessPartner: ${bp.status}`);
       return { status: bp.status, blockReason: bp.blockReason };
     }
 
-    // 2. Sinon, chercher s'il y a une demande d'inscription en cours ou rejetée
-    const reg = await SELECT.one
-      .from(RegistrationRequests)
-      .where({ email: email });
+    const reg = await SELECT.one.from(RegistrationRequests).where("lower(email) =", email.toLowerCase());
     if (reg) {
+      console.log(`[StatusCheck] Trouvé dans RegistrationRequests: ${reg.status}`);
       return { status: reg.status, blockReason: reg.adminComment };
     }
 
-    return null;
+    console.log(`[StatusCheck] Aucun dossier trouvé pour: ${email}`);
+    return { status: 'NOT_FOUND' };
   });
 
   this.on("checkAvailability", async (req) => {
-    const { email, companyName, type } = req.data;
+    const { email, companyName, type, rcNumber, nif, ai, ribNumber, phone } = req.data;
     const { BusinessPartner } = cds.entities("sap.pme");
 
     if (companyName && type) {
-      const bpName = await SELECT.one
-        .from(BusinessPartner)
-        .where({ displayName: companyName, bpType: type });
-      const regName = await SELECT.one
-        .from(RegistrationRequests)
-        .where({ companyName, type, status: "PENDING" });
-      if (bpName || regName)
-        return {
-          status: "CONFLICT",
-          blockReason: `La société "${companyName}" est déjà enregistrée comme ${type}.`,
-        };
+      const bpName = await SELECT.one.from(BusinessPartner).where({ displayName: companyName, bpType: type });
+      const regName = await SELECT.one.from(RegistrationRequests).where({ companyName, type, status: "PENDING" });
+      if (bpName || regName) return { status: "CONFLICT", blockReason: `La société "${companyName}" est déjà enregistrée comme ${type}.` };
+    }
+
+    if (rcNumber && type) {
+      const bpRC = await SELECT.one.from(BusinessPartner).where({ rc: rcNumber, bpType: type });
+      const regRC = await SELECT.one.from(RegistrationRequests).where({ rcNumber, type, status: "PENDING" });
+      if (bpRC || regRC) return { status: "CONFLICT", blockReason: `Le Registre de Commerce (RC) "${rcNumber}" est déjà pris pour ce rôle.` };
+    }
+
+    if (nif && type) {
+      const bpNIF = await SELECT.one.from(BusinessPartner).where({ nif, bpType: type });
+      const regNIF = await SELECT.one.from(RegistrationRequests).where({ nif, type, status: "PENDING" });
+      if (bpNIF || regNIF) return { status: "CONFLICT", blockReason: `Le NIF "${nif}" est déjà pris pour ce rôle.` };
+    }
+
+    if (ai && type) {
+      const bpAI = await SELECT.one.from(BusinessPartner).where({ ai, bpType: type });
+      const regAI = await SELECT.one.from(RegistrationRequests).where({ ai, type, status: "PENDING" });
+      if (bpAI || regAI) return { status: "CONFLICT", blockReason: `L'Article d'Imposition "${ai}" est déjà pris pour ce rôle.` };
+    }
+
+    if (ribNumber && type) {
+      const bpRIB = await SELECT.one.from(BusinessPartner).where({ ribNumber, bpType: type });
+      const regRIB = await SELECT.one.from(RegistrationRequests).where({ ribNumber, type, status: "PENDING" });
+      if (bpRIB || regRIB) return { status: "CONFLICT", blockReason: `Le RIB "${ribNumber}" est déjà pris pour ce rôle.` };
+    }
+
+    if (phone && type) {
+      const bpPhone = await SELECT.one.from(BusinessPartner).where({ phone, bpType: type });
+      const regPhone = await SELECT.one.from(RegistrationRequests).where({ phone, type, status: "PENDING" });
+      if (bpPhone || regPhone) return { status: "CONFLICT", blockReason: `Le Téléphone "${phone}" est déjà pris pour ce rôle.` };
     }
 
     if (email) {
-      const bp = await SELECT.one.from(BusinessPartner).where({ email });
-      const reg = await SELECT.one
-        .from(RegistrationRequests)
-        .where({ email, status: "PENDING" });
-      if (bp || reg)
-        return {
-          status: "CONFLICT",
-          blockReason:
-            "Cet email est déjà utilisé par un compte actif ou en attente.",
-        };
+      const bp = await SELECT.one.from(BusinessPartner).where("lower(email) =", email.toLowerCase());
+      const reg = await SELECT.one.from(RegistrationRequests).where("lower(email) =", email.toLowerCase(), "and status = 'PENDING'");
+      if (bp || reg) return { status: "CONFLICT", blockReason: "Cet email est déjà utilisé par un compte actif ou en attente." };
     }
 
     return { status: "AVAILABLE" };
@@ -218,9 +288,10 @@ module.exports = cds.service.impl(async function () {
     const { email, password } = req.data;
     console.log(`[AUTH] Tentative de connexion pour: ${email}`);
     const { BusinessPartner } = cds.entities("sap.pme");
+    const { RegistrationRequests } = cds.entities("pme.registration");
     const bp = await SELECT.one
       .from(BusinessPartner)
-      .where({ email, password });
+      .where("lower(email) =", email.toLowerCase(), "and password =", password);
 
     if (bp) {
       console.log(`[AUTH] Succès pour: ${email} (Type: ${bp.bpType})`);

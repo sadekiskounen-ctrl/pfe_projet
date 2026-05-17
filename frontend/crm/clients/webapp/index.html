@@ -4,8 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion Clients — PME</title>
+    <script src="/auth-interceptor.js"></script>
     <script>
-        if (localStorage.getItem('isLoggedIn') !== 'true' || localStorage.getItem('userRole') !== 'client') {
+        if (sessionStorage.getItem('isLoggedIn') !== 'true' || sessionStorage.getItem('userRole') !== 'client') {
             window.location.href = '/auth.html?app=crm';
         }
     </script>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/auth-interceptor.js"></script>
+    <script>
+        // --- SECURITY GUARD ---
+        const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+        const userRole = sessionStorage.getItem('userRole');
+        if (isLoggedIn !== 'true' || userRole !== 'client') {
+            window.location.href = '/auth.html?app=crm';
+        }
+    </script>
+    <title>PME Connect | Portail Client B2B</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --sap-blue: #0070f2;
+            --sap-bg: #f7f9fc;
+            --text: #1d2d3e;
+            --white: #ffffff;
+            --border: #dbeafe;
+        }
+        body { font-family: Arial, sans-serif; margin: 0; background: var(--sap-bg); display: flex; }
+        .sidebar { width: 260px; height: 100vh; background: #1d2d3e; color: white; padding: 20px; position: fixed; }
+        .main-content { margin-left: 280px; padding: 40px; width: 100%; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .nav-item { padding: 12px; margin-bottom: 5px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div style="margin-bottom: 20px;">
+            <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" style="width: 50px; background: white; padding: 5px; border-radius: 5px;">
+        </div>
+        <h2 style="color:#4ade80">PME Connect</h2>
+        <div class="nav-item"><i class="fas fa-home"></i> Tableau de bord</div>
+        <div class="nav-item"><i class="fas fa-file-invoice"></i> Mes Factures</div>
+        <div class="nav-item" onclick="sessionStorage.clear(); window.location.href='/auth.html'"><i class="fas fa-sign-out-alt"></i> Déconnexion</div>
+    </div>
+    <div class="main-content">
+        <h1>Bienvenue dans votre Espace Client</h1>
+        <div class="card">
+            <h3>Vos dernières activités</h3>
+            <p>Données sécurisées et filtrées pour votre entreprise.</p>
+        </div>
+    </div>
+</body>
+</html>

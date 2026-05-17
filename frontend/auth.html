@@ -186,6 +186,7 @@
 
 <div class="auth-container">
     <div class="auth-header">
+        <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" style="width: 70px; background: white; padding: 5px; border-radius: 5px; margin-bottom: 20px;">
         <h1>Gestion PME</h1>
         <p style="opacity: 0.8; font-size: 0.9rem;">Accédez à votre écosystème SAP BTP</p>
     </div>
@@ -249,82 +250,100 @@
         let success = false;
         let finalRole = role;
 
-        // 0. CHECK STATUS IN BACKEND (For Clients/Suppliers)
-        if (role !== 'admin') {
+        // 1. EMERGENCY ADMIN LOGIN (Priority)
+        if (role === 'admin') {
+            const customAdmin = JSON.parse(localStorage.getItem('admin_profile'));
+            if ((user === 'admin' && pass === 'admin') || 
+                (customAdmin && user === customAdmin.email && pass === customAdmin.password)) {
+                console.log("Admin Emergency Login Success");
+                success = true;
+            }
+        }
+
+        // 2. CHECK STATUS & DB (Only if not already success as admin)
+        if (!success && role !== 'admin') {
             try {
+                console.log(`Checking status for ${user}...`);
                 const res = await fetch(`/odata/v4/registration/checkStatus(email='${user}')`);
-                const data = await res.json();
+                const rawData = await res.json();
+                const data = rawData.value || rawData;
                 
+                console.log("Status check result:", data);
+
                 if (data && data.status === 'BLOCKED') {
-                    errorDiv.innerText = `Accès refusé : Votre compte a été désactivé par l'administrateur. \nMotif : ${data.blockReason || 'Non spécifié'}`;
+                    errorDiv.innerText = `Accès refusé : Compte désactivé. Motif : ${data.blockReason || 'N/A'}`;
                     errorDiv.style.display = 'block';
                     return;
                 }
                 
                 if (data && data.status === 'PENDING') {
-                    errorDiv.innerText = `L'administrateur n'a pas encore validé votre dossier. \nVeuillez patienter jusqu'à la validation pour vous connecter.`;
+                    errorDiv.innerHTML = `<strong>Dossier en attente</strong><br>L'administrateur examine votre demande. Veuillez patienter.`;
                     errorDiv.style.display = 'block';
-                    errorDiv.style.background = '#fff3cd'; // Yellow background for pending
+                    errorDiv.style.background = '#fff3cd';
                     errorDiv.style.color = '#856404';
-                    errorDiv.style.border = '1px solid #ffeeba';
                     return;
                 }
 
                 if (data && data.status === 'REJECTED') {
-                    errorDiv.innerText = `L'administrateur a refusé votre dossier. \nMotif : ${data.blockReason || 'Dossier non conforme'} \nVeuillez vous inscrire à nouveau et corriger votre dossier.`;
+                    errorDiv.innerHTML = `<strong>Dossier refusé</strong><br>Votre demande d'inscription a été rejetée par l'administrateur.<br><strong>Motif :</strong> ${data.blockReason || 'Aucun motif fourni.'}<br><br>Veuillez vous rendre sur la <a href="/registration/index.html" style="color: #721c24; text-decoration: underline; font-weight: bold;">page d'inscription</a> pour soumettre une nouvelle demande corrigée.`;
                     errorDiv.style.display = 'block';
-                    errorDiv.style.background = '#fee2e2'; // Light red for rejection
-                    errorDiv.style.color = '#991b1b';
-                    errorDiv.style.border = '1px solid #fecaca';
+                    errorDiv.style.background = '#f8d7da';
+                    errorDiv.style.color = '#721c24';
+                    errorDiv.style.border = '1px solid #f5c6cb';
                     return;
                 }
-            } catch (err) { console.error("Status check failed", err); }
-        }
 
-        // 1. Check for CUSTOM ADMIN or DEFAULT (Emergency access)
-        if (role === 'admin') {
-            const customAdmin = JSON.parse(localStorage.getItem('admin_profile'));
-            if (user === 'admin' && pass === 'admin') {
-                success = true; // Emergency fallback
-            } else if (customAdmin && user === customAdmin.email && pass === customAdmin.password) {
-                success = true;
-            }
-        } else {
-            // 2. CHECK REAL CREDENTIALS IN DATABASE (For Clients/Suppliers)
-            try {
+                // 3. TRY REAL LOGIN
+                console.log("Attempting database login...");
                 const loginRes = await fetch('/odata/v4/registration/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: user, password: pass })
                 });
-                const loginData = await loginRes.json();
+                const rawLoginData = await loginRes.json();
+                const loginData = rawLoginData.value || rawLoginData;
                 
                 if (loginData && loginData.status === 'SUCCESS') {
-                    // Vérifier si le rôle choisi (Client/Fournisseur) correspond au type de BP
-                    const bpType = loginData.blockReason;
-                    if ((role === 'client' && (bpType === 'CLIENT_B2B' || bpType === 'CLIENT_B2C')) ||
-                        (role === 'fournisseur' && bpType === 'FOURNISSEUR')) {
-                        success = true;
-                        finalRole = role;
-                    } else {
-                        errorDiv.innerText = "Accès refusé : Le rôle choisi ne correspond pas à votre compte.";
+                    const dbType = loginData.blockReason; // 'CLIENT_B2B', 'CLIENT_B2C', or 'FOURNISSEUR'
+                    
+                    // Validate selected UI role vs database partner type
+                    if (role === 'client' && dbType === 'FOURNISSEUR') {
+                        errorDiv.innerText = "Accès refusé : Ce compte appartient à un Fournisseur. Veuillez sélectionner le profil Fournisseur pour vous connecter.";
                         errorDiv.style.display = 'block';
                         return;
                     }
+                    if (role === 'fournisseur' && (dbType === 'CLIENT_B2B' || dbType === 'CLIENT_B2C')) {
+                        errorDiv.innerText = "Accès refusé : Ce compte appartient à un Client. Veuillez sélectionner le profil Client pour vous connecter.";
+                        errorDiv.style.display = 'block';
+                        return;
+                    }
+
+                    success = true;
+                    if (dbType === 'FOURNISSEUR') {
+                        finalRole = 'fournisseur';
+                    } else if (dbType === 'CLIENT_B2B' || dbType === 'CLIENT_B2C') {
+                        finalRole = 'client';
+                    } else {
+                        finalRole = role;
+                    }
                 }
-            } catch (err) { console.error("Login fetch failed", err); }
+            } catch (err) { 
+                console.error("Login process error:", err); 
+            }
         }
 
         if (success) {
             sessionStorage.setItem('isLoggedIn', 'true');
             sessionStorage.setItem('userRole', finalRole);
             sessionStorage.setItem('currentUser', user);
+            // Save Basic Auth token for backend authentication
+            sessionStorage.setItem('authHeader', 'Basic ' + btoa(user + ':' + pass));
             
             const urlParams = new URLSearchParams(window.location.search);
             const targetApp = urlParams.get('app');
             
-            if (targetApp === 'crm' || finalRole === 'client') window.location.href = '/crm/clients/webapp/index.html';
-            else if (targetApp === 'srm' || finalRole === 'fournisseur') window.location.href = '/srm/fournisseurs/webapp/index.html';
+            if (targetApp === 'crm' || finalRole === 'client') window.location.href = '/crm/index.html';
+            else if (targetApp === 'srm' || finalRole === 'fournisseur') window.location.href = '/srm/index.html';
             else if (targetApp === 'admin' || finalRole === 'admin') window.location.href = '/admin/dashboard.html';
             else window.location.href = '/index.html';
         } else {

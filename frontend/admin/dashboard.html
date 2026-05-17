@@ -3,6 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/auth-interceptor.js"></script>
+    <script>
+        // --- SECURITY GUARD ---
+        const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+        const userRole = sessionStorage.getItem('userRole');
+        if (isLoggedIn !== 'true' || userRole !== 'admin') {
+            window.location.href = '/auth.html?app=admin';
+        }
+    </script>
     <title>PME Cloud Control Center — Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -141,7 +150,7 @@
 
     <aside class="sidebar">
         <div class="brand">
-            <span class="brand-logo">🏢</span>
+            <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" style="width: 50px; margin-right: 10px;">
             <span class="brand-name">PME CLOUD</span>
         </div>
         <nav class="nav-menu">
@@ -302,12 +311,17 @@
                                 <label>Article d'Imposition (AI)</label>
                                 <p id="exam-ai">---</p>
                             </div>
+                            <div class="info-group">
+                                <label>RIB Bancaire</label>
+                                <p id="exam-ribNumber">---</p>
+                            </div>
                         </div>
                         
                         <div class="docs-section">
                             <h4>📄 Documents Justificatifs (Algérie)</h4>
                             <div class="docs-grid">
                                 <button class="btn-doc" onclick="viewDoc('rc')">📂 Voir RC</button>
+                                <button class="btn-doc" onclick="viewDoc('nifDoc')">📑 Voir NIF</button>
                                 <button class="btn-doc" onclick="viewDoc('aiDoc')">📑 Voir AI</button>
                                 <button class="btn-doc" onclick="viewDoc('rib')">🏦 Voir RIB</button>
                             </div>
@@ -362,6 +376,10 @@
                                 <p id="det-ai">---</p>
                             </div>
                             <div class="info-group">
+                                <label>RIB Bancaire</label>
+                                <p id="det-ribNumber">---</p>
+                            </div>
+                            <div class="info-group">
                                 <label>Statut Actuel</label>
                                 <p id="det-status">---</p>
                                 <input type="hidden" id="det-bp-id">
@@ -371,6 +389,7 @@
                             <h4>📄 Documents Justificatifs</h4>
                             <div class="docs-grid">
                                 <button class="btn-doc" onclick="viewPartnerDoc('rcDoc')">📂 Voir RC</button>
+                                <button class="btn-doc" onclick="viewPartnerDoc('nifDoc')">📑 Voir NIF</button>
                                 <button class="btn-doc" onclick="viewPartnerDoc('aiDoc')">📑 Voir AI</button>
                                 <button class="btn-doc" onclick="viewPartnerDoc('ribDoc')">🏦 Voir RIB</button>
                             </div>
@@ -698,6 +717,7 @@
                 document.getElementById('exam-rc').innerText = r.rcNumber || 'N/A';
                 document.getElementById('exam-nif').innerText = r.nif || 'N/A';
                 document.getElementById('exam-ai').innerText = r.ai || 'N/A';
+                document.getElementById('exam-ribNumber').innerText = r.ribNumber || 'N/A';
                 document.getElementById('exam-modal').style.display = 'flex';
             } catch(e) { await Dialog.alert("Erreur de chargement."); }
         }
@@ -716,6 +736,7 @@
                 document.getElementById('det-rc').innerText = bp.rc || 'N/A';
                 document.getElementById('det-nif').innerText = bp.nif || 'N/A';
                 document.getElementById('det-ai').innerText = bp.ai || 'N/A';
+                document.getElementById('det-ribNumber').innerText = bp.ribNumber || 'N/A';
                 document.getElementById('det-status').innerText = bp.status;
                 document.getElementById('det-bp-id').value = id;
                 

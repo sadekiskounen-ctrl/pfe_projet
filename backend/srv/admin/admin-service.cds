@@ -10,7 +10,7 @@ using {sap.pme.doc as doc} from '../../db/schema/documents';
 using {sap.pme.admin as admin} from '../../db/schema/admin';
 
 @path: '/odata/v4/admin'
-@auth: 'none'
+@requires: 'Admin'
 service AdminService {
 
   // ── Master Data (read/write) ──

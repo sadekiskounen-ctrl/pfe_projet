@@ -26,11 +26,13 @@ entity BusinessPartner : cuid, managed, pme.SoftDelete, pme.Annotatable {
   status      : pme.BPStatus default 'PENDING';
   blockReason : String(512); // Motif de blocage/désactivation
   password    : String(100);
+  sector      : String(128); // Secteur d'activité
 
   // Algerian Fiscal Identifiers
   nif         : String(20);
   rc          : String(20);
   ai          : String(20);
+  ribNumber   : String(30); // Numéro de RIB (20 ou 24 chiffres)
 
   // Address (embedded)
   street      : String(256);
@@ -42,6 +44,8 @@ entity BusinessPartner : cuid, managed, pme.SoftDelete, pme.Annotatable {
   // Documents Médias
   rcDoc       : LargeBinary @Core.MediaType: rcType;
   rcType      : String  @Core.IsMediaType: true;
+  nifDoc      : LargeBinary @Core.MediaType: nifType;
+  nifType     : String  @Core.IsMediaType: true;
   aiDoc       : LargeBinary @Core.MediaType: aiType;
   aiType      : String  @Core.IsMediaType: true;
   ribDoc      : LargeBinary @Core.MediaType: ribType;
