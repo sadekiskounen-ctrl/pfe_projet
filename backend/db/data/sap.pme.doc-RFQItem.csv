@@ -1,0 +1,4 @@
+ID;parent_ID;lineNumber;description;quantity;unit;targetPrice
+item-001-1;rfq-001;1;Câbles RJ45 Cat6;200.000;PIECE;1200.00
+item-002-1;rfq-002;1;Switch 24 ports;10.000;PIECE;25000.00
+item-003-1;rfq-003;1;Alimentations 12V;30.000;PIECE;5000.00

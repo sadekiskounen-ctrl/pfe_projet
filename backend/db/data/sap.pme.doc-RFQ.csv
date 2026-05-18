@@ -1,0 +1,4 @@
+ID;rfqNumber;title;description;date;deadline;status;currency_code;selectedResponse_ID
+rfq-001;RFQ-001;Câbles RJ45 Cat6;Lot de 200 câbles ethernet RJ45 Cat6 blindés;2026-05-01;2026-06-30;OPEN;DZD;
+rfq-002;RFQ-002;Switch 24 ports;Achat de switches administrables 24 ports Gigabit;2026-05-05;2026-06-25;OPEN;DZD;
+rfq-003;RFQ-003;Alimentations 12V;Alimentations stabilisées 12V 10A pour serveurs;2026-05-10;2026-06-01;APPROVED;DZD;resp-003-1

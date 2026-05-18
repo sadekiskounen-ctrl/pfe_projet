@@ -850,6 +850,28 @@
             btn.innerText = "Soumettre mon dossier";
           }
         });
+
+        document.getElementById("customSector").addEventListener("input", function() {
+          const val = this.value.toLowerCase().trim();
+          const sectorSelect = document.getElementById("sector");
+          
+          let match = "";
+          if (val.includes("informatique") || val.includes("tech") || val.includes("service") || val.includes("logiciel")) {
+            match = "Informatique & Tech";
+          } else if (val.includes("industrie") || val.includes("manufacture") || val.includes("fabrication") || val.includes("usine")) {
+            match = "Industrie & Manufacture";
+          } else if (val.includes("btp") || val.includes("construction") || val.includes("batiment")) {
+            match = "BTP & Construction";
+          } else if (val.includes("commerce") || val.includes("distribution") || val.includes("magasin") || val.includes("boutique")) {
+            match = "Commerce & Distribution";
+          }
+          
+          if (match) {
+            alert(`Votre saisie "${this.value}" correspond au secteur standard "${match}". Nous l'avons sélectionné pour vous.`);
+            sectorSelect.value = match;
+            toggleCustomSector(); // Automatically hide custom field and reset
+          }
+        });
     </script>
   </body>
 </html>

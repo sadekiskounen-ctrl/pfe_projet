@@ -198,18 +198,17 @@ module.exports = class SRMService extends cds.ApplicationService {
   // ── Helper: Generate sequential number ──
   async _generateNumber(objectType, prefix) {
     const { NumberRange } = cds.entities('sap.pme.admin');
-    const tx = cds.tx(this);
 
-    let range = await tx.run(SELECT.one.from(NumberRange).where({ objectType }));
+    let range = await SELECT.one.from(NumberRange).where({ objectType });
     if (!range) {
-      await tx.run(INSERT.into(NumberRange).entries({
+      await INSERT.into(NumberRange).entries({
         objectType, prefix, currentNumber: 0, padLength: 5
-      }));
+      });
       range = { currentNumber: 0, padLength: 5, prefix };
     }
 
     const nextNumber = (range.currentNumber || 0) + 1;
-    await tx.run(UPDATE(NumberRange).set({ currentNumber: nextNumber }).where({ objectType }));
+    await UPDATE(NumberRange).set({ currentNumber: nextNumber }).where({ objectType });
 
     return `${prefix}-${String(nextNumber).padStart(range.padLength, '0')}`;
   }
