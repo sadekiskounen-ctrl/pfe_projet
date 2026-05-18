@@ -40,7 +40,7 @@ module.exports = cds.service.impl(async function() {
             });
             const delaisFournisseurs = validOrders > 0 ? Math.round(totalDays / validOrders) : 0;
             
-            const clients = await SELECT.from(BusinessPartner).where({ status: 'ACTIVE' });
+            const clients = await SELECT.from(BusinessPartner).where({ status: 'ACTIVE', bpType: { 'in': ['CLIENT_B2B', 'CLIENT_B2C'] } });
             const pending = await SELECT.from(RegistrationRequest).where({ status: 'PENDING' });
 
             return {
@@ -119,5 +119,52 @@ module.exports = cds.service.impl(async function() {
             result.push({ day: `${i}`, value: found ? found.value : 0 });
         }
         return result;
+    });
+
+    // --- ADMIN DASHBOARD ---
+    this.on('getAdminDashboard', async (req) => {
+        try {
+            const bps = await SELECT.from(BusinessPartner);
+            const pending = await SELECT.from(RegistrationRequest).where({ status: 'PENDING' });
+            return {
+                totalBusinessPartners: bps.length,
+                bpEnAttente: pending.length,
+                totalDocuments: 150, // Fictive data for documents
+                systemHealth: "OK"
+            };
+        } catch (e) {
+            console.error("[Analytics] Admin Dashboard Error:", e);
+            throw e;
+        }
+    });
+
+    // --- CRM DASHBOARD ---
+    this.on('getCRMDashboard', async (req) => {
+        try {
+            const clients = await SELECT.from(BusinessPartner).where({ bpType: { 'in': ['CLIENT_B2B', 'CLIENT_B2C'] } });
+            const clientsB2B = clients.filter(c => c.bpType === 'CLIENT_B2B');
+            const clientsB2C = clients.filter(c => c.bpType === 'CLIENT_B2C');
+            const activeClients = clients.filter(c => c.status === 'ACTIVE');
+            
+            return {
+                totalClients: clients.length,
+                totalClientsB2B: clientsB2B.length,
+                totalClientsB2C: clientsB2C.length,
+                activeClients: activeClients.length,
+                totalDevis: 0,
+                devisEnCours: 0,
+                totalCommandes: 0,
+                commandesEnCours: 0,
+                totalFactures: 0,
+                facturesImpayees: 0,
+                chiffreAffaireMois: 0,
+                chiffreAffaireAnnee: 0,
+                totalPaiements: 0,
+                tauxConversion: 0
+            };
+        } catch (e) {
+            console.error("[Analytics] CRM Dashboard Error:", e);
+            throw e;
+        }
     });
 });

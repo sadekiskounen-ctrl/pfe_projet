@@ -1,4 +1,4 @@
 ID;code;name;description;unitPrice;stock
-p1f7799d-963a-40af-b8cf-745760e51801;PRD001;Serveur Cloud Pro;Instance haute performance;45000.00;10
-p1f7799d-963a-40af-b8cf-745760e51802;PRD002;Suite Sécurité;Protection antivirus & firewall;12000.00;50
-p1f7799d-963a-40af-b8cf-745760e51803;PRD003;Support IT 24/7;Maintenance mensuelle;25000.00;99
+a1f7799d-963a-40af-b8cf-745760e51801;PRD001;Serveur Cloud Pro;Instance haute performance;45000.00;10
+a1f7799d-963a-40af-b8cf-745760e51802;PRD002;Suite Sécurité;Protection antivirus & firewall;12000.00;50
+a1f7799d-963a-40af-b8cf-745760e51803;PRD003;Support IT 24/7;Maintenance mensuelle;25000.00;99
