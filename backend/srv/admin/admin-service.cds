@@ -45,6 +45,9 @@ service AdminService {
   entity AllBonsCommande        as projection on doc.BonCommandeFournisseur;
 
   @readonly
+  entity AllRFQResponses        as projection on doc.RFQResponse;
+
+  @readonly
   entity AllFacturesFournisseur as projection on doc.FactureFournisseur;
 
   // ── Admin Entities ──
@@ -63,4 +66,5 @@ service AdminService {
   action downloadBusinessPartnerPDF(bpId: UUID)                                         returns String;
   action downloadFacturePDF(factId: UUID)                                               returns String;
   action downloadDevisPDF(devisId: UUID)                                                returns String;
+  action downloadCommandePDF(commandeId: UUID)                                          returns String;
 }

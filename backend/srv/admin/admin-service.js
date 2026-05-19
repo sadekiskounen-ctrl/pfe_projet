@@ -3,7 +3,7 @@
 // ============================================================
 
 const cds = require('@sap/cds');
-const { generateRegistrationPDF, generateFacturePDF, generateDevisPDF } = require('../lib/pdf-generator');
+const { generateRegistrationPDF, generateFacturePDF, generateDevisPDF, generateCommandePDF } = require('../lib/pdf-generator');
 
 module.exports = class AdminService extends cds.ApplicationService {
 
@@ -95,11 +95,30 @@ module.exports = class AdminService extends cds.ApplicationService {
     // ── PDF: Download Devis ──
     this.on('downloadDevisPDF', async (req) => {
       const { devisId } = req.data;
-      const { Devis } = cds.entities('sap.pme.doc');
+      const { Devis, DevisItem } = cds.entities('sap.pme.doc');
       const devis = await SELECT.one.from(Devis, devisId);
       if (!devis) return req.error(404, `Devis ${devisId} not found`);
+      const items = await SELECT.from(DevisItem).where({ parent_ID: devisId });
+      const client = devis.clientB2B_ID
+        ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B).where({ ID: devis.clientB2B_ID })
+        : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C).where({ ID: devis.clientB2C_ID });
 
-      const pdfBuffer = await generateDevisPDF(devis);
+      const pdfBuffer = await generateDevisPDF({ ...devis, items, clientB2B: devis.clientB2B_ID ? client : null, clientB2C: !devis.clientB2B_ID ? client : null });
+      return pdfBuffer.toString('base64');
+    });
+
+    // ── PDF: Download Commande ──
+    this.on('downloadCommandePDF', async (req) => {
+      const { commandeId } = req.data;
+      const { CommandeClient, CommandeItem } = cds.entities('sap.pme.doc');
+      const commande = await SELECT.one.from(CommandeClient, commandeId);
+      if (!commande) return req.error(404, `Commande ${commandeId} not found`);
+      const items = await SELECT.from(CommandeItem).where({ parent_ID: commandeId });
+      const client = commande.clientB2B_ID
+        ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B).where({ ID: commande.clientB2B_ID })
+        : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C).where({ ID: commande.clientB2C_ID });
+
+      const pdfBuffer = await generateCommandePDF({ ...commande, items, clientB2B: commande.clientB2B_ID ? client : null, clientB2C: !commande.clientB2B_ID ? client : null });
       return pdfBuffer.toString('base64');
     });
 

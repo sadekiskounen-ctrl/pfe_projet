@@ -87,4 +87,119 @@ cds.on('bootstrap', (app) => {
     });
 });
 
+cds.on('served', async () => {
+    console.log('[Sync] Starting automatic database synchronization...');
+    try {
+        const { BusinessPartner } = cds.entities('sap.pme');
+        const { ClientB2B, ClientB2C } = cds.entities('sap.pme.crm');
+        const { Fournisseur } = cds.entities('sap.pme.srm');
+
+        if (BusinessPartner && ClientB2B && Fournisseur && ClientB2C) {
+            const bps = await SELECT.from(BusinessPartner);
+            for (const bp of bps) {
+                if (bp.bpType === 'CLIENT_B2B') {
+                    const client = await SELECT.one.from(ClientB2B).where({ email: bp.email });
+                    if (!client) {
+                        console.log(`[Sync] Syncing missing ClientB2B for: ${bp.displayName} (${bp.email})`);
+                        await INSERT.into(ClientB2B).entries({
+                            ID: cds.utils.uuid(),
+                            bp_ID: bp.ID,
+                            companyName: bp.displayName,
+                            email: bp.email,
+                            phone: bp.phone,
+                            status: bp.status || 'ACTIVE',
+                            rc: bp.rc,
+                            nif: bp.nif,
+                            ai: bp.ai,
+                            sector: bp.sector,
+                            wilaya: bp.wilaya
+                        });
+                    } else {
+                        // Synchro des colonnes éventuellement vides
+                        const updates = {};
+                        if (!client.bp_ID) updates.bp_ID = bp.ID;
+                        if (!client.rc && bp.rc) updates.rc = bp.rc;
+                        if (!client.nif && bp.nif) updates.nif = bp.nif;
+                        if (!client.ai && bp.ai) updates.ai = bp.ai;
+                        if (!client.sector && bp.sector) updates.sector = bp.sector;
+                        if (!client.wilaya && bp.wilaya) updates.wilaya = bp.wilaya;
+                        if (!client.phone && bp.phone) updates.phone = bp.phone;
+                        
+                        if (Object.keys(updates).length > 0) {
+                            console.log(`[Sync] Updating missing fields on ClientB2B for: ${bp.displayName}`);
+                            await UPDATE(ClientB2B).set(updates).where({ ID: client.ID });
+                        }
+                    }
+                } else if (bp.bpType === 'FOURNISSEUR') {
+                    const fournisseur = await SELECT.one.from(Fournisseur).where({ email: bp.email });
+                    if (!fournisseur) {
+                        console.log(`[Sync] Syncing missing Fournisseur for: ${bp.displayName} (${bp.email})`);
+                        await INSERT.into(Fournisseur).entries({
+                            ID: cds.utils.uuid(),
+                            bp_ID: bp.ID,
+                            companyName: bp.displayName,
+                            email: bp.email,
+                            phone: bp.phone,
+                            status: bp.status || 'ACTIVE',
+                            rc: bp.rc,
+                            nif: bp.nif,
+                            ai: bp.ai,
+                            sector: bp.sector,
+                            wilaya: bp.wilaya,
+                            rib: bp.ribNumber,
+                            bankAccount: bp.ribNumber,
+                            kycStatus: 'VALIDATED'
+                        });
+                    } else {
+                        // Synchro des colonnes éventuellement vides
+                        const updates = {};
+                        if (!fournisseur.bp_ID) updates.bp_ID = bp.ID;
+                        if (!fournisseur.rc && bp.rc) updates.rc = bp.rc;
+                        if (!fournisseur.nif && bp.nif) updates.nif = bp.nif;
+                        if (!fournisseur.ai && bp.ai) updates.ai = bp.ai;
+                        if (!fournisseur.sector && bp.sector) updates.sector = bp.sector;
+                        if (!fournisseur.wilaya && bp.wilaya) updates.wilaya = bp.wilaya;
+                        if (!fournisseur.phone && bp.phone) updates.phone = bp.phone;
+                        if (!fournisseur.rib && bp.ribNumber) updates.rib = bp.ribNumber;
+                        if (!fournisseur.bankAccount && bp.ribNumber) updates.bankAccount = bp.ribNumber;
+                        
+                        if (Object.keys(updates).length > 0) {
+                            console.log(`[Sync] Updating missing fields on Fournisseur for: ${bp.displayName}`);
+                            await UPDATE(Fournisseur).set(updates).where({ ID: fournisseur.ID });
+                        }
+                    }
+                } else if (bp.bpType === 'CLIENT_B2C') {
+                    const clientB2c = await SELECT.one.from(ClientB2C).where({ email: bp.email });
+                    if (!clientB2c) {
+                        console.log(`[Sync] Syncing missing ClientB2C for: ${bp.displayName} (${bp.email})`);
+                        await INSERT.into(ClientB2C).entries({
+                            ID: cds.utils.uuid(),
+                            bp_ID: bp.ID,
+                            firstName: bp.displayName.split(' ')[0] || bp.displayName,
+                            lastName: bp.displayName.split(' ').slice(1).join(' ') || bp.displayName,
+                            email: bp.email,
+                            phone: bp.phone,
+                            status: bp.status || 'ACTIVE',
+                            wilaya: bp.wilaya
+                        });
+                    } else {
+                        const updates = {};
+                        if (!clientB2c.bp_ID) updates.bp_ID = bp.ID;
+                        if (!clientB2c.wilaya && bp.wilaya) updates.wilaya = bp.wilaya;
+                        if (!clientB2c.phone && bp.phone) updates.phone = bp.phone;
+                        
+                        if (Object.keys(updates).length > 0) {
+                            console.log(`[Sync] Updating missing fields on ClientB2C for: ${bp.displayName}`);
+                            await UPDATE(ClientB2C).set(updates).where({ ID: clientB2c.ID });
+                        }
+                    }
+                }
+            }
+            console.log('[Sync] Database synchronization completed successfully.');
+        }
+    } catch (err) {
+        console.error('[Sync] Error during database synchronization:', err);
+    }
+});
+
 module.exports = cds.server;

@@ -90,11 +90,15 @@ service CRMService {
   action approveDevis(devisId: UUID) returns Devis;
   action rejectDevis(devisId: UUID, reason: String) returns Devis;
   action recordPayment(factureId: UUID, amount: Decimal, method: String, reference: String) returns Paiements;
+  action sendOrderToClient(commandeId: UUID) returns Commandes;
+  action acceptOrder(commandeId: UUID) returns Commandes;
+  action rejectOrder(commandeId: UUID) returns Commandes;
 
   // ── PDF Actions ──
   // Returns base64 encoded PDF
   function downloadDevisPDF(devisId: UUID) returns String;
   function downloadFacturePDF(factureId: UUID) returns String;
+  function downloadCommandePDF(commandeId: UUID) returns String;
 
   // ── Email Actions ──
   action sendDevisByEmail(devisId: UUID) returns Boolean;

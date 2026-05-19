@@ -199,9 +199,80 @@
       .card-type input {
         display: none;
       }
+
+      /* Custom Fiori Styled Alert */
+      .custom-alert-overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(28, 42, 56, 0.4);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+      }
+      .custom-alert-overlay.show {
+        opacity: 1;
+      }
+      .custom-alert-box {
+        background: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 450px;
+        padding: 24px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        transform: scale(0.9);
+        transition: transform 0.25s ease;
+        border-left: 5px solid var(--sap-blue, #0070f2);
+      }
+      .custom-alert-overlay.show .custom-alert-box {
+        transform: scale(1);
+      }
+      .custom-alert-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .custom-alert-icon {
+        font-size: 1.5rem;
+        color: var(--sap-blue, #0070f2);
+      }
+      .custom-alert-header h4 {
+        margin: 0;
+        font-weight: 700;
+        color: var(--text, #2c3e50);
+        font-size: 1.15rem;
+      }
+      .custom-alert-body {
+        color: #4a5568;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 20px;
+      }
+      .custom-alert-footer {
+        display: flex;
+        justify-content: flex-end;
+      }
     </style>
   </head>
   <body>
+    <!-- Custom Elegant Dialog/Modal -->
+    <div id="customAlert" class="custom-alert-overlay" style="display: none;">
+        <div class="custom-alert-box">
+            <div class="custom-alert-header">
+                <i class="fas fa-info-circle custom-alert-icon"></i>
+                <h4 id="customAlertTitle">Notification</h4>
+            </div>
+            <div class="custom-alert-body" id="customAlertMessage"></div>
+            <div class="custom-alert-footer">
+                <button class="btn btn-primary" onclick="closeCustomAlert()" style="padding: 8px 20px; font-size: 0.85rem;">OK</button>
+            </div>
+        </div>
+    </div>
+
     <div class="wizard-container">
       <div class="text-center mb-5">
           <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" style="width: 70px; margin-bottom: 10px;">
@@ -272,6 +343,7 @@
                     <label class="form-label">NIF (15 chiffres) *</label>
                     <input type="text" class="form-control" id="nif" placeholder="Ex: 123456789012345" 
                            pattern="[0-9]{15}" minlength="15" maxlength="15" required
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '');"
                            onblur="checkFieldConflict('nif', 'nifError')">
                     <div class="invalid-feedback" id="nifError">Le NIF doit contenir exactement 15 chiffres.</div>
                 </div>
@@ -279,6 +351,7 @@
                     <label class="form-label">Article d'Imposition (AI) *</label>
                     <input type="text" class="form-control" id="ai" placeholder="Ex: 16012345678" 
                            pattern="[0-9]{11}" minlength="11" maxlength="11" required
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '');"
                            onblur="checkFieldConflict('ai', 'aiError')">
                     <div class="invalid-feedback" id="aiError">L'AI doit contenir exactement 11 chiffres.</div>
                 </div>
@@ -289,6 +362,7 @@
                     <label class="form-label">RIB Bancaire (20 chiffres) *</label>
                     <input type="text" class="form-control" id="ribNumber" placeholder="Ex: 00799999000000000000" 
                            pattern="[0-9]{20}" minlength="20" maxlength="20" required
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '');"
                            onblur="checkFieldConflict('ribNumber', 'ribError')">
                     <div class="invalid-feedback" id="ribError">Le RIB doit contenir exactement 20 chiffres.</div>
                 </div>
@@ -378,6 +452,7 @@
                     <label class="form-label">Téléphone (10 chiffres) *</label>
                     <input type="tel" class="form-control" id="phone" placeholder="Ex: 0550123456" 
                            pattern="^0[0-9]{9}$" minlength="10" maxlength="10" required
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '');"
                            onblur="checkFieldConflict('phone', 'phoneError')">
                     <div class="invalid-feedback" id="phoneError">Le numéro de téléphone doit comporter exactement 10 chiffres et commencer par un 0.</div>
                 </div>
@@ -512,6 +587,20 @@
     </div>
 
     <script>
+      // Custom Alert helper functions
+      function showCustomAlert(message, title = "Notification") {
+        const overlay = document.getElementById("customAlert");
+        document.getElementById("customAlertTitle").innerText = title;
+        document.getElementById("customAlertMessage").innerHTML = message;
+        overlay.style.display = "flex";
+        setTimeout(() => overlay.classList.add("show"), 10);
+      }
+      function closeCustomAlert() {
+        const overlay = document.getElementById("customAlert");
+        overlay.classList.remove("show");
+        setTimeout(() => overlay.style.display = "none", 250);
+      }
+
       // Vérification inline en temps réel d'un champ contre les données existantes
       async function checkFieldConflict(fieldId, errorDivId) {
         const input = document.getElementById(fieldId);
@@ -638,7 +727,7 @@
             const data = await res.json();
             
             if (data.status === "CONFLICT") {
-              alert(data.blockReason);
+              showCustomAlert(data.blockReason, "Conflit détecté");
               btn.innerHTML = originalText;
               btn.disabled = false;
               return;
@@ -668,7 +757,7 @@
             const data = await res.json();
             
             if (data.status === "CONFLICT") {
-              alert(data.blockReason);
+              showCustomAlert(data.blockReason, "Conflit détecté");
               btn.innerHTML = originalText;
               btn.disabled = false;
               return;
@@ -773,8 +862,9 @@
             const fileNIF = document.getElementById("fileNIF").files[0];
 
             if (!fileRC || !fileRIB || !fileAI || !fileNIF) {
-              alert(
+              showCustomAlert(
                 "Veuillez joindre tous les documents obligatoires (RC, NIF, AI, RIB).",
+                "Documents manquants"
               );
               btn.disabled = false;
               btn.innerText = originalText;
@@ -833,18 +923,20 @@
             } else {
               const err = await response.json();
               console.error("Erreur Serveur:", err);
-              alert(
+              showCustomAlert(
                 "Erreur: " +
                   (err.error?.message ||
                     "Le serveur a rejeté la demande. Vérifiez la taille des PDFs."),
+                "Erreur d'inscription"
               );
               btn.disabled = false;
               btn.innerText = originalText;
             }
           } catch (error) {
             console.error("Erreur de connexion:", error);
-            alert(
+            showCustomAlert(
               "Erreur technique lors de l'envoi. Vérifiez votre connexion.",
+              "Erreur réseau"
             );
             btn.disabled = false;
             btn.innerText = "Soumettre mon dossier";
@@ -867,7 +959,7 @@
           }
           
           if (match) {
-            alert(`Votre saisie "${this.value}" correspond au secteur standard "${match}". Nous l'avons sélectionné pour vous.`);
+            showCustomAlert(`Votre saisie "${this.value}" correspond au secteur standard "${match}". Nous l'avons sélectionné pour vous.`, "Secteur d'activité");
             sectorSelect.value = match;
             toggleCustomSector(); // Automatically hide custom field and reset
           }

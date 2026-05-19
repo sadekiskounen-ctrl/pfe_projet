@@ -229,11 +229,20 @@
         document.querySelector(`.role-option[data-role="${role}"]`).classList.add('active');
         document.getElementById('selectedRole').value = role;
         
-        // Auto-fill logic for demo users
-        const userMap = { 'admin': 'admin', 'client': 'client', 'fournisseur': 'fournisseur' };
+        // Auto-fill logic for demo users matching the database records
+        const userMap = { 
+            'admin': 'admin', 
+            'client': 'contact@algiers-tech.dz', 
+            'fournisseur': 'distrilog@fournisseur.dz' 
+        };
+        const passMap = {
+            'admin': 'admin',
+            'client': 'pme2026',
+            'fournisseur': 'pme2026'
+        };
         if(userMap[role]) {
             document.getElementById('username').value = userMap[role];
-            document.getElementById('password').value = userMap[role];
+            document.getElementById('password').value = passMap[role];
         }
     }
 
@@ -264,7 +273,7 @@
         if (!success && role !== 'admin') {
             try {
                 console.log(`Checking status for ${user}...`);
-                const res = await fetch(`/odata/v4/registration/checkStatus(email='${user}')`);
+                const res = await fetch(`/odata/v4/registration/checkStatus(email='${user}',role='${role}')`);
                 const rawData = await res.json();
                 const data = rawData.value || rawData;
                 
@@ -277,7 +286,7 @@
                 }
                 
                 if (data && data.status === 'PENDING') {
-                    errorDiv.innerHTML = `<strong>Dossier en attente</strong><br>L'administrateur examine votre demande. Veuillez patienter.`;
+                    errorDiv.innerHTML = `<strong>Dossier en cours de traitement</strong><br>L'administrateur examine votre demande. Veuillez patienter.`;
                     errorDiv.style.display = 'block';
                     errorDiv.style.background = '#fff3cd';
                     errorDiv.style.color = '#856404';
@@ -341,14 +350,27 @@
             sessionStorage.setItem('isLoggedIn', 'true');
             sessionStorage.setItem('userRole', finalRole);
             sessionStorage.setItem('currentUser', user);
-            // Save Basic Auth token for backend authentication
-            sessionStorage.setItem('authHeader', 'Basic ' + btoa(user + ':' + pass));
+            
+            // Map actual logged in role to the mock user for local CAP Basic Auth role validation
+            let mockUser = user;
+            let mockPass = pass;
+            if (finalRole === 'client_b2b' || finalRole === 'client_b2c') {
+                mockUser = 'client';
+                mockPass = 'client';
+            } else if (finalRole === 'fournisseur') {
+                mockUser = 'fournisseur';
+                mockPass = 'fournisseur';
+            } else if (finalRole === 'admin') {
+                mockUser = 'admin';
+                mockPass = 'admin';
+            }
+            sessionStorage.setItem('authHeader', 'Basic ' + btoa(mockUser + ':' + mockPass));
             
             const urlParams = new URLSearchParams(window.location.search);
             const targetApp = urlParams.get('app');
             
             if (finalRole === 'client_b2b') window.location.href = '/crm/index.html';
-            else if (finalRole === 'client_b2c') window.location.href = '/crm/clients/webapp/index.html';
+            else if (finalRole === 'client_b2c') window.location.href = '/crm/b2c.html';
             else if (targetApp === 'srm' || finalRole === 'fournisseur') window.location.href = '/srm/index.html';
             else if (targetApp === 'admin' || finalRole === 'admin') window.location.href = '/admin/dashboard.html';
             else window.location.href = '/index.html';

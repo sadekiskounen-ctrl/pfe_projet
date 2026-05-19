@@ -22,7 +22,7 @@ service RegistrationService {
         blockReason : String;
     }
 
-    function checkStatus(email: String)                                          returns StatusResponse;
+    function checkStatus(email: String, role: String)                            returns StatusResponse;
     function checkAvailability(
         email: String, 
         companyName: String, 

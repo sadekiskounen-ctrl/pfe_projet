@@ -3,8 +3,8 @@
 // ============================================================
 
 'use strict';
-const cds = require('@sap/cds');
-const { generateDevisPDF, generateFacturePDF } = require('../lib/pdf-generator');
+const cds = require('@sap/cds'); // Touch for restart
+const { generateDevisPDF, generateFacturePDF, generateCommandePDF } = require('../lib/pdf-generator');
 const { sendDevis, sendFacture, sendWelcomeB2B } = require('../lib/email-service');
 const { validateClientB2B, validateFournisseur } = require('../lib/validators');
 
@@ -80,7 +80,7 @@ module.exports = class CRMService extends cds.ApplicationService {
       const [commande] = await INSERT.into(Commandes).entries({
         orderNumber: orderNum, clientB2B_ID: devis.clientB2B_ID, clientB2C_ID: devis.clientB2C_ID,
         devis_ID: devis.ID, date: new Date().toISOString().split('T')[0],
-        status: 'CONFIRMED', totalHT: devis.totalHT, totalTVA: devis.totalTVA, totalTTC: devis.totalTTC,
+        status: 'DRAFT', totalHT: devis.totalHT, totalTVA: devis.totalTVA, totalTTC: devis.totalTTC,
         currency_code: devis.currency_code,
         items: items.map((item, i) => ({
           lineNumber: i + 1, product_ID: item.product_ID, description: item.description,
@@ -90,6 +90,53 @@ module.exports = class CRMService extends cds.ApplicationService {
       });
       await UPDATE(Devis).set({ convertedToOrder: true, commande_ID: commande?.ID }).where({ ID: devisId });
       return commande;
+    });
+
+    // ── Action: Send Order to Client ──
+    this.on('sendOrderToClient', async (req) => {
+      const { commandeId } = req.data;
+      const cmd = await SELECT.one.from(Commandes).where({ ID: commandeId });
+      if (!cmd) return req.error(404, 'Commande introuvable');
+      await UPDATE(Commandes).set({ status: 'SENT_TO_CLIENT', statusDate: new Date().toISOString() }).where({ ID: commandeId });
+      return SELECT.one.from(Commandes, commandeId);
+    });
+
+    // ── Action: Accept Order ──
+    this.on('acceptOrder', async (req) => {
+      const { commandeId } = req.data;
+      const cmd = await SELECT.one.from(Commandes).where({ ID: commandeId });
+      if (!cmd) return req.error(404, 'Commande introuvable');
+      await UPDATE(Commandes).set({ status: 'ACCEPTED_BY_CLIENT', statusDate: new Date().toISOString() }).where({ ID: commandeId });
+      
+      // Auto-convert to Facture so client can pay it!
+      const items = await SELECT.from(CommandeItems).where({ parent_ID: commandeId });
+      const invNum = await this._generateNumber('FACTURE', 'FAC');
+      const dueDate = new Date(); dueDate.setDate(dueDate.getDate() + 30);
+
+      const [facture] = await INSERT.into(Factures).entries({
+        invoiceNumber: invNum, commande_ID: commandeId,
+        clientB2B_ID: cmd.clientB2B_ID, clientB2C_ID: cmd.clientB2C_ID,
+        date: new Date().toISOString().split('T')[0], dueDate: dueDate.toISOString().split('T')[0],
+        status: 'SENT', totalHT: cmd.totalHT, totalTVA: cmd.totalTVA, totalTTC: cmd.totalTTC,
+        remainingAmount: cmd.totalTTC, currency_code: cmd.currency_code,
+        items: items.map((item, i) => ({
+          lineNumber: i + 1, product_ID: item.product_ID, description: item.description,
+          quantity: item.quantity, unit: item.unit, unitPrice: item.unitPrice,
+          tvaRate: item.tvaRate, totalHT: item.totalHT, totalTVA: item.totalTVA, totalTTC: item.totalTTC
+        }))
+      });
+      await UPDATE(Commandes).set({ invoiced: true, facture_ID: facture?.ID }).where({ ID: commandeId });
+      
+      return SELECT.one.from(Commandes, commandeId);
+    });
+
+    // ── Action: Reject Order ──
+    this.on('rejectOrder', async (req) => {
+      const { commandeId } = req.data;
+      const cmd = await SELECT.one.from(Commandes).where({ ID: commandeId });
+      if (!cmd) return req.error(404, 'Commande introuvable');
+      await UPDATE(Commandes).set({ status: 'REJECTED_BY_CLIENT', statusDate: new Date().toISOString() }).where({ ID: commandeId });
+      return SELECT.one.from(Commandes, commandeId);
     });
 
     // ── Action: Convert Commande → Facture ──
@@ -136,6 +183,11 @@ module.exports = class CRMService extends cds.ApplicationService {
       const newRem  = Math.max(0, parseFloat(facture.totalTTC) - newPaid);
       const newStat = newRem <= 0 ? 'PAID' : 'PARTIALLY_PAID';
       await UPDATE(Factures).set({ paidAmount: newPaid, remainingAmount: newRem, status: newStat }).where({ ID: factureId });
+      
+      if (newStat === 'PAID' && facture.commande_ID) {
+        await UPDATE(Commandes).set({ status: 'PAID', statusDate: new Date().toISOString() }).where({ ID: facture.commande_ID });
+      }
+
       return paiement;
     });
 
@@ -160,6 +212,20 @@ module.exports = class CRMService extends cds.ApplicationService {
       if (!facture) return req.error(404, 'Facture introuvable');
       const items = await SELECT.from(FactureItems).where({ parent_ID: factureId });
       const pdfBuffer = await generateFacturePDF({ ...facture, items });
+      return pdfBuffer.toString('base64');
+    });
+
+    // ── Function: Download Commande PDF ──
+    this.on('downloadCommandePDF', async (req) => {
+      const { commandeId } = req.data;
+      const commande = await SELECT.one.from(Commandes).where({ ID: commandeId });
+      if (!commande) return req.error(404, 'Commande introuvable');
+      const items = await SELECT.from(CommandeItems).where({ parent_ID: commandeId });
+      const client = commande.clientB2B_ID
+        ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B).where({ ID: commande.clientB2B_ID })
+        : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C).where({ ID: commande.clientB2C_ID });
+
+      const pdfBuffer = await generateCommandePDF({ ...commande, items, clientB2B: commande.clientB2B_ID ? client : null, clientB2C: !commande.clientB2B_ID ? client : null });
       return pdfBuffer.toString('base64');
     });
 

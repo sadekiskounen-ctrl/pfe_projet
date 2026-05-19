@@ -3,69 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PME Connect | Espace B2B Client</title>
-    <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <title>Espace Client B2C — PME Connect</title>
     
     <!-- Security & Interceptor -->
     <script src="/auth-interceptor.js"></script>
     <script>
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
         const userRole = sessionStorage.getItem('userRole');
-        if (isLoggedIn !== 'true' || (userRole !== 'client' && userRole !== 'client_b2b')) {
+        if (isLoggedIn !== 'true' || (userRole !== 'client' && userRole !== 'client_b2c')) {
             window.location.href = '/auth.html?app=crm';
         }
     </script>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
+        /* CSS Core variables (Fiori Horizon Linen/Stone Premium Aesthetic) */
         :root {
-            /* Premium Linen / Stone Theme Color Palette */
-            --bg-stone: #f5f4f0;       /* Soft warm linen/stone background */
-            --bg-card: #ffffff;        /* Pure white cards */
-            --primary: #1c2a38;        /* Deep charcoal slate */
-            --primary-light: #2c3e50;  /* Secondary charcoal */
-            --accent: #c5a059;         /* Linen gold / warm amber */
-            --accent-hover: #b48f47;
-            --text-dark: #2d312e;      /* Soft black */
-            --text-muted: #737874;     /* Medium stone gray */
-            --border-color: #e4e2de;   /* Soft warm gray border */
-            --success: #2e7d32;        /* Elegant forest green */
-            --warning: #d84315;        /* Deep orange */
-            --shadow-soft: 0 10px 30px rgba(28, 42, 56, 0.04);
-            --shadow-hover: 0 15px 40px rgba(28, 42, 56, 0.08);
+            --primary: #1c2a38;
+            --accent: #c5a059;
+            --accent-hover: #b48e47;
+            --bg-base: #f5f4f0;
+            --bg-card: #ffffff;
+            --text-dark: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #e2dfd2;
+            --success: #2e7d32;
+            --warning: #d84315;
+            
+            --shadow-soft: 0 4px 20px rgba(28, 42, 56, 0.05);
+            --shadow-hover: 0 10px 30px rgba(28, 42, 56, 0.1);
             --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
+            margin: 0; padding: 0;
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+            font-family: 'Inter', sans-serif;
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
-            background-color: var(--bg-stone);
+            background-color: var(--bg-base);
             color: var(--text-dark);
-            min-height: 100vh;
             display: flex;
+            min-height: 100vh;
             overflow-x: hidden;
         }
 
-        /* ── Sidebar Styling ── */
+        /* Sidebar Frame */
         .sidebar {
             width: 280px;
             background-color: var(--primary);
-            color: #ffffff;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
+            color: white;
             padding: 30px 20px;
             display: flex;
             flex-direction: column;
-            border-right: 1px solid rgba(255,255,255,0.05);
-            z-index: 100;
+            justify-content: space-between;
+            position: fixed;
+            height: 100vh;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
+            z-index: 10;
         }
 
         .logo-container {
@@ -73,22 +72,18 @@
             align-items: center;
             gap: 12px;
             margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-left: 10px;
         }
 
         .logo-container img {
-            width: 42px;
-            background: #ffffff;
-            padding: 4px;
-            border-radius: 6px;
+            height: 32px;
         }
 
         .logo-container h2 {
             font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
-            letter-spacing: 0.5px;
+            font-size: 1.35rem;
             color: var(--accent);
+            letter-spacing: 0.5px;
         }
 
         .nav-list {
@@ -102,9 +97,9 @@
         .nav-item {
             display: flex;
             align-items: center;
-            gap: 14px;
-            padding: 14px 16px;
-            border-radius: 12px;
+            gap: 15px;
+            padding: 14px 18px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 0.95rem;
             font-weight: 500;
@@ -112,297 +107,109 @@
             transition: var(--transition-smooth);
         }
 
-        .nav-item i {
-            font-size: 1.1rem;
-            width: 20px;
-            text-align: center;
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(197, 160, 89, 0.15);
             color: var(--accent);
         }
 
-        .nav-item:hover, .nav-item.active {
-            background-color: rgba(255, 255, 255, 0.06);
-            color: #ffffff;
-        }
-
-        .nav-item.active {
-            border-left: 4px solid var(--accent);
-            padding-left: 12px;
+        .nav-item i {
+            font-size: 1.1rem;
+            width: 20px;
         }
 
         .logout-btn {
-            margin-top: auto;
-            border: 1px solid rgba(255,255,255,0.15);
-            background: transparent;
-            color: #ffffff;
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            padding: 12px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.9rem;
+            font-weight: 500;
             transition: var(--transition-smooth);
+            margin-top: 20px;
         }
 
         .logout-btn:hover {
-            background-color: #ef4444;
-            border-color: #ef4444;
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(197, 160, 89, 0.05);
         }
 
-        /* ── Main Content Layout ── */
+        /* Main Frame layout */
         .main-content {
             margin-left: 280px;
-            padding: 40px 50px;
-            width: calc(100% - 280px);
-            min-height: 100vh;
+            flex-grow: 1;
+            padding: 40px;
+            max-width: calc(100vw - 280px);
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 35px;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 25px;
         }
 
-        .welcome-text h1 {
+        header h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
-            color: var(--primary);
-            margin-bottom: 6px;
-        }
-
-        .welcome-text p {
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
-
-        /* Tab Content Panel Switching */
-        .tab-content {
-            display: none;
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ── Profile Details Card ── */
-        .profile-card {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 30px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-soft);
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 24px;
-            margin-bottom: 35px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .profile-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 6px;
-            height: 100%;
-            background-color: var(--accent);
-        }
-
-        .profile-item {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .profile-label {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        .profile-val {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--primary);
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            width: fit-content;
-        }
-
-        .badge-active {
-            background-color: #e8f5e9;
-            color: var(--success);
-        }
-
-        .badge-pending {
-            background-color: #fff3e0;
-            color: var(--warning);
-        }
-
-        /* ── KPI Widgets ── */
-        .kpi-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 35px;
-        }
-
-        .kpi-card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-soft);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: var(--transition-smooth);
-        }
-
-        .kpi-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-hover);
-        }
-
-        .kpi-info h4 {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .kpi-info span {
             font-size: 1.8rem;
-            font-weight: 700;
             color: var(--primary);
-        }
-
-        .kpi-icon {
-            font-size: 2rem;
-            color: var(--accent);
-            opacity: 0.8;
-        }
-
-        /* ── Standard Premium Tables ── */
-        .panel {
-            background: var(--bg-card);
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow-soft);
-            padding: 30px;
-            margin-bottom: 35px;
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
-        }
-
-        .panel-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
-            color: var(--primary);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            padding: 16px 20px;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-            border-bottom: 2px solid var(--border-color);
             font-weight: 600;
         }
 
-        td {
-            padding: 16px 20px;
+        header p {
+            color: var(--text-muted);
             font-size: 0.95rem;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-dark);
-            font-weight: 500;
+            margin-top: 4px;
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover td {
-            background-color: rgba(197, 160, 89, 0.03);
-        }
-
-        /* ── Buttons & UI Controls ── */
+        /* Buttons styling */
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
             padding: 10px 20px;
             border-radius: 8px;
-            font-size: 0.88rem;
             font-weight: 600;
+            font-size: 0.9rem;
             cursor: pointer;
-            border: none;
             transition: var(--transition-smooth);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            outline: none;
         }
 
         .btn-primary {
             background-color: var(--primary);
-            color: #ffffff;
+            color: white;
         }
 
         .btn-primary:hover {
-            background-color: var(--primary-light);
-            transform: translateY(-1px);
+            opacity: 0.9;
         }
 
         .btn-accent {
             background-color: var(--accent);
-            color: #ffffff;
+            color: var(--primary);
         }
 
         .btn-accent:hover {
             background-color: var(--accent-hover);
-            transform: translateY(-1px);
         }
 
         .btn-outline {
-            background-color: transparent;
+            background: none;
             border: 1px solid var(--border-color);
             color: var(--primary);
         }
 
         .btn-outline:hover {
-            background-color: rgba(28, 42, 56, 0.04);
+            background-color: rgba(28, 42, 56, 0.03);
             border-color: var(--primary);
         }
 
@@ -412,91 +219,211 @@
             border-radius: 6px;
         }
 
+        /* Panels */
+        .panel {
+            background-color: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-soft);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .panel-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Tables Grid */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            padding: 14px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-dark);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Profile details grid */
+        .profile-card {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .profile-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .profile-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .profile-val {
+            font-size: 0.95rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Badge status styling */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            width: fit-content;
+        }
+
+        .badge-active {
+            background-color: rgba(46, 125, 50, 0.1);
+            color: var(--success);
+        }
+
+        .badge-pending {
+            background-color: rgba(216, 67, 21, 0.1);
+            color: var(--warning);
+        }
+
+        /* KPI counters */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .kpi-info h4 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .kpi-info span {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .kpi-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            background: rgba(197, 160, 89, 0.1);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        /* Forms input fields */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            outline: none;
+            background-color: #fafaf8;
+            font-size: 0.9rem;
+            transition: var(--transition-smooth);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border-color: var(--accent);
+            background-color: white;
+        }
+
+        /* Pills */
+        .status-pill {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-PENDING { background-color: #ffeeb3; color: #856404; }
+        .status-APPROVED { background-color: #d4edda; color: #155724; }
+        .status-REJECTED { background-color: #f8d7da; color: #721c24; }
+        .status-CONFIRMED { background-color: #d1ecf1; color: #0c5460; }
+
         .action-cell {
             display: flex;
             gap: 8px;
         }
 
-        /* ── Quote Builder Form Grid ── */
-        .quote-form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
+        /* Tabs Display */
+        .tab-content {
+            display: none;
         }
 
-        @media (max-width: 900px) {
-            .quote-form-grid {
-                grid-template-columns: 1fr;
-            }
+        .tab-content.active {
+            display: block;
         }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-dark);
-        }
-
-        select, input, textarea {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            outline: none;
-            font-family: inherit;
-            font-size: 0.95rem;
-            background-color: #fafaf8;
-            transition: var(--transition-smooth);
-        }
-
-        select:focus, input:focus, textarea:focus {
-            border-color: var(--accent);
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.1);
-        }
-
-        .product-summary {
-            background-color: rgba(197, 160, 89, 0.05);
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px dashed var(--accent);
-            margin-top: 15px;
-        }
-
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-
-        .summary-row.total {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--primary);
-            border-top: 1px solid var(--border-color);
-            padding-top: 10px;
-            margin-top: 10px;
-        }
-
-        /* Statuses coloring */
-        .status-pill {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        .status-PENDING { background-color: #fff3e0; color: #e65100; }
-        .status-APPROVED { background-color: #e8f5e9; color: #2e7d32; }
-        .status-REJECTED { background-color: #ffebee; color: #c62828; }
-        .status-CONFIRMED { background-color: #e3f2fd; color: #1565c0; }
 
         /* Loader */
         .loader-overlay {
@@ -765,7 +692,7 @@
         <header>
             <div class="welcome-text">
                 <h1 id="headerWelcome">Bienvenue dans votre Espace Client</h1>
-                <p>Gérez vos demandes de devis et vos bons de commande.</p>
+                <p>Gérez vos demandes de devis et vos bons de commande en tant que Particulier.</p>
             </div>
             <div>
                 <button class="btn btn-outline" onclick="initDashboard()"><i class="fas fa-sync-alt"></i> Actualiser</button>
@@ -830,22 +757,46 @@
 
         <!-- ───────────────── TAB: DASHBOARD ───────────────── -->
         <div class="tab-content" id="tab-dashboard">
-            <!-- Client B2B Profile Card -->
+            <!-- Client B2C Profile Card -->
             <div class="profile-card">
                 <div class="profile-item">
-                    <span class="profile-label">Raison Sociale</span>
-                    <span class="profile-val" id="profileCompany">-</span>
+                    <span class="profile-label">Nom Complet</span>
+                    <span class="profile-val" id="profileName">-</span>
                 </div>
                 <div class="profile-item">
                     <span class="profile-label">Numéro Partenaire</span>
                     <span class="profile-val" id="profileBPNumber">-</span>
                 </div>
                 <div class="profile-item">
-                    <span class="profile-label">RC / Registre de Commerce</span>
+                    <span class="profile-label">E-mail</span>
+                    <span class="profile-val" id="profileEmail">-</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-label">Téléphone</span>
+                    <span class="profile-val" id="profilePhone">-</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-label">Wilaya</span>
+                    <span class="profile-val" id="profileWilaya">-</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-label">Ville / Commune</span>
+                    <span class="profile-val" id="profileCity">-</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-label">Adresse</span>
+                    <span class="profile-val" id="profileAddress">-</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-label">RIB Bancaire</span>
+                    <span class="profile-val" id="profileRIB">-</span>
+                </div>
+                <div class="profile-item">
+                    <span class="profile-label">Registre Commerce (RC)</span>
                     <span class="profile-val" id="profileRC">-</span>
                 </div>
                 <div class="profile-item">
-                    <span class="profile-label">Numéro NIF</span>
+                    <span class="profile-label">Numéro d'Identification Fiscale (NIF)</span>
                     <span class="profile-val" id="profileNIF">-</span>
                 </div>
                 <div class="profile-item">
@@ -853,16 +804,8 @@
                     <span class="profile-val" id="profileAI">-</span>
                 </div>
                 <div class="profile-item">
-                    <span class="profile-label">RIB Bancaire</span>
-                    <span class="profile-val" id="profileRIB">-</span>
-                </div>
-                <div class="profile-item">
                     <span class="profile-label">Secteur d'activité</span>
                     <span class="profile-val" id="profileSector">-</span>
-                </div>
-                <div class="profile-item">
-                    <span class="profile-label">Wilaya</span>
-                    <span class="profile-val" id="profileWilaya">-</span>
                 </div>
                 <div class="profile-item">
                     <span class="profile-label">Statut du Compte</span>
@@ -1037,7 +980,7 @@
                     <div class="card-details-row">
                         <div>
                             <span style="font-size:0.65rem; opacity:0.7; display:block;">Titulaire</span>
-                            <span id="card-holder-display" style="font-weight:600;">NOM DE L'ENTREPRISE</span>
+                            <span id="card-holder-display" style="font-weight:600;">NOM COMPLET</span>
                         </div>
                         <div style="text-align:right;">
                             <span style="font-size:0.65rem; opacity:0.7; display:block;">Expire fin</span>
@@ -1091,7 +1034,7 @@
                         <p style="font-size:0.85rem; color:var(--text-muted); line-height:1.4;">Un code de validation temporaire a été envoyé par SMS au numéro associé à votre carte.</p>
                     </div>
                     
-<div class="form-group" style="margin:0 auto; max-width:200px; display:flex; flex-direction:column; gap:8px;">
+                    <div class="form-group" style="margin:0 auto; max-width:200px; display:flex; flex-direction:column; gap:8px;">
                         <input type="text" id="pay-3ds-otp" placeholder="Code à 6 chiffres" maxlength="6" style="text-align:center; font-size:1.3rem; font-weight:700; letter-spacing:4px; padding:10px;" oninput="this.value=this.value.replace(/\D/g,'')">
                         <span class="field-error" id="err-pay-3ds-otp" style="display:none; color:#ef4444; font-size:0.75rem; margin-top:4px;"></span>
                     </div>
@@ -1107,17 +1050,16 @@
         </div>
     </div>
 
-    <!-- Logic Script -->
     <script>
         // Automatic orientation routing guard
         const userRole = sessionStorage.getItem('userRole') || '';
-        if (userRole === 'client_b2c') {
-            window.location.replace('/crm/b2c.html');
+        if (userRole === 'client_b2b') {
+            window.location.replace('/crm/index.html');
         }
 
         // State variables
         const currentUserEmail = sessionStorage.getItem('currentUser') || '';
-        let clientB2B = null;
+        let clientProfile = null;
         let products = [];
         let devisList = [];
         let ordersList = [];
@@ -1263,22 +1205,22 @@
         async function initDashboard() {
             showLoader(true);
             try {
-                // 1. Fetch B2B Client Details
-                let clientRes = await fetch(`/odata/v4/crm/ClientsB2B?$filter=tolower(email) eq '${currentUserEmail.toLowerCase()}'`);
+                // 1. Fetch B2C Client Details
+                let clientRes = await fetch(`/odata/v4/crm/ClientsB2C?$filter=tolower(email) eq '${currentUserEmail.toLowerCase()}'`);
                 let clientData = {};
                 if (clientRes.ok) {
                     clientData = await clientRes.json();
                 }
 
                 if (clientData.value && clientData.value.length > 0) {
-                    clientB2B = clientData.value[0];
-                    sessionStorage.setItem('currentUser', clientB2B.email);
+                    clientProfile = clientData.value[0];
+                    sessionStorage.setItem('currentUser', clientProfile.email);
 
                     // Fetch BusinessPartner data if linked
                     let bpData = {};
-                    if (clientB2B.bp_ID) {
+                    if (clientProfile.bp_ID) {
                         try {
-                            const bpRes = await fetch(`/odata/v4/crm/BusinessPartners(${clientB2B.bp_ID})`);
+                            const bpRes = await fetch(`/odata/v4/crm/BusinessPartners(${clientProfile.bp_ID})`);
                             if (bpRes.ok) {
                                 bpData = await bpRes.json();
                             }
@@ -1287,21 +1229,25 @@
                         }
                     }
 
-                    document.getElementById('headerWelcome').innerText = `Espace Client B2B — ${clientB2B.companyName}`;
-                    document.getElementById('profileCompany').innerText = clientB2B.companyName;
+                    document.getElementById('headerWelcome').innerText = `Espace Client B2C — ${clientProfile.fullName}`;
+                    document.getElementById('profileName').innerText = clientProfile.fullName;
                     document.getElementById('profileBPNumber').innerText = bpData.bpNumber || 'N/A';
-                    document.getElementById('profileRC').innerText = clientB2B.rc || bpData.rc || 'N/A';
-                    document.getElementById('profileNIF').innerText = clientB2B.nif || bpData.nif || 'N/A';
-                    document.getElementById('profileAI').innerText = clientB2B.ai || bpData.ai || 'N/A';
+                    document.getElementById('profileEmail').innerText = clientProfile.email;
+                    document.getElementById('profilePhone').innerText = clientProfile.phone || 'N/A';
+                    document.getElementById('profileWilaya').innerText = clientProfile.wilaya || 'N/A';
+                    document.getElementById('profileCity').innerText = clientProfile.city || 'N/A';
+                    document.getElementById('profileAddress').innerText = clientProfile.street || 'N/A';
                     document.getElementById('profileRIB').innerText = bpData.ribNumber || 'N/A';
-                    document.getElementById('profileSector').innerText = clientB2B.sector || bpData.sector || 'N/A';
-                    document.getElementById('profileWilaya').innerText = clientB2B.wilaya || bpData.wilaya || 'N/A';
+                    document.getElementById('profileRC').innerText = bpData.rc || 'N/A';
+                    document.getElementById('profileNIF').innerText = bpData.nif || 'N/A';
+                    document.getElementById('profileAI').innerText = bpData.ai || 'N/A';
+                    document.getElementById('profileSector').innerText = bpData.sector || 'N/A';
                     
                     const statEl = document.getElementById('profileStatus');
-                    statEl.innerText = clientB2B.status;
-                    statEl.className = 'badge ' + (clientB2B.status === 'ACTIVE' ? 'badge-active' : 'badge-pending');
+                    statEl.innerText = clientProfile.status;
+                    statEl.className = 'badge ' + (clientProfile.status === 'ACTIVE' ? 'badge-active' : 'badge-pending');
                 } else {
-                    Toast.error("Erreur Profil", "Impossible de charger le profil B2B de cette adresse email.");
+                    Toast.error("Erreur Profil", "Impossible de charger le profil B2C de cette adresse email.");
                 }
 
                 // 2. Fetch Products
@@ -1313,7 +1259,7 @@
                 }
 
                 // 3. Fetch Devis & Orders
-                if (clientB2B) {
+                if (clientProfile) {
                     await fetchDevisAndOrders();
                 }
             } catch (err) {
@@ -1327,12 +1273,12 @@
         // Fetch Devis and Orders
         async function fetchDevisAndOrders() {
             // Devis list
-            const devisRes = await fetch(`/odata/v4/crm/Devis?$filter=clientB2B_ID eq '${clientB2B.ID}'&$expand=items`);
+            const devisRes = await fetch(`/odata/v4/crm/Devis?$filter=clientB2C_ID eq '${clientProfile.ID}'&$expand=items`);
             const devisData = await devisRes.json();
             devisList = devisData.value || [];
 
             // Orders list
-            const ordersRes = await fetch(`/odata/v4/crm/Commandes?$filter=clientB2B_ID eq '${clientB2B.ID}'&$expand=items`);
+            const ordersRes = await fetch(`/odata/v4/crm/Commandes?$filter=clientB2C_ID eq '${clientProfile.ID}'&$expand=items`);
             const ordersData = await ordersRes.json();
             ordersList = ordersData.value || [];
 
@@ -1505,7 +1451,7 @@
             const notes = document.getElementById('cart-notes').value.trim();
 
             const payload = {
-                clientB2B_ID: clientB2B.ID,
+                clientB2C_ID: clientProfile.ID,
                 date: new Date().toISOString().split('T')[0],
                 validUntil: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0],
                 currency_code: 'DZD',
@@ -1808,7 +1754,7 @@
             closeOrderModal();
             showLoader(true);
             try {
-                const res = await fetch(`/odata/v4/crm/Factures?$filter=commande_ID eq ${orderId} and clientB2B_ID eq ${clientB2B.ID}`);
+                const res = await fetch(`/odata/v4/crm/Factures?$filter=commande_ID eq ${orderId} and clientB2C_ID eq ${clientProfile.ID}`);
                 const data = await res.json();
                 
                 if (!data.value || data.value.length === 0) {
@@ -1819,12 +1765,12 @@
 
                 document.getElementById('pay-amount-total').innerText = formatAmount(activePaymentInvoice.totalTTC) + " DZD";
                 document.getElementById('pay-card-number').value = '';
-                document.getElementById('pay-card-holder').value = clientB2B.companyName;
+                document.getElementById('pay-card-holder').value = clientProfile.fullName;
                 document.getElementById('pay-card-expiry').value = '';
                 document.getElementById('pay-card-cvv').value = '';
                 
                 document.getElementById('card-num-display').innerText = '•••• •••• •••• ••••';
-                document.getElementById('card-holder-display').innerText = clientB2B.companyName.toUpperCase();
+                document.getElementById('card-holder-display').innerText = clientProfile.fullName.toUpperCase();
                 document.getElementById('card-expiry-display').innerText = 'MM/AA';
                 
                 const face = document.querySelector('.payment-card-face');
@@ -1877,7 +1823,7 @@
 
         function updateCardDisplay(field, val) {
             if (field === 'holder') {
-                document.getElementById('card-holder-display').innerText = val ? val.toUpperCase() : 'NOM DE L\'ENTREPRISE';
+                document.getElementById('card-holder-display').innerText = val ? val.toUpperCase() : 'NOM COMPLET';
             }
         }
 

@@ -287,4 +287,52 @@ function _formatAmount(amount) {
   });
 }
 
-module.exports = { generateDevisPDF, generateFacturePDF, generateRegistrationPDF };
+/**
+ * Generate a Commande PDF buffer
+ * @param {Object} commande - CommandeClient entity with expanded items and client
+ * @returns {Promise<Buffer>} PDF buffer
+ */
+async function generateCommandePDF(commande) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    const buffers = [];
+
+    doc.on('data', chunk => buffers.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(buffers)));
+    doc.on('error', reject);
+
+    // ── Header ──
+    _drawHeader(doc, 'BON DE COMMANDE', commande.orderNumber);
+
+    // ── Client Info ──
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor('#333333');
+    doc.text('CLIENT', { underline: true });
+    doc.text(commande.clientB2B?.companyName || commande.clientB2C?.fullName || '');
+    doc.text(`Email: ${commande.clientB2B?.email || commande.clientB2C?.email || ''}`);
+    doc.text(`Téléphone: ${commande.clientB2B?.phone || commande.clientB2C?.phone || ''}`);
+    if (commande.clientB2B?.rc) doc.text(`RC: ${commande.clientB2B.rc}`);
+
+    // ── Document Info ──
+    doc.moveDown();
+    doc.text(`Date de commande: ${_formatDate(commande.date)}`);
+    if (commande.deliveryDate) doc.text(`Date de livraison prévue: ${_formatDate(commande.deliveryDate)}`);
+    doc.text(`Statut: ${commande.status}`);
+
+    // ── Items Table ──
+    doc.moveDown();
+    _drawItemsTable(doc, commande.items || []);
+
+    // ── Totals ──
+    doc.moveDown();
+    _drawTotals(doc, commande);
+
+    // ── Footer ──
+    _drawFooter(doc);
+
+    doc.end();
+  });
+}
+
+module.exports = { generateDevisPDF, generateFacturePDF, generateRegistrationPDF, generateCommandePDF };
+

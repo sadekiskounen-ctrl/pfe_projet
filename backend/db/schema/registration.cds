@@ -5,6 +5,7 @@ using { cuid, managed } from '@sap/cds/common';
 entity RegistrationRequest : cuid, managed {
     type        : String(20) enum {
         CLIENT_B2B = 'CLIENT_B2B';
+        CLIENT_B2C = 'CLIENT_B2C';
         FOURNISSEUR = 'FOURNISSEUR';
     };
     status      : String(20) enum {

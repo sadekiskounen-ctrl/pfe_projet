@@ -11,10 +11,12 @@ module.exports = cds.service.impl(async function () {
     // 0. Vérifier doublon Nom Société + Type (Client/Fournisseur)
     const bpName = await SELECT.one
       .from(BusinessPartner)
-      .where({ displayName: companyName, bpType: type });
+      .where("lower(displayName) =", companyName.toLowerCase())
+      .and({ bpType: type });
     const regName = await SELECT.one
       .from(RegistrationRequests)
-      .where({ companyName, type, status: "PENDING" });
+      .where("lower(companyName) =", companyName.toLowerCase())
+      .and({ type, status: "PENDING" });
     if (bpName || regName) {
       return req.error(
         400,
@@ -22,15 +24,19 @@ module.exports = cds.service.impl(async function () {
       );
     }
 
-    // 1. Vérifier si déjà approuvé (BP existant) par email
-    const bp = await SELECT.one.from(BusinessPartner).where({ email });
+    // 1. Vérifier si déjà approuvé (BP existant) par email et type
+    const bp = await SELECT.one
+      .from(BusinessPartner)
+      .where("lower(email) =", email.toLowerCase())
+      .and({ bpType: type });
     if (bp)
-      return req.error(400, "Cet email appartient déjà à un partenaire actif.");
+      return req.error(400, `Cet email appartient déjà à un partenaire actif de type ${type}.`);
 
-    // 2. Vérifier s'il y a une demande en cours
+    // 2. Vérifier s'il y a une demande en cours pour cet email et ce type
     const existing = await SELECT.one
       .from(RegistrationRequests)
-      .where({ email });
+      .where("lower(email) =", email.toLowerCase())
+      .and({ type });
     if (existing) {
       if (existing.status === "PENDING") {
         return req.error(400, "Une demande est déjà en cours pour cet email.");
@@ -168,8 +174,12 @@ module.exports = cds.service.impl(async function () {
     const nextBP =
       "BP" + (1000 + count[0].total + Math.floor(Math.random() * 100));
 
+    const bpId = cds.utils.uuid();
+
     try {
+      // 1. Créer le BusinessPartner principal
       await INSERT.into(BusinessPartner).entries({
+        ID: bpId,
         bpNumber: nextBP,
         displayName: reg.companyName,
         email: reg.email,
@@ -193,6 +203,145 @@ module.exports = cds.service.impl(async function () {
         ribType: reg.ribType,
         status: "ACTIVE",
       });
+
+      // 2. Créer l'entité spécifique correspondante (ClientB2B, ClientB2C, ou Fournisseur)
+      if (reg.type === "CLIENT_B2B") {
+        const { ClientB2B, ClientDocument } = cds.entities("sap.pme.crm");
+        const clientB2bId = cds.utils.uuid();
+
+        await INSERT.into(ClientB2B).entries({
+          ID: clientB2bId,
+          bp_ID: bpId,
+          companyName: reg.companyName,
+          email: reg.email,
+          phone: reg.phone,
+          status: "ACTIVE",
+          rc: reg.rcNumber,
+          nif: reg.nif,
+          ai: reg.ai,
+          sector: reg.sector,
+          wilaya: reg.address,
+        });
+
+        // Transférer les documents légaux
+        if (reg.rc) {
+          await INSERT.into(ClientDocument).entries({
+            ID: cds.utils.uuid(),
+            client_ID: clientB2bId,
+            docType: "RC",
+            fileName: "rc_document",
+            fileType: reg.rcType,
+            verified: true,
+          });
+        }
+        if (reg.nifDoc) {
+          await INSERT.into(ClientDocument).entries({
+            ID: cds.utils.uuid(),
+            client_ID: clientB2bId,
+            docType: "NIF",
+            fileName: "nif_document",
+            fileType: reg.nifType,
+            verified: true,
+          });
+        }
+        if (reg.aiDoc) {
+          await INSERT.into(ClientDocument).entries({
+            ID: cds.utils.uuid(),
+            client_ID: clientB2bId,
+            docType: "AI",
+            fileName: "ai_document",
+            fileType: reg.aiType,
+            verified: true,
+          });
+        }
+        if (reg.rib) {
+          await INSERT.into(ClientDocument).entries({
+            ID: cds.utils.uuid(),
+            client_ID: clientB2bId,
+            docType: "RIB",
+            fileName: "rib_document",
+            fileType: reg.ribType,
+            verified: true,
+          });
+        }
+
+      } else if (reg.type === "FOURNISSEUR") {
+        const { Fournisseur, FournisseurDocument } = cds.entities("sap.pme.srm");
+        const fournisseurId = cds.utils.uuid();
+
+        await INSERT.into(Fournisseur).entries({
+          ID: fournisseurId,
+          bp_ID: bpId,
+          companyName: reg.companyName,
+          email: reg.email,
+          phone: reg.phone,
+          status: "ACTIVE",
+          rc: reg.rcNumber,
+          nif: reg.nif,
+          ai: reg.ai,
+          sector: reg.sector,
+          wilaya: reg.address,
+          rib: reg.ribNumber,
+          bankAccount: reg.ribNumber,
+          kycStatus: "VALIDATED"
+        });
+
+        if (reg.rc) {
+          await INSERT.into(FournisseurDocument).entries({
+            ID: cds.utils.uuid(),
+            fournisseur_ID: fournisseurId,
+            docType: "RC",
+            fileName: "rc_document",
+            fileType: reg.rcType,
+            verified: true,
+          });
+        }
+        if (reg.nifDoc) {
+          await INSERT.into(FournisseurDocument).entries({
+            ID: cds.utils.uuid(),
+            fournisseur_ID: fournisseurId,
+            docType: "NIF",
+            fileName: "nif_document",
+            fileType: reg.nifType,
+            verified: true,
+          });
+        }
+        if (reg.aiDoc) {
+          await INSERT.into(FournisseurDocument).entries({
+            ID: cds.utils.uuid(),
+            fournisseur_ID: fournisseurId,
+            docType: "AI",
+            fileName: "ai_document",
+            fileType: reg.aiType,
+            verified: true,
+          });
+        }
+        if (reg.rib) {
+          await INSERT.into(FournisseurDocument).entries({
+            ID: cds.utils.uuid(),
+            fournisseur_ID: fournisseurId,
+            docType: "RIB",
+            fileName: "rib_document",
+            fileType: reg.ribType,
+            verified: true,
+          });
+        }
+
+      } else if (reg.type === "CLIENT_B2C") {
+        const { ClientB2C } = cds.entities("sap.pme.crm");
+        const clientB2cId = cds.utils.uuid();
+
+        await INSERT.into(ClientB2C).entries({
+          ID: clientB2cId,
+          bp_ID: bpId,
+          firstName: reg.companyName.split(" ")[0] || reg.companyName,
+          lastName: reg.companyName.split(" ").slice(1).join(" ") || reg.companyName,
+          email: reg.email,
+          phone: reg.phone,
+          status: "ACTIVE",
+          wilaya: reg.address,
+        });
+      }
 
       await UPDATE(RegistrationRequests)
         .set({ status: "APPROVED" })
@@ -221,13 +370,32 @@ module.exports = cds.service.impl(async function () {
     console.log(`[StatusCheck] Vérification pour: ${email}`);
     const { BusinessPartner } = cds.entities("sap.pme");
 
-    const bp = await SELECT.one.from(BusinessPartner).where("lower(email) =", email.toLowerCase());
+    // 1. Chercher dans les partenaires actifs (n'importe quel rôle)
+    const bp = await SELECT.one.from(BusinessPartner)
+      .where("lower(email) =", email.toLowerCase());
+      
     if (bp) {
       console.log(`[StatusCheck] Trouvé dans BusinessPartner: ${bp.status}`);
-      return { status: bp.status, blockReason: bp.blockReason };
+      return { status: bp.status, blockReason: bp.bpType };
     }
 
-    const reg = await SELECT.one.from(RegistrationRequests).where("lower(email) =", email.toLowerCase());
+    // 2. Chercher dans les demandes d'inscription
+    // Prioriser PENDING, sinon REJECTED
+    let reg = await SELECT.one.from(RegistrationRequests)
+      .where("lower(email) =", email.toLowerCase())
+      .and("status =", "PENDING");
+
+    if (!reg) {
+      reg = await SELECT.one.from(RegistrationRequests)
+        .where("lower(email) =", email.toLowerCase())
+        .and("status =", "REJECTED");
+    }
+
+    if (!reg) {
+      reg = await SELECT.one.from(RegistrationRequests)
+        .where("lower(email) =", email.toLowerCase());
+    }
+
     if (reg) {
       console.log(`[StatusCheck] Trouvé dans RegistrationRequests: ${reg.status}`);
       return { status: reg.status, blockReason: reg.adminComment };

@@ -1122,71 +1122,175 @@
                     </div>
                 </div>
             </div>
-            <!-- MODAL: DETAILS PARTENAIRE -->
+            <!-- MODAL: DETAILS PARTENAIRE (SPLIT FOR PROFILE & DOCUMENTS + DEVIS/COMMANDES) -->
             <div id="details-modal" class="modal-overlay">
-                <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-content" style="max-width: 1100px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
                     <div class="modal-header">
                         <h3>Détails Partenaire : <span id="det-name">---</span></h3>
                         <span class="close-modal" onclick="closeDetails()">×</span>
                     </div>
-                    <div class="modal-body">
-                        <div class="info-grid">
-                            <div class="info-group">
-                                <label>Numéro BP</label>
-                                <p id="det-bp">---</p>
+                    <div class="modal-body" style="display: flex; gap: 25px; flex: 1; overflow: hidden; min-height: 0; padding: 20px;">
+                        <!-- LEFT SIDE: Profile & Documents -->
+                        <div style="flex: 1; min-width: 350px; display: flex; flex-direction: column; gap: 20px; border-right: 1px solid var(--glass-border); padding-right: 25px; overflow-y: auto;">
+                            <div class="info-grid">
+                                <div class="info-group">
+                                    <label>Numéro BP</label>
+                                    <p id="det-bp">---</p>
+                                </div>
+                                <div class="info-group">
+                                    <label>Type</label>
+                                    <p id="det-type">---</p>
+                                </div>
+                                <div class="info-group" style="grid-column: span 2;">
+                                    <label>Email</label>
+                                    <p id="det-email">---</p>
+                                </div>
+                                <div class="info-group">
+                                    <label>Secteur d'activité</label>
+                                    <p id="det-sector">---</p>
+                                </div>
+                                <div class="info-group">
+                                    <label>Téléphone</label>
+                                    <p id="det-phone">---</p>
+                                </div>
+                                <div class="info-group">
+                                    <label>RC (Registre)</label>
+                                    <p id="det-rc">---</p>
+                                </div>
+                                <div class="info-group">
+                                    <label>NIF (Fiscal)</label>
+                                    <p id="det-nif">---</p>
+                                </div>
+                                <div class="info-group">
+                                    <label>AI (Article)</label>
+                                    <p id="det-ai">---</p>
+                                </div>
+                                <div class="info-group" style="grid-column: span 2;">
+                                    <label>RIB Bancaire</label>
+                                    <p id="det-ribNumber">---</p>
+                                </div>
+                                <div class="info-group">
+                                    <label>Statut Actuel</label>
+                                    <p id="det-status">---</p>
+                                    <input type="hidden" id="det-bp-id">
+                                </div>
                             </div>
-                            <div class="info-group">
-                                <label>Type</label>
-                                <p id="det-type">---</p>
+                            <div class="docs-section">
+                                <h4>📄 Documents Justificatifs</h4>
+                                <div class="docs-grid">
+                                    <button class="btn-doc" onclick="viewPartnerDoc('rcDoc')">📂 Voir RC</button>
+                                    <button class="btn-doc" onclick="viewPartnerDoc('nifDoc')">📑 Voir NIF</button>
+                                    <button class="btn-doc" onclick="viewPartnerDoc('aiDoc')">📑 Voir AI</button>
+                                    <button class="btn-doc" onclick="viewPartnerDoc('ribDoc')">🏦 Voir RIB</button>
+                                </div>
                             </div>
-                            <div class="info-group">
-                                <label>Email</label>
-                                <p id="det-email">---</p>
+                            <div id="det-reason-box" style="display:none; padding:15px; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:10px;">
+                                <label style="font-size:0.75rem; color:#ef4444; text-transform:uppercase;">Motif de blocage :</label>
+                                <p id="det-reason" style="color:white; font-weight:600; margin-top:5px;"></p>
                             </div>
-                            <div class="info-group">
-                                <label>Secteur d'activité</label>
-                                <p id="det-sector">---</p>
+                            <button class="btn-dialog-secondary" onclick="closeDetails()" style="width: 100%; margin-top: auto; padding: 12px; border-radius: 8px;">Fermer</button>
+                        </div>
+
+                        <!-- RIGHT SIDE: Devis & Commandes / RFQs & Orders -->
+                        <div style="flex: 1.5; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;">
+                            <!-- Dynamic title depending on type -->
+                            <div>
+                                <h4 id="det-right-title-1" style="margin-bottom: 10px; color: var(--accent); display: flex; align-items: center; gap: 8px; font-weight: 700;">📄 Demandes de Devis (Client)</h4>
+                                <div style="max-height: 250px; overflow-y: auto; border: 1px solid var(--glass-border); border-radius: 10px; background: rgba(0,0,0,0.2);">
+                                    <table class="custom-table" style="font-size: 0.8rem; margin: 0; width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>N° Devis / RFQ</th>
+                                                <th>Date</th>
+                                                <th>Montant (DA)</th>
+                                                <th>Statut</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="det-right-tbody-1">
+                                            <tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">⏳ Chargement...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                            <div class="info-group">
-                                <label>Téléphone</label>
-                                <p id="det-phone">---</p>
-                            </div>
-                            <div class="info-group">
-                                <label>RC (Registre)</label>
-                                <p id="det-rc">---</p>
-                            </div>
-                            <div class="info-group">
-                                <label>NIF (Fiscal)</label>
-                                <p id="det-nif">---</p>
-                            </div>
-                            <div class="info-group">
-                                <label>AI (Article)</label>
-                                <p id="det-ai">---</p>
-                            </div>
-                            <div class="info-group">
-                                <label>RIB Bancaire</label>
-                                <p id="det-ribNumber">---</p>
-                            </div>
-                            <div class="info-group">
-                                <label>Statut Actuel</label>
-                                <p id="det-status">---</p>
-                                <input type="hidden" id="det-bp-id">
+
+                            <div>
+                                <h4 id="det-right-title-2" style="margin-bottom: 10px; color: var(--accent-orange); display: flex; align-items: center; gap: 8px; font-weight: 700;">🛒 Bons de Commande</h4>
+                                <div style="max-height: 250px; overflow-y: auto; border: 1px solid var(--glass-border); border-radius: 10px; background: rgba(0,0,0,0.2);">
+                                    <table class="custom-table" style="font-size: 0.8rem; margin: 0; width: 100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>N° Commande</th>
+                                                <th>Date</th>
+                                                <th>Montant (DA)</th>
+                                                <th>Statut</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="det-right-tbody-2">
+                                            <tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">⏳ Chargement...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                        <div class="docs-section">
-                            <h4>📄 Documents Justificatifs</h4>
-                            <div class="docs-grid">
-                                <button class="btn-doc" onclick="viewPartnerDoc('rcDoc')">📂 Voir RC</button>
-                                <button class="btn-doc" onclick="viewPartnerDoc('nifDoc')">📑 Voir NIF</button>
-                                <button class="btn-doc" onclick="viewPartnerDoc('aiDoc')">📑 Voir AI</button>
-                                <button class="btn-doc" onclick="viewPartnerDoc('ribDoc')">🏦 Voir RIB</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL: DETAILS DE COMMANDE CLIENT (AVANT ENVOI OU POUR SUIVI) -->
+            <div id="commande-detail-modal" class="modal-overlay" style="display:none; align-items:center; justify-content:center; z-index: 1050;">
+                <div class="modal-content" style="max-width: 700px; width: 90%; max-height: 85vh; display: flex; flex-direction: column;">
+                    <div class="modal-header" style="background: rgba(0,0,0,0.2);">
+                        <h3>🛒 Bon de Commande : <span id="cmd-det-number" style="color: var(--accent);">---</span></h3>
+                        <span class="close-modal" onclick="closeCommandeDetailModal()">×</span>
+                    </div>
+                    <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 25px; display: flex; flex-direction: column; gap: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px;">
+                            <div>
+                                <label style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Client</label>
+                                <p id="cmd-det-client" style="font-weight: 600; margin: 4px 0 0 0; color: white;">---</p>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Date de création</label>
+                                <p id="cmd-det-date" style="font-weight: 600; margin: 4px 0 0 0; color: white;">---</p>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">Statut Actuel</label>
+                                <p id="cmd-det-status" style="font-weight: 700; margin: 4px 0 0 0;">---</p>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">N° Devis Référence</label>
+                                <p id="cmd-det-devis-ref" style="font-weight: 600; margin: 4px 0 0 0; color: white;">---</p>
                             </div>
                         </div>
-                        <div id="det-reason-box" style="display:none; padding:15px; background:rgba(239,68,68,0.1); border:1px solid #ef4444; border-radius:10px; margin-top:10px;">
-                            <label style="font-size:0.75rem; color:#ef4444; text-transform:uppercase;">Motif de blocage :</label>
-                            <p id="det-reason" style="color:white; font-weight:600; margin-top:5px;"></p>
+
+                        <div>
+                            <h4 style="margin-bottom: 10px; color: white; font-weight: 600;">📦 Liste des articles</h4>
+                            <table class="custom-table" style="font-size: 0.85rem; width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Produit</th>
+                                        <th style="text-align: right;">Qté</th>
+                                        <th style="text-align: right;">Prix HT</th>
+                                        <th style="text-align: right;">Total HT</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cmd-det-items-tbody">
+                                    <!-- Dynamic items -->
+                                </tbody>
+                            </table>
                         </div>
-                        <button class="btn-dialog-secondary" onclick="closeDetails()" style="width: 100%; margin-top: 20px;">Fermer</button>
+
+                        <div style="align-self: flex-end; width: 250px; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--glass-border); padding-top: 15px;">
+                            <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-dim);">Total HT:</span><span id="cmd-det-total-ht" style="color: white; font-weight: 600;">0.00 DA</span></div>
+                            <div style="display: flex; justify-content: space-between;"><span style="color: var(--text-dim);">TVA (19%):</span><span id="cmd-det-total-tva" style="color: white; font-weight: 600;">0.00 DA</span></div>
+                            <div style="display: flex; justify-content: space-between; font-size: 1.1rem; font-weight: 700;"><span style="color: var(--accent-orange);">Total TTC:</span><span id="cmd-det-total-ttc" style="color: var(--accent-orange);">0.00 DA</span></div>
+                        </div>
+
+                        <div id="cmd-det-actions" style="margin-top: 15px; display: flex; gap: 15px;">
+                            <!-- Dynamic buttons like "Envoyer" -->
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2015,10 +2119,326 @@
                 } else {
                     reasonBox.style.display = 'none';
                 }
+                
+                // Fetch devis & commandes for this partner!
+                await loadPartnerDocuments(bp);
+                
                 document.getElementById('details-modal').style.display = 'flex';
-            } catch(e) { Toast.error("Erreur", "Erreur lors de la récupération des détails."); }
+            } catch(e) { 
+                console.error("OpenDetailsModal Error", e);
+                Toast.error("Erreur", "Erreur lors de la récupération des détails."); 
+            }
         }
         function closeDetails() { document.getElementById('details-modal').style.display = 'none'; }
+
+        async function loadPartnerDocuments(bp) {
+            const tbody1 = document.getElementById('det-right-tbody-1');
+            const tbody2 = document.getElementById('det-right-tbody-2');
+            const title1 = document.getElementById('det-right-title-1');
+            const title2 = document.getElementById('det-right-title-2');
+
+            tbody1.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">⏳ Chargement...</td></tr>';
+            tbody2.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">⏳ Chargement...</td></tr>';
+
+            const isSupplier = bp.bpType === 'FOURNISSEUR';
+            const bpId = bp.ID;
+
+            if (!isSupplier) {
+                // Client: Devis & Commandes
+                title1.innerHTML = '📄 Demandes de Devis (Client)';
+                title2.innerHTML = '🛒 Bons de Commande (Client)';
+
+                try {
+                    // 1. Fetch Client Profile (B2B or B2C) to get CRM Client ID
+                    const clientEntity = bp.bpType === 'CLIENT_B2B' ? 'ClientsB2B' : 'ClientsB2C';
+                    const clientRes = await fetch(`/odata/v4/admin/${clientEntity}?$filter=bp_ID eq ${bpId}`);
+                    const clientData = await clientRes.json();
+                    
+                    if (!clientData.value || clientData.value.length === 0) {
+                        tbody1.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">Profil CRM introuvable.</td></tr>';
+                        tbody2.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">Profil CRM introuvable.</td></tr>';
+                        return;
+                    }
+                    
+                    const clientId = clientData.value[0].ID;
+                    const clientFilterField = bp.bpType === 'CLIENT_B2B' ? 'clientB2B_ID' : 'clientB2C_ID';
+
+                    // 2. Fetch Devis
+                    const devisRes = await fetch(`/odata/v4/admin/AllDevis?$filter=${clientFilterField} eq ${clientId}&$orderby=date desc`);
+                    const devisData = await devisRes.json();
+                    const devisList = devisData.value || [];
+
+                    if (devisList.length === 0) {
+                        tbody1.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">Aucune demande de devis.</td></tr>';
+                    } else {
+                        tbody1.innerHTML = devisList.map(d => {
+                            let actionBtn = '';
+                            if (d.status === 'PENDING') {
+                                actionBtn = `<button class="btn-action" style="background:#22c55e; color:black; font-size:0.75rem; padding:4px 8px; border:none; border-radius:4px;" onclick="approveAndConvertDevis('${d.ID}', event)">Approuver & Créer BC</button>`;
+                            } else if (d.status === 'APPROVED') {
+                                actionBtn = `<span style="color:#22c55e;">Approuvé</span>`;
+                            } else {
+                                actionBtn = `<span style="color:var(--text-dim);">${d.status}</span>`;
+                            }
+                            
+                            return `
+                            <tr>
+                                <td><strong>${d.devisNumber}</strong></td>
+                                <td>${d.date}</td>
+                                <td>${new Intl.NumberFormat().format(d.totalTTC)} DA</td>
+                                <td><span class="status-badge status-${d.status.toLowerCase()}">${d.status}</span></td>
+                                <td style="display:flex; gap:5px; align-items:center;">
+                                    <button class="btn-action" style="background:rgba(255,255,255,0.1); color:white; font-size:0.75rem; padding:4px 8px;" onclick="viewPdfDocument('/odata/v4/admin/downloadDevisPDF(devisId=${d.ID})'); event.stopPropagation();">PDF</button>
+                                    ${actionBtn}
+                                </td>
+                            </tr>`;
+                        }).join('');
+                    }
+
+                    // 3. Fetch Commandes Client
+                    const cmdRes = await fetch(`/odata/v4/admin/AllCommandes?$filter=${clientFilterField} eq ${clientId}&$orderby=date desc`);
+                    const cmdData = await cmdRes.json();
+                    const cmdList = cmdData.value || [];
+
+                    if (cmdList.length === 0) {
+                        tbody2.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">Aucun bon de commande.</td></tr>';
+                    } else {
+                        tbody2.innerHTML = cmdList.map(c => {
+                            let actionBtn = '';
+                            if (c.status === 'DRAFT') {
+                                actionBtn = `<button class="btn-action" style="background:#fb923c; color:black; font-size:0.75rem; padding:4px 8px; border:none; border-radius:4px;" onclick="openCommandeDetailModal('${c.ID}', event)">Voir & Envoyer</button>`;
+                            } else {
+                                actionBtn = `<button class="btn-action" style="background:rgba(255,255,255,0.1); color:white; font-size:0.75rem; padding:4px 8px;" onclick="openCommandeDetailModal('${c.ID}', event)">Détails</button>`;
+                            }
+
+                            return `
+                            <tr>
+                                <td><strong>${c.orderNumber}</strong></td>
+                                <td>${c.date}</td>
+                                <td>${new Intl.NumberFormat().format(c.totalTTC)} DA</td>
+                                <td><span class="status-badge status-${c.status.toLowerCase()}">${c.status}</span></td>
+                                <td style="display:flex; gap:5px; align-items:center;">
+                                    <button class="btn-action" style="background:rgba(255,255,255,0.1); color:white; font-size:0.75rem; padding:4px 8px;" onclick="viewPdfDocument('/odata/v4/admin/downloadCommandePDF(commandeId=${c.ID})'); event.stopPropagation();">PDF</button>
+                                    ${actionBtn}
+                                </td>
+                            </tr>`;
+                        }).join('');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    tbody1.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:#ef4444;">Erreur de chargement.</td></tr>';
+                    tbody2.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:#ef4444;">Erreur de chargement.</td></tr>';
+                }
+
+            } else {
+                // Supplier: RFQ Responses & Purchase Orders
+                title1.innerHTML = '📄 Offres / Réponses RFQ (Fournisseur)';
+                title2.innerHTML = '🛒 Bons de Commande (PO Fournisseur)';
+
+                try {
+                    // 1. Fetch Fournisseur ID
+                    const supplierRes = await fetch(`/odata/v4/admin/Fournisseurs?$filter=bp_ID eq ${bpId}`);
+                    const supplierData = await supplierRes.json();
+                    
+                    if (!supplierData.value || supplierData.value.length === 0) {
+                        tbody1.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">Profil SRM introuvable.</td></tr>';
+                        tbody2.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">Profil SRM introuvable.</td></tr>';
+                        return;
+                    }
+                    
+                    const supplierId = supplierData.value[0].ID;
+
+                    // 2. Fetch RFQ Responses
+                    const rfqRespRes = await fetch(`/odata/v4/admin/AllRFQResponses?$filter=fournisseur_ID eq ${supplierId}&$orderby=createdAt desc`);
+                    const rfqRespData = await rfqRespRes.json();
+                    const rfqRespList = rfqRespData.value || [];
+
+                    if (rfqRespList.length === 0) {
+                        tbody1.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">Aucune offre soumise.</td></tr>';
+                    } else {
+                        tbody1.innerHTML = rfqRespList.map(r => {
+                            const selLabel = r.selected ? '<span style="color:#22c55e; font-weight:700;">Sélectionnée</span>' : 'En attente';
+                            return `
+                            <tr>
+                                <td><strong>Offre RFQ</strong></td>
+                                <td>${new Date(r.createdAt || r.modifiedAt).toISOString().split('T')[0]}</td>
+                                <td>${new Intl.NumberFormat().format(r.totalAmount)} DA</td>
+                                <td>${selLabel}</td>
+                                <td>-</td>
+                            </tr>`;
+                        }).join('');
+                    }
+
+                    // 3. Fetch Bons de Commande Fournisseur
+                    const poRes = await fetch(`/odata/v4/admin/AllBonsCommande?$filter=fournisseur_ID eq ${supplierId}&$orderby=date desc`);
+                    const poData = await poRes.json();
+                    const poList = poData.value || [];
+
+                    if (poList.length === 0) {
+                        tbody2.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">Aucun bon de commande.</td></tr>';
+                    } else {
+                        tbody2.innerHTML = poList.map(p => `
+                            <tr>
+                                <td><strong>${p.poNumber}</strong></td>
+                                <td>${p.date}</td>
+                                <td>${new Intl.NumberFormat().format(p.totalHT)} DA</td>
+                                <td><span class="status-badge status-${p.status.toLowerCase()}">${p.status}</span></td>
+                                <td>-</td>
+                            </tr>
+                        `).join('');
+                    }
+
+                } catch (e) {
+                    console.error(e);
+                    tbody1.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:#ef4444;">Erreur de chargement.</td></tr>';
+                    tbody2.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:#ef4444;">Erreur de chargement.</td></tr>';
+                }
+            }
+        }
+
+        async function approveAndConvertDevis(devisId, event) {
+            if (event) event.stopPropagation();
+            try {
+                Toast.info("Traitement...", "Approbation du devis et création du bon de commande...");
+                const appRes = await fetch(`/odata/v4/crm/approveDevis`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ devisId })
+                });
+                if (!appRes.ok) {
+                    const err = await appRes.json();
+                    throw new Error(err?.error?.message || "Erreur lors de l'approbation");
+                }
+                
+                const convRes = await fetch(`/odata/v4/crm/convertDevisToCommande`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ devisId })
+                });
+                if (!convRes.ok) {
+                    const err = await convRes.json();
+                    throw new Error(err?.error?.message || "Erreur lors de la conversion en BC");
+                }
+                
+                const cmd = await convRes.json();
+                Toast.success("Succès !", `Devis approuvé et Bon de Commande généré en brouillon.`);
+                
+                // Reload documents in details modal
+                const bpId = document.getElementById('det-bp-id').value;
+                const bpRes = await fetch(`/odata/v4/admin/BusinessPartners(${bpId})`);
+                const bp = await bpRes.json();
+                await loadPartnerDocuments(bp);
+            } catch(e) {
+                console.error(e);
+                Toast.error("Erreur", e.message);
+            }
+        }
+
+        async function openCommandeDetailModal(commandeId, event) {
+            if (event) event.stopPropagation();
+            try {
+                // Fetch CommandeClient along with its items
+                const res = await fetch(`/odata/v4/crm/Commandes(${commandeId})?$expand=items`);
+                const cmd = await res.json();
+                if (!cmd) throw new Error("Impossible de récupérer la commande");
+
+                // Get Client B2B or B2C Name
+                let clientName = "Client";
+                if (cmd.clientB2B_ID) {
+                    const bpRes = await fetch(`/odata/v4/crm/ClientsB2B(${cmd.clientB2B_ID})?$expand=bp`);
+                    const bpData = await bpRes.json();
+                    clientName = bpData.bp?.displayName || "Client B2B";
+                } else if (cmd.clientB2C_ID) {
+                    const bpRes = await fetch(`/odata/v4/admin/ClientsB2C(${cmd.clientB2C_ID})`);
+                    const bpData = await bpRes.json();
+                    const bpRes2 = await fetch(`/odata/v4/admin/BusinessPartners(${bpData.bp_ID})`);
+                    const bpData2 = await bpRes2.json();
+                    clientName = bpData2.displayName || "Client B2C";
+                }
+
+                document.getElementById('cmd-det-number').innerText = cmd.orderNumber;
+                document.getElementById('cmd-det-client').innerText = clientName;
+                document.getElementById('cmd-det-date').innerText = cmd.date;
+                document.getElementById('cmd-det-status').innerText = cmd.status;
+                
+                const statusEl = document.getElementById('cmd-det-status');
+                statusEl.className = '';
+                statusEl.style.color = cmd.status === 'DRAFT' ? '#fb923c' : (cmd.status === 'SENT_TO_CLIENT' ? '#38bdf8' : '#4ade80');
+                
+                document.getElementById('cmd-det-devis-ref').innerText = cmd.devis_ID ? "Relié au Devis" : "Aucun";
+
+                // Populate items
+                const itemsTbody = document.getElementById('cmd-det-items-tbody');
+                const items = cmd.items || [];
+                if (items.length === 0) {
+                    itemsTbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Aucun article</td></tr>';
+                } else {
+                    itemsTbody.innerHTML = items.map(item => `
+                        <tr>
+                            <td>${item.description}</td>
+                            <td style="text-align: right;">${item.quantity}</td>
+                            <td style="text-align: right;">${new Intl.NumberFormat().format(item.unitPrice)} DA</td>
+                            <td style="text-align: right;">${new Intl.NumberFormat().format(item.totalHT)} DA</td>
+                        </tr>
+                    `).join('');
+                }
+
+                document.getElementById('cmd-det-total-ht').innerText = new Intl.NumberFormat().format(cmd.totalHT) + " DA";
+                document.getElementById('cmd-det-total-tva').innerText = new Intl.NumberFormat().format(cmd.totalTVA) + " DA";
+                document.getElementById('cmd-det-total-ttc').innerText = new Intl.NumberFormat().format(cmd.totalTTC) + " DA";
+
+                // Setup actions
+                const actionsCont = document.getElementById('cmd-det-actions');
+                actionsCont.innerHTML = '';
+                
+                if (cmd.status === 'DRAFT') {
+                    actionsCont.innerHTML = `
+                        <button class="btn-action" style="flex: 2; padding: 12px; background: #fb923c; color: black; font-weight:700; border-radius:8px; border:none; cursor:pointer;" onclick="sendCommandeToClient('${cmd.ID}')">✉️ Envoyer le Bon de Commande au Client</button>
+                        <button class="btn-dialog-secondary" style="flex: 1; padding: 12px; border-radius: 8px;" onclick="closeCommandeDetailModal()">Fermer</button>
+                    `;
+                } else {
+                    actionsCont.innerHTML = `
+                        <button class="btn-dialog-secondary" style="width: 100%; padding: 12px; border-radius: 8px;" onclick="closeCommandeDetailModal()">Fermer</button>
+                    `;
+                }
+
+                document.getElementById('commande-detail-modal').style.display = 'flex';
+            } catch(e) {
+                console.error(e);
+                Toast.error("Erreur", e.message || "Erreur de chargement du bon de commande.");
+            }
+        }
+
+        function closeCommandeDetailModal() {
+            document.getElementById('commande-detail-modal').style.display = 'none';
+        }
+
+        async function sendCommandeToClient(commandeId) {
+            try {
+                Toast.info("Envoi...", "Envoi du bon de commande au client...");
+                const res = await fetch(`/odata/v4/crm/sendOrderToClient`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ commandeId })
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err?.error?.message || "Erreur lors de l'envoi");
+                }
+                
+                Toast.success("Envoyé !", "Le Bon de Commande a été envoyé avec succès au portail client.");
+                closeCommandeDetailModal();
+                
+                // Reload documents in details modal
+                const bpId = document.getElementById('det-bp-id').value;
+                const bpRes = await fetch(`/odata/v4/admin/BusinessPartners(${bpId})`);
+                const bp = await bpRes.json();
+                await loadPartnerDocuments(bp);
+            } catch(e) {
+                console.error(e);
+                Toast.error("Erreur", e.message);
+            }
+        }
         
         function viewPartnerDoc(type) { 
             const id = document.getElementById('det-bp-id').value;

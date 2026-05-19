@@ -49,6 +49,7 @@
           "client": {
             "roles": [
               "ClientB2B",
+              "ClientB2C",
               "authenticated-user"
             ]
           },
@@ -61,7 +62,10 @@
         }
       },
       "db": {
-        "kind": "sql"
+        "kind": "sqlite",
+        "credentials": {
+          "url": "db.sqlite"
+        }
       }
     },
     "[production]": {
