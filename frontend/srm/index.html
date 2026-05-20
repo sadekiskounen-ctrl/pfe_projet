@@ -1,49 +1,826 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/auth-interceptor.js"></script>
-    <script>
-        // --- SECURITY GUARD ---
-        const isLoggedIn = sessionStorage.getItem('isLoggedIn');
-        const userRole = sessionStorage.getItem('userRole');
-        if (isLoggedIn !== 'true' || userRole !== 'fournisseur') {
-            window.location.href = '/auth.html?app=srm';
-        }
-    </script>
-    <title>PME Connect | Portail Fournisseur SRM</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --sap-orange: #e9730c;
-            --sap-bg: #fdfaf7;
-            --text: #1d2d3e;
-        }
-        body { font-family: Arial, sans-serif; margin: 0; background: var(--sap-bg); display: flex; }
-        .sidebar { width: 260px; height: 100vh; background: #2c3e50; color: white; padding: 20px; position: fixed; }
-        .main-content { margin-left: 280px; padding: 40px; width: 100%; }
-        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .nav-item { padding: 12px; margin-bottom: 5px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
-        .nav-item:hover { background: rgba(255,255,255,0.1); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PME Connect | Portail Fournisseur</title>
+<meta name="description" content="Portail Fournisseur PME Connect — Appels d'offres, bons de commande et suivi 3-way match.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="/auth-interceptor.js"></script>
+<script>
+  const _r = sessionStorage.getItem('userRole');
+  if (sessionStorage.getItem('isLoggedIn') !== 'true' || _r !== 'fournisseur') {
+    window.location.href = '/auth.html?app=srm';
+  }
+</script>
+<style>
+:root {
+  --bg: #0c1118;
+  --bg-card: #141b24;
+  --bg-card2: #1c2533;
+  --accent: #00c9a7;
+  --accent2: #6c63ff;
+  --accent-gold: #f5a623;
+  --accent-red: #ff6584;
+  --text: #e2e8f0;
+  --text-dim: #718096;
+  --border: rgba(0,201,167,0.12);
+  --border-light: rgba(255,255,255,0.06);
+  --shadow: 0 8px 32px rgba(0,0,0,0.5);
+  --radius: 16px;
+  --sidebar-w: 260px;
+  --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar {
+  width: var(--sidebar-w); min-height: 100vh; background: var(--bg-card);
+  border-right: 1px solid var(--border-light); display: flex; flex-direction: column;
+  position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
+}
+.sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border-light); }
+.logo-mark { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; color: white; margin-bottom: 10px; }
+.sidebar-logo h2 { font-size: 1rem; font-weight: 700; }
+.sidebar-logo p  { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
+.supplier-badge { display: inline-block; margin-top: 6px; padding: 3px 10px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; background: rgba(0,201,167,0.15); color: var(--accent); letter-spacing: 0.5px; }
+
+.sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
+.nav-section-label { font-size: 0.64rem; font-weight: 700; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; padding: 12px 20px 6px; }
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 20px; color: var(--text-dim); cursor: pointer; border-radius: 10px; margin: 2px 10px; font-size: 0.85rem; font-weight: 500; transition: all var(--transition); }
+.nav-item:hover { background: rgba(0,201,167,0.08); color: var(--text); }
+.nav-item.active { background: rgba(0,201,167,0.15); color: var(--accent); font-weight: 600; }
+.nav-icon { width: 18px; text-align: center; font-size: 0.9rem; }
+.nav-badge { margin-left: auto; background: var(--accent); color: #0c1118; border-radius: 10px; padding: 1px 7px; font-size: 0.65rem; font-weight: 700; }
+
+.sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); }
+.user-info { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; cursor: pointer; transition: background var(--transition); }
+.user-info:hover { background: rgba(255,255,255,0.04); }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: white; flex-shrink: 0; }
+.user-name  { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.user-email { font-size: 0.7rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-logout { background: none; border: 1px solid rgba(255,101,132,0.3); color: var(--accent-red); padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; margin-top: 10px; width: 100%; transition: all var(--transition); }
+.btn-logout:hover { background: rgba(255,101,132,0.1); }
+
+/* MAIN */
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow-y: auto; }
+.topbar { position: sticky; top: 0; z-index: 50; background: rgba(12,17,24,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; padding: 14px 32px; gap: 16px; }
+.page-title { font-size: 1.1rem; font-weight: 700; flex: 1; }
+.content { padding: 28px 32px; flex: 1; }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 16px; margin-bottom: 28px; }
+.stat-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 20px; display: flex; align-items: center; gap: 16px; transition: transform var(--transition); }
+.stat-card:hover { transform: translateY(-2px); }
+.stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.stat-val { font-size: 1.6rem; font-weight: 800; }
+.stat-lbl { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
+
+/* TABLE */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; }
+.section-title { font-size: 1.1rem; font-weight: 700; }
+.table-wrap { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius); overflow: hidden; overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; min-width: 600px; }
+.data-table th { padding: 13px 16px; text-align: left; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-dim); border-bottom: 1px solid var(--border-light); white-space: nowrap; }
+.data-table td { padding: 14px 16px; font-size: 0.85rem; border-bottom: 1px solid var(--border-light); }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: rgba(255,255,255,0.02); }
+.empty-row td { text-align: center; color: var(--text-dim); padding: 40px; }
+
+/* BADGES */
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; }
+.badge-open     { background: rgba(0,201,167,0.15);  color: var(--accent); }
+.badge-closed   { background: rgba(136,146,176,0.15);color: var(--text-dim); }
+.badge-confirmed{ background: rgba(108,99,255,0.15); color: var(--accent2); }
+.badge-matched  { background: rgba(0,201,167,0.15);  color: var(--accent); }
+.badge-pending  { background: rgba(245,166,35,0.15); color: var(--accent-gold); }
+.badge-discrepancy { background: rgba(255,101,132,0.15); color: var(--accent-red); }
+.badge-submitted{ background: rgba(108,99,255,0.15); color: var(--accent2); }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 9px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: none; transition: all var(--transition); }
+.btn-primary { background: linear-gradient(135deg, var(--accent), #00a886); color: #0c1118; }
+.btn-primary:hover { transform: translateY(-1px); opacity: 0.9; }
+.btn-accent2 { background: linear-gradient(135deg, var(--accent2), #9c56ff); color: white; }
+.btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border-light); }
+.btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+.btn-danger { background: rgba(255,101,132,0.15); color: var(--accent-red); border: 1px solid rgba(255,101,132,0.3); }
+.btn-sm { padding: 5px 11px; font-size: 0.75rem; border-radius: 7px; }
+
+/* MODAL */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 300; align-items: center; justify-content: center; padding: 20px; display: none; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; width: 100%; box-shadow: var(--shadow); max-height: 90vh; overflow-y: auto; }
+.modal-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.modal-subtitle { font-size: 0.78rem; color: var(--text-dim); margin-bottom: 20px; }
+
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 0.72rem; font-weight: 700; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+.form-input { width: 100%; padding: 10px 13px; background: var(--bg-card2); border: 1px solid var(--border); border-radius: 9px; color: var(--text); font-size: 0.88rem; outline: none; transition: border-color var(--transition); font-family: inherit; }
+.form-input:focus { border-color: var(--accent); }
+.form-input[disabled] { opacity: 0.5; cursor: not-allowed; }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+/* RFQ OFFER BUILDER */
+.offer-items-table { width: 100%; border-collapse: collapse; background: var(--bg-card2); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+.offer-items-table th { padding: 10px 12px; font-size: 0.7rem; text-transform: uppercase; color: var(--text-dim); font-weight: 700; border-bottom: 1px solid var(--border-light); text-align: left; }
+.offer-items-table td { padding: 10px 12px; font-size: 0.83rem; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
+.offer-items-table tr:last-child td { border-bottom: none; }
+.price-input { width: 110px; padding: 7px 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 0.85rem; outline: none; }
+.price-input:focus { border-color: var(--accent); }
+
+/* 3-WAY MATCH */
+.match-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.match-card { background: var(--bg-card2); border: 1px solid var(--border-light); border-radius: 12px; padding: 18px; }
+.match-card-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.match-status-icon { font-size: 1.2rem; }
+.match-status-ok { color: var(--accent); }
+.match-status-warn { color: var(--accent-gold); }
+.match-status-err { color: var(--accent-red); }
+
+/* PROFILE */
+.profile-section { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 24px; margin-bottom: 20px; }
+.profile-section h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--border-light); }
+.profile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 16px; }
+.profile-field label { font-size: 0.7rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+.profile-field p { font-size: 0.88rem; font-weight: 500; color: var(--text); }
+
+/* LOADER */
+.loader-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; align-items: center; justify-content: center; display: none; }
+.loader-overlay.active { display: flex; }
+.spinner { width: 44px; height: 44px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* TOAST */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 12px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow); min-width: 280px; animation: slideIn 0.3s ease; }
+@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+.toast.success { background: #071e18; border: 1px solid rgba(0,201,167,0.3); color: var(--accent); }
+.toast.error   { background: #200a12; border: 1px solid rgba(255,101,132,0.3); color: var(--accent-red); }
+.toast.info    { background: var(--bg-card); border: 1px solid var(--border-light); color: var(--text); }
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
+.empty-state i { font-size: 2.5rem; margin-bottom: 16px; opacity: 0.3; display: block; }
+</style>
 </head>
 <body>
-    <div class="sidebar">
-        <div style="margin-bottom: 20px;">
-            <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" style="width: 50px; background: white; padding: 5px; border-radius: 5px;">
-        </div>
-        <h2 style="color:#fb923c">PME Connect</h2>
-        <div class="nav-item"><i class="fas fa-chart-line"></i> Dashboard SRM</div>
-        <div class="nav-item"><i class="fas fa-box"></i> Mes Livraisons</div>
-        <div class="nav-item" onclick="sessionStorage.clear(); window.location.href='/auth.html'"><i class="fas fa-sign-out-alt"></i> Déconnexion</div>
+
+<div class="loader-overlay" id="loader"><div class="spinner"></div></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">S</div>
+    <h2>PME Connect</h2>
+    <p>Portail Fournisseur</p>
+    <span class="supplier-badge">FOURNISSEUR</span>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Tableau de bord</div>
+    <div class="nav-item active" id="nav-dashboard" onclick="showView('dashboard',this)">
+      <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span> Tableau de bord
     </div>
-    <div class="main-content">
-        <h1>Espace Fournisseur Sécurisé</h1>
-        <div class="card">
-            <h3>Commandes à confirmer</h3>
-            <p>Seul vous avez accès à ces informations confidentielles.</p>
-        </div>
+    <div class="nav-section-label">Achats</div>
+    <div class="nav-item" id="nav-rfqs" onclick="showView('rfqs',this)">
+      <span class="nav-icon"><i class="fas fa-file-contract"></i></span> Appels d'Offres
+      <span class="nav-badge" id="rfqBadge" style="display:none">0</span>
     </div>
+    <div class="nav-item" id="nav-pos" onclick="showView('pos',this)">
+      <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span> Bons de Commande
+    </div>
+    <div class="nav-item" id="nav-match" onclick="showView('match',this)">
+      <span class="nav-icon"><i class="fas fa-layer-group"></i></span> 3-Way Match
+    </div>
+    <div class="nav-section-label">Mon compte</div>
+    <div class="nav-item" id="nav-profil" onclick="showView('profil',this)">
+      <span class="nav-icon"><i class="fas fa-id-card"></i></span> Profil & KYC
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info" onclick="showView('profil',document.getElementById('nav-profil'))">
+      <div class="avatar" id="avatarInitial">?</div>
+      <div>
+        <div class="user-name" id="userDisplayName">Chargement...</div>
+        <div class="user-email" id="userEmailDisplay"></div>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <h1 class="page-title" id="pageTitle">Tableau de bord</h1>
+  </div>
+  <div class="content">
+
+    <!-- VIEW: DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(0,201,167,0.15)"><i class="fas fa-file-contract" style="color:var(--accent)"></i></div>
+          <div><div class="stat-val" id="kpi-rfqs">0</div><div class="stat-lbl">Appels d'offres ouverts</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(108,99,255,0.15)"><i class="fas fa-clipboard-list" style="color:var(--accent2)"></i></div>
+          <div><div class="stat-val" id="kpi-pos">0</div><div class="stat-lbl">Bons de commande</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(245,166,35,0.15)"><i class="fas fa-clock" style="color:var(--accent-gold)"></i></div>
+          <div><div class="stat-val" id="kpi-pending-match">0</div><div class="stat-lbl">3-Way Match en attente</div></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:rgba(255,101,132,0.15)"><i class="fas fa-star" style="color:var(--accent-red)"></i></div>
+          <div><div class="stat-val" id="kpi-rating">—</div><div class="stat-lbl">Note fournisseur</div></div>
+        </div>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius);padding:24px;margin-bottom:20px">
+        <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:16px;color:var(--accent)"><i class="fas fa-bell" style="margin-right:8px"></i>Appels d'offres récents</h3>
+        <div id="recentRFQs"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div></div>
+      </div>
+    </div>
+
+    <!-- VIEW: RFQs -->
+    <div class="view" id="view-rfqs">
+      <div class="section-header">
+        <span class="section-title"><i class="fas fa-file-contract" style="color:var(--accent);margin-right:8px"></i>Appels d'Offres</span>
+        <select class="form-input" id="rfqStatusFilter" style="width:auto;padding:8px 14px" onchange="loadRFQs()">
+          <option value="">Tous les statuts</option>
+          <option value="OPEN">Ouverts</option>
+          <option value="CLOSED">Clôturés</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>N° RFQ</th><th>Titre</th><th>Date limite</th>
+            <th>Budget</th><th>Statut</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="rfqTableBody"><tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEW: BONS DE COMMANDE -->
+    <div class="view" id="view-pos">
+      <div class="section-header">
+        <span class="section-title"><i class="fas fa-clipboard-list" style="color:var(--accent2);margin-right:8px"></i>Bons de Commande</span>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>N° PO</th><th>Date</th><th>Livraison prévue</th>
+            <th>Total TTC</th><th>Statut</th><th>Actions</th>
+          </tr></thead>
+          <tbody id="poTableBody"><tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEW: 3-WAY MATCH -->
+    <div class="view" id="view-match">
+      <div class="section-header">
+        <span class="section-title"><i class="fas fa-layer-group" style="color:var(--accent-gold);margin-right:8px"></i>Suivi 3-Way Match</span>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>N° Facture</th>
+            <th><i class="fas fa-clipboard-list"></i> Bon de Commande</th>
+            <th><i class="fas fa-truck"></i> Bon de Réception</th>
+            <th><i class="fas fa-file-invoice"></i> Facture</th>
+            <th>Statut Match</th><th>Montant</th>
+          </tr></thead>
+          <tbody id="matchTableBody"><tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEW: PROFIL KYC -->
+    <div class="view" id="view-profil">
+      <div class="section-header">
+        <span class="section-title"><i class="fas fa-id-card" style="color:var(--accent);margin-right:8px"></i>Profil & KYC</span>
+        <button class="btn btn-primary" onclick="openEditProfile()"><i class="fas fa-edit"></i> Modifier</button>
+      </div>
+
+      <div class="profile-section">
+        <h3><i class="fas fa-building" style="color:var(--accent)"></i> Informations Générales</h3>
+        <div class="profile-grid" id="profileGeneral">
+          <div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <h3><i class="fas fa-university" style="color:var(--accent2)"></i> Informations Bancaires</h3>
+        <div class="profile-grid" id="profileBanque">
+          <div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <h3><i class="fas fa-certificate" style="color:var(--accent-gold)"></i> Statut KYC</h3>
+        <div id="kycStatus" style="padding:16px;border-radius:10px;">
+          <div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+</main>
+
+<!-- MODAL: RFQ RESPONSE -->
+<div class="modal-overlay" id="rfqModal">
+  <div class="modal-box" style="max-width:760px">
+    <div class="modal-title"><i class="fas fa-paper-plane" style="color:var(--accent)"></i> Soumettre une Offre</div>
+    <div class="modal-subtitle" id="rfqModalSubtitle">Appel d'offres — chargement...</div>
+    <div class="form-grid-2" style="margin-bottom:20px">
+      <div class="form-group">
+        <label>Délai de livraison (jours)</label>
+        <input type="number" class="form-input" id="resp-delivery" value="7" min="1">
+      </div>
+      <div class="form-group">
+        <label>Offre valide jusqu'au</label>
+        <input type="date" class="form-input" id="resp-validUntil">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:20px">
+      <label>Note commerciale (optionnel)</label>
+      <textarea class="form-input" id="resp-notes" rows="3" placeholder="Conditions particulières, remises proposées..."></textarea>
+    </div>
+    <div style="font-weight:700;font-size:0.85rem;color:var(--text-dim);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px">Articles de l'appel d'offres</div>
+    <table class="offer-items-table" id="offerItemsTable">
+      <thead><tr><th>#</th><th>Description</th><th>Qté</th><th>Prix Unitaire Proposé (DA)</th><th>Total Estimé</th></tr></thead>
+      <tbody id="offerItemsBody"></tbody>
+    </table>
+    <div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;margin-bottom:20px;padding:16px;background:var(--bg-card2);border-radius:10px">
+      <div style="color:var(--text-dim);font-size:0.85rem">Total de votre offre :</div>
+      <div style="font-size:1.3rem;font-weight:800;color:var(--accent)" id="offerTotal">0.00 DA</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeRFQModal()">Annuler</button>
+      <button class="btn btn-primary" id="submitOfferBtn" onclick="submitOffer()"><i class="fas fa-paper-plane"></i> Soumettre l'offre</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDIT PROFILE -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal-box" style="max-width:600px">
+    <div class="modal-title"><i class="fas fa-edit" style="color:var(--accent)"></i> Modifier mon profil</div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Téléphone</label><input type="text" class="form-input" id="edit-phone" placeholder="+213..."></div>
+      <div class="form-group"><label>Wilaya</label><input type="text" class="form-input" id="edit-wilaya" placeholder="Ex: Alger"></div>
+      <div class="form-group"><label>Adresse</label><input type="text" class="form-input" id="edit-street" placeholder="Rue, N°..."></div>
+      <div class="form-group"><label>Ville</label><input type="text" class="form-input" id="edit-city" placeholder="Alger..."></div>
+    </div>
+    <div style="padding-bottom:12px;margin-bottom:16px;border-bottom:1px solid var(--border-light);font-size:0.8rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Informations Bancaires</div>
+    <div class="form-grid-2">
+      <div class="form-group"><label>Nom de la banque</label><input type="text" class="form-input" id="edit-bankName" placeholder="BNA, CPA..."></div>
+      <div class="form-group"><label>RIB</label><input type="text" class="form-input" id="edit-rib" placeholder="00000 00000 00000000000 00"></div>
+      <div class="form-group"><label>Délais de paiement</label><input type="text" class="form-input" id="edit-paymentTerms" placeholder="Ex: 30 jours net"></div>
+      <div class="form-group"><label>Délais de livraison</label><input type="text" class="form-input" id="edit-deliveryTerms" placeholder="Ex: FOB Alger"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeProfileModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveProfile()"><i class="fas fa-save"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PO DETAILS -->
+<div class="modal-overlay" id="poModal">
+  <div class="modal-box" style="max-width:700px">
+    <div class="modal-title"><i class="fas fa-clipboard-list" style="color:var(--accent2)"></i> Détails du Bon de Commande</div>
+    <div id="poModalContent"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closePOModal()">Fermer</button></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const EMAIL = sessionStorage.getItem('currentUser') || '';
+let profile  = null;
+let rfqsList = [];
+let posList  = [];
+let matchList = [];
+let currentRFQ = null;
+
+// ═══════════════════════════════════════════════════════
+// LOADER & TOAST
+// ═══════════════════════════════════════════════════════
+function showLoader(v) { document.getElementById('loader').classList.toggle('active', v); }
+function toast(type, msg, dur = 4000) {
+  const c = document.getElementById('toastContainer'), t = document.createElement('div');
+  const icons = { success: 'fas fa-check-circle', error: 'fas fa-exclamation-circle', info: 'fas fa-info-circle' };
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="${icons[type]||icons.info}"></i><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), dur);
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+function showView(id, navEl) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + id)?.classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  const titles = { dashboard:'Tableau de bord', rfqs:'Appels d\'Offres', pos:'Bons de Commande', match:'Suivi 3-Way Match', profil:'Profil & KYC' };
+  document.getElementById('pageTitle').textContent = titles[id] || '';
+  if (id === 'rfqs')    loadRFQs();
+  if (id === 'pos')     loadPOs();
+  if (id === 'match')   loadMatch();
+  if (id === 'profil')  renderProfileView();
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+async function init() {
+  showLoader(true);
+  try {
+    await loadProfile();
+    await loadDashboard();
+  } catch(e) { toast('error', 'Erreur : ' + e.message); }
+  finally { showLoader(false); }
+}
+
+async function loadProfile() {
+  const enc = encodeURIComponent(`tolower(email) eq '${EMAIL.toLowerCase()}'`);
+  const res  = await fetch(`/odata/v4/srm/Fournisseurs?$filter=${enc}`);
+  const data = await res.json();
+  if (data.value?.length > 0) {
+    profile = data.value[0];
+    const name = profile.companyName || EMAIL;
+    document.getElementById('userDisplayName').textContent = name;
+    document.getElementById('userEmailDisplay').textContent = profile.email;
+    document.getElementById('avatarInitial').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('kpi-rating').textContent = profile.rating || '—';
+  }
+}
+
+async function loadDashboard() {
+  if (!profile) return;
+
+  // Open RFQs (all, since supplier can see open ones)
+  const [rfqRes, poRes, matchRes] = await Promise.all([
+    fetch(`/odata/v4/srm/RFQs?$filter=status eq 'OPEN'&$orderby=deadline asc`),
+    fetch(`/odata/v4/srm/BonsCommande?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID}`)}&$orderby=createdAt desc&$top=10`),
+    fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID} and matchStatus eq 'PENDING'`)}&$select=ID`)
+  ]);
+
+  const rfqData   = await rfqRes.json();
+  const poData    = await poRes.json();
+  const matchData = await matchRes.json();
+
+  rfqsList = rfqData.value || [];
+  posList  = poData.value  || [];
+
+  const openRFQs    = rfqsList.length;
+  const pendingMatch = (matchData.value || []).length;
+
+  document.getElementById('kpi-rfqs').textContent         = openRFQs;
+  document.getElementById('kpi-pos').textContent          = posList.length;
+  document.getElementById('kpi-pending-match').textContent = pendingMatch;
+
+  if (openRFQs > 0) {
+    document.getElementById('rfqBadge').textContent = openRFQs;
+    document.getElementById('rfqBadge').style.display = '';
+  }
+
+  // Recent RFQs on dashboard
+  const container = document.getElementById('recentRFQs');
+  if (!rfqsList.length) {
+    container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>Aucun appel d\'offres ouvert.</p></div>';
+  } else {
+    container.innerHTML = rfqsList.slice(0, 5).map(r => `
+      <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border-light)">
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:0.88rem">${r.title || 'Sans titre'}</div>
+          <div style="font-size:0.75rem;color:var(--text-dim);margin-top:3px">Limite : ${fmtDate(r.deadline)} · Budget : ${fmt(r.totalBudget)} DA</div>
+        </div>
+        <span class="badge badge-open">OUVERT</span>
+        <button class="btn btn-primary btn-sm" onclick="openRFQModal('${r.ID}')"><i class="fas fa-reply"></i> Répondre</button>
+      </div>
+    `).join('');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// RFQS
+// ═══════════════════════════════════════════════════════
+async function loadRFQs() {
+  const tbody  = document.getElementById('rfqTableBody');
+  const filter = document.getElementById('rfqStatusFilter').value;
+  tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+  try {
+    const url = filter ? `/odata/v4/srm/RFQs?$filter=status eq '${filter}'&$orderby=deadline asc` : `/odata/v4/srm/RFQs?$orderby=deadline asc`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    rfqsList = data.value || [];
+    if (!rfqsList.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>Aucun appel d\'offres.</td></tr>'; return; }
+    tbody.innerHTML = rfqsList.map(r => {
+      const isOpen = r.status === 'OPEN' || !r.status;
+      const action = isOpen ? `<button class="btn btn-primary btn-sm" onclick="openRFQModal('${r.ID}')"><i class="fas fa-reply"></i> Répondre</button>` : '<span style="color:var(--text-dim);font-size:0.8rem">Clôturé</span>';
+      return `<tr>
+        <td style="font-family:monospace;font-weight:600">${r.rfqNumber||'—'}</td>
+        <td style="font-weight:600">${r.title||'—'}</td>
+        <td>${fmtDate(r.deadline)}</td>
+        <td style="color:var(--accent-gold);font-weight:700">${fmt(r.totalBudget)} DA</td>
+        <td><span class="badge ${isOpen?'badge-open':'badge-closed'}">${isOpen?'Ouvert':'Clôturé'}</span></td>
+        <td>${action}</td>
+      </tr>`;
+    }).join('');
+  } catch(e) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6" style="color:var(--accent-red)">${e.message}</td></tr>`; }
+}
+
+async function openRFQModal(rfqId) {
+  showLoader(true);
+  try {
+    const res  = await fetch(`/odata/v4/srm/RFQs(ID=${rfqId})?$expand=items`);
+    if (!res.ok) throw new Error('Chargement RFQ échoué');
+    currentRFQ = await res.json();
+
+    document.getElementById('rfqModalSubtitle').textContent = `${currentRFQ.title} · Limite : ${fmtDate(currentRFQ.deadline)}`;
+    document.getElementById('resp-delivery').value = 7;
+    const d = new Date(); d.setDate(d.getDate() + 30);
+    document.getElementById('resp-validUntil').value = d.toISOString().split('T')[0];
+    document.getElementById('resp-notes').value = '';
+
+    const tbody = document.getElementById('offerItemsBody');
+    const items = currentRFQ.items || [];
+    if (!items.length) { toast('error', 'Cet appel d\'offres n\'a pas d\'articles.'); return; }
+    tbody.innerHTML = items.map((item, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td style="font-weight:600">${item.description||'Article '+( i+1)}</td>
+        <td style="font-family:monospace">${item.quantity} ${item.unit||''}</td>
+        <td>
+          <input type="number" class="price-input" id="price-${item.ID}" data-qty="${item.quantity}"
+            placeholder="0.00" min="0" step="0.01" oninput="recalcOffer()">
+        </td>
+        <td style="font-family:monospace;font-weight:600;color:var(--accent)" id="line-total-${item.ID}">0.00 DA</td>
+      </tr>
+    `).join('');
+
+    document.getElementById('rfqModal').classList.add('open');
+  } catch(e) { toast('error', e.message); }
+  finally { showLoader(false); }
+}
+
+function recalcOffer() {
+  let total = 0;
+  (currentRFQ?.items || []).forEach(item => {
+    const priceEl = document.getElementById(`price-${item.ID}`);
+    const totalEl = document.getElementById(`line-total-${item.ID}`);
+    if (priceEl && totalEl) {
+      const lineTotal = parseFloat(priceEl.value || 0) * parseFloat(item.quantity || 1);
+      total += lineTotal;
+      totalEl.textContent = fmt(lineTotal) + ' DA';
+    }
+  });
+  document.getElementById('offerTotal').textContent = fmt(total) + ' DA';
+}
+
+function closeRFQModal() { document.getElementById('rfqModal').classList.remove('open'); currentRFQ = null; }
+
+async function submitOffer() {
+  if (!profile) { toast('error', 'Profil non chargé'); return; }
+  const items = (currentRFQ?.items || []).map(item => {
+    const priceEl = document.getElementById(`price-${item.ID}`);
+    return { rfqItemId: item.ID, unitPrice: parseFloat(priceEl?.value || 0), notes: '' };
+  });
+  if (items.some(i => i.unitPrice <= 0)) { toast('error', 'Veuillez saisir un prix pour chaque article.'); return; }
+
+  const btn = document.getElementById('submitOfferBtn');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+  showLoader(true);
+  try {
+    const res = await fetch('/odata/v4/srm/submitRFQResponse', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        rfqId         : currentRFQ.ID,
+        fournisseurId : profile.ID,
+        deliveryDays  : parseInt(document.getElementById('resp-delivery').value) || 7,
+        validUntil    : document.getElementById('resp-validUntil').value,
+        notes         : document.getElementById('resp-notes').value,
+        items
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Erreur serveur');
+    toast('success', 'Offre soumise avec succès !');
+    closeRFQModal();
+    loadRFQs();
+  } catch(e) { toast('error', e.message); }
+  finally {
+    showLoader(false);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Soumettre l\'offre';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// PURCHASE ORDERS
+// ═══════════════════════════════════════════════════════
+async function loadPOs() {
+  if (!profile) return;
+  const tbody = document.getElementById('poTableBody');
+  tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+  try {
+    const enc = encodeURIComponent(`fournisseur_ID eq ${profile.ID}`);
+    const res  = await fetch(`/odata/v4/srm/BonsCommande?$filter=${enc}&$orderby=createdAt desc`);
+    const data = await res.json();
+    posList = data.value || [];
+    if (!posList.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>Aucun bon de commande.</td></tr>'; return; }
+    const statusMap = { CONFIRMED:'badge-confirmed', DELIVERED:'badge-matched', CANCELLED:'badge-closed' };
+    tbody.innerHTML = posList.map(po => `
+      <tr>
+        <td style="font-family:monospace;font-weight:600">${po.poNumber||'—'}</td>
+        <td>${fmtDate(po.date)}</td>
+        <td>${fmtDate(po.deliveryDate)}</td>
+        <td style="font-weight:700;color:var(--accent-gold)">${fmt(po.totalTTC)} DA</td>
+        <td><span class="badge ${statusMap[po.status]||'badge-pending'}">${po.status||'—'}</span></td>
+        <td><button class="btn btn-ghost btn-sm" onclick="viewPO('${po.ID}')"><i class="fas fa-eye"></i> Voir</button></td>
+      </tr>
+    `).join('');
+  } catch(e) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6" style="color:var(--accent-red)">${e.message}</td></tr>`; }
+}
+
+async function viewPO(poId) {
+  showLoader(true);
+  try {
+    const res  = await fetch(`/odata/v4/srm/BonsCommande(ID=${poId})?$expand=items`);
+    const data = await res.json();
+    const items = data.items || [];
+    document.getElementById('poModalContent').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div><div style="font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">N° PO</div><div style="font-family:monospace;font-weight:700">${data.poNumber||'—'}</div></div>
+        <div><div style="font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Date livraison</div><div style="font-weight:600">${fmtDate(data.deliveryDate)}</div></div>
+      </div>
+      <table class="offer-items-table">
+        <thead><tr><th>#</th><th>Description</th><th>Qté</th><th>P.U.</th><th>TVA</th><th>Total HT</th></tr></thead>
+        <tbody>${items.map((item,i) => `
+          <tr>
+            <td>${i+1}</td>
+            <td>${item.description||'—'}</td>
+            <td style="font-family:monospace">${item.quantity} ${item.unit||''}</td>
+            <td style="font-family:monospace">${fmt(item.unitPrice)} DA</td>
+            <td>${item.tvaRate||19}%</td>
+            <td style="font-family:monospace;font-weight:700;color:var(--accent)">${fmt(item.totalHT)} DA</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="display:flex;justify-content:flex-end;gap:20px;padding:16px;background:var(--bg-card2);border-radius:10px;margin-top:12px">
+        <div><span style="color:var(--text-dim);font-size:0.82rem">Total HT: </span><strong>${fmt(data.totalHT)} DA</strong></div>
+        <div><span style="color:var(--text-dim);font-size:0.82rem">TVA: </span><strong>${fmt(data.totalTVA)} DA</strong></div>
+        <div style="font-size:1.1rem"><span style="color:var(--text-dim);font-size:0.82rem">Total TTC: </span><strong style="color:var(--accent)">${fmt(data.totalTTC)} DA</strong></div>
+      </div>
+    `;
+    document.getElementById('poModal').classList.add('open');
+  } catch(e) { toast('error', e.message); }
+  finally { showLoader(false); }
+}
+function closePOModal() { document.getElementById('poModal').classList.remove('open'); }
+
+// ═══════════════════════════════════════════════════════
+// 3-WAY MATCH
+// ═══════════════════════════════════════════════════════
+async function loadMatch() {
+  if (!profile) return;
+  const tbody = document.getElementById('matchTableBody');
+  tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+  try {
+    const enc  = encodeURIComponent(`fournisseur_ID eq ${profile.ID}`);
+    const res  = await fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${enc}&$expand=bonCommande,reception&$orderby=createdAt desc`);
+    const data = await res.json();
+    matchList = data.value || [];
+    if (!matchList.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-layer-group" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>Aucune facture à apparier.</td></tr>'; return; }
+    const matchBadge = { PENDING:'badge-pending', MATCHED:'badge-matched', DISCREPANCY:'badge-discrepancy' };
+    const matchLabel = { PENDING:'En attente', MATCHED:'Apparié ✓', DISCREPANCY:'Écart détecté' };
+    tbody.innerHTML = matchList.map(f => {
+      const po  = f.bonCommande;
+      const gr  = f.reception;
+      const poIcon  = po ? `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${po.poNumber}` : `<span class="match-status-err"><i class="fas fa-times-circle"></i></span> Aucun PO`;
+      const grIcon  = gr ? `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${gr.receiptNumber}` : `<span class="match-status-warn"><i class="fas fa-clock"></i></span> En attente`;
+      const invIcon = `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${f.invoiceNumber}`;
+      return `<tr>
+        <td style="font-family:monospace;font-weight:600">${f.invoiceNumber||'—'}</td>
+        <td style="font-size:0.82rem">${poIcon}</td>
+        <td style="font-size:0.82rem">${grIcon}</td>
+        <td style="font-size:0.82rem">${invIcon}</td>
+        <td><span class="badge ${matchBadge[f.matchStatus]||'badge-pending'}">${matchLabel[f.matchStatus]||f.matchStatus}</span></td>
+        <td style="font-weight:700;color:var(--accent-gold)">${fmt(f.totalTTC)} DA</td>
+      </tr>`;
+    }).join('');
+  } catch(e) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6" style="color:var(--accent-red)">${e.message}</td></tr>`; }
+}
+
+// ═══════════════════════════════════════════════════════
+// PROFIL KYC
+// ═══════════════════════════════════════════════════════
+function renderProfileView() {
+  if (!profile) { toast('error', 'Profil non disponible'); return; }
+  const g1 = document.getElementById('profileGeneral');
+  const g2 = document.getElementById('profileBanque');
+  g1.innerHTML = `
+    <div class="profile-field"><label>Raison Sociale</label><p>${profile.companyName||'—'}</p></div>
+    <div class="profile-field"><label>Secteur</label><p>${profile.sector||'—'}</p></div>
+    <div class="profile-field"><label>Email</label><p>${profile.email||'—'}</p></div>
+    <div class="profile-field"><label>Téléphone</label><p>${profile.phone||'—'}</p></div>
+    <div class="profile-field"><label>RC</label><p style="font-family:monospace">${profile.rc||'—'}</p></div>
+    <div class="profile-field"><label>NIF</label><p style="font-family:monospace">${profile.nif||'—'}</p></div>
+    <div class="profile-field"><label>Adresse</label><p>${profile.street||'—'}</p></div>
+    <div class="profile-field"><label>Wilaya</label><p>${profile.wilaya||'—'}</p></div>
+  `;
+  g2.innerHTML = `
+    <div class="profile-field"><label>Banque</label><p>${profile.bankName||'—'}</p></div>
+    <div class="profile-field"><label>RIB</label><p style="font-family:monospace">${profile.rib||'—'}</p></div>
+    <div class="profile-field"><label>Conditions paiement</label><p>${profile.paymentTerms||'—'}</p></div>
+    <div class="profile-field"><label>Conditions livraison</label><p>${profile.deliveryTerms||'—'}</p></div>
+  `;
+  const kycCont = document.getElementById('kycStatus');
+  const kycOK = profile.kycStatus === 'VALIDATED';
+  const kycColors = { VALIDATED: { bg:'rgba(0,201,167,0.1)', border:'rgba(0,201,167,0.3)', color:'var(--accent)', icon:'fa-check-shield' }, PENDING: { bg:'rgba(245,166,35,0.1)', border:'rgba(245,166,35,0.3)', color:'var(--accent-gold)', icon:'fa-clock' }, REJECTED: { bg:'rgba(255,101,132,0.1)', border:'rgba(255,101,132,0.3)', color:'var(--accent-red)', icon:'fa-times-circle' } };
+  const kStyle = kycColors[profile.kycStatus] || kycColors.PENDING;
+  kycCont.style.background = kStyle.bg;
+  kycCont.style.border = `1px solid ${kStyle.border}`;
+  kycCont.innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px">
+      <i class="fas ${kStyle.icon}" style="font-size:1.8rem;color:${kStyle.color}"></i>
+      <div>
+        <div style="font-weight:700;font-size:1rem;color:${kStyle.color}">${profile.kycStatus||'PENDING'}</div>
+        <div style="font-size:0.82rem;color:var(--text-dim);margin-top:3px">
+          ${profile.kycStatus==='VALIDATED' ? `Validé le ${fmtDate(profile.kycDate)} par ${profile.kycBy||'Admin'}` : profile.kycStatus==='REJECTED' ? 'Dossier rejeté. Contactez l\'administrateur.' : 'Votre dossier est en cours d\'examen par l\'administrateur.'}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function openEditProfile() {
+  if (!profile) return;
+  document.getElementById('edit-phone').value         = profile.phone || '';
+  document.getElementById('edit-wilaya').value        = profile.wilaya || '';
+  document.getElementById('edit-street').value        = profile.street || '';
+  document.getElementById('edit-city').value          = profile.city || '';
+  document.getElementById('edit-bankName').value      = profile.bankName || '';
+  document.getElementById('edit-rib').value           = profile.rib || '';
+  document.getElementById('edit-paymentTerms').value  = profile.paymentTerms || '';
+  document.getElementById('edit-deliveryTerms').value = profile.deliveryTerms || '';
+  document.getElementById('profileModal').classList.add('open');
+}
+function closeProfileModal() { document.getElementById('profileModal').classList.remove('open'); }
+
+async function saveProfile() {
+  if (!profile) return;
+  showLoader(true);
+  try {
+    const body = {
+      fournisseurId : profile.ID,
+      phone         : document.getElementById('edit-phone').value,
+      wilaya        : document.getElementById('edit-wilaya').value,
+      street        : document.getElementById('edit-street').value,
+      city          : document.getElementById('edit-city').value,
+      bankName      : document.getElementById('edit-bankName').value,
+      rib           : document.getElementById('edit-rib').value,
+      paymentTerms  : document.getElementById('edit-paymentTerms').value,
+      deliveryTerms : document.getElementById('edit-deliveryTerms').value,
+    };
+    const res = await fetch('/odata/v4/srm/updateProfile', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Erreur serveur');
+    profile = { ...profile, ...body };
+    closeProfileModal();
+    renderProfileView();
+    toast('success', 'Profil mis à jour avec succès');
+  } catch(e) { toast('error', e.message); }
+  finally { showLoader(false); }
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════
+function fmt(v) { return parseFloat(v||0).toLocaleString('fr-FR', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
+function fmtDate(d) { if (!d) return '—'; try { return new Date(d).toLocaleDateString('fr-FR'); } catch { return d; } }
+function logout() { if (confirm('Déconnexion ?')) { sessionStorage.clear(); window.location.href = '/auth.html'; } }
+
+init();
+</script>
 </body>
 </html>

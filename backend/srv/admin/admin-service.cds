@@ -33,6 +33,9 @@ service AdminService {
   entity AllDevis               as projection on doc.Devis;
 
   @readonly
+  entity AllDevisItems          as projection on doc.DevisItem;
+
+  @readonly
   entity AllCommandes           as projection on doc.CommandeClient;
 
   @readonly
@@ -60,6 +63,17 @@ service AdminService {
   action activateBusinessPartner(bpId: UUID)                                            returns BusinessPartners;
   action blockBusinessPartner(bpId: UUID, reason: String)                               returns BusinessPartners;
   action sendNotification(userId: String, title: String, message: String, type: String) returns Notifications;
+
+  // ── CRM Revision Actions ──
+  action reviseDevis(
+    devisId: UUID, 
+    discountGlobal: Decimal,
+    items: many { 
+      itemId: UUID; 
+      unitPrice: Decimal; 
+      discount: Decimal; 
+    }
+  ) returns AllDevis;
 
   // ── PDF Document Actions ──
   action downloadRegistrationPDF(regId: UUID)                                           returns String;

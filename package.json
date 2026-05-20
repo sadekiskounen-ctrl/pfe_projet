@@ -24,7 +24,8 @@
   },
   "scripts": {
     "start": "cds-serve",
-    "dev": "cds watch",
+    "dev": "cds deploy --to sqlite && cds watch",
+    "db:deploy": "cds deploy --to sqlite",
     "build": "cds build --production",
     "test": "jest --forceExit",
     "mta:build": "mbt build",

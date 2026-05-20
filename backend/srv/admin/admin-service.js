@@ -57,6 +57,67 @@ module.exports = class AdminService extends cds.ApplicationService {
       }
     });
 
+    // ── Action: Revise Devis ──
+    this.on('reviseDevis', async (req) => {
+      const { devisId, discountGlobal, items } = req.data;
+      const { Devis, DevisItem } = cds.entities('sap.pme.doc');
+
+      const devis = await SELECT.one.from(Devis).where({ ID: devisId });
+      if (!devis) return req.error(404, `Devis ${devisId} non trouvé`);
+      if (devis.status === 'APPROVED' || devis.status === 'REJECTED') {
+        return req.error(400, `Impossible de modifier un devis au statut ${devis.status}`);
+      }
+
+      let totalHT = 0;
+      let totalTVA = 0;
+      
+      if (items && items.length > 0) {
+        for (const reqItem of items) {
+          const item = await SELECT.one.from(DevisItem).where({ ID: reqItem.itemId, parent_ID: devisId });
+          if (!item) continue;
+          
+          const price = parseFloat(reqItem.unitPrice != null ? reqItem.unitPrice : item.unitPrice);
+          const qty = parseFloat(item.quantity || 1);
+          const disc = parseFloat(reqItem.discount != null ? reqItem.discount : item.discount || 0);
+          const tvaRate = parseFloat(item.tvaRate || 19);
+          
+          const subtotal = qty * price * (1 - disc / 100);
+          const tva = subtotal * (tvaRate / 100);
+          const ttc = subtotal + tva;
+          
+          await UPDATE(DevisItem).set({
+            unitPrice: price, discount: disc,
+            totalHT: subtotal, totalTVA: tva, totalTTC: ttc
+          }).where({ ID: reqItem.itemId });
+          
+          totalHT += subtotal;
+          totalTVA += tva;
+        }
+      } else {
+        // If no items passed, we still need to calculate from existing items
+        const existItems = await SELECT.from(DevisItem).where({ parent_ID: devisId });
+        for (const item of existItems) {
+          totalHT += parseFloat(item.totalHT || 0);
+          totalTVA += parseFloat(item.totalTVA || 0);
+        }
+      }
+      
+      const globDisc = parseFloat(discountGlobal || 0);
+      const finalHT = totalHT * (1 - globDisc / 100);
+      const finalTVA = totalTVA * (1 - globDisc / 100);
+      const finalTTC = finalHT + finalTVA;
+      
+      await UPDATE(Devis).set({
+        discount: globDisc,
+        totalHT: finalHT, totalTVA: finalTVA, totalTTC: finalTTC
+      }).where({ ID: devisId });
+      
+      await this._logAudit(req, 'UPDATE', 'Devis', devisId, 'Prices revised by admin');
+      
+      const res = await SELECT.one.from(Devis).where({ ID: devisId });
+      return res;
+    });
+
     // ── PDF: Download Registration Certificate ──
     this.on('downloadRegistrationPDF', async (req) => {
       try {

@@ -1,5 +1,6 @@
 // ============================================================
-// CRM Service — OData V4 (Extended with PDF & Email actions)
+// CRM Service — OData V4
+// Portail Client B2B & B2C — PME Connect
 // ============================================================
 
 using { sap.pme as pme }           from '../../db/schema/common';
@@ -7,7 +8,7 @@ using { sap.pme.crm as crm }       from '../../db/schema/crm';
 using { sap.pme.doc as doc }        from '../../db/schema/documents';
 
 @path: '/odata/v4/crm'
-@requires: ['Admin', 'Commercial', 'ClientB2B', 'ClientB2C']
+@requires: ['Admin', 'Commercial', 'ClientB2B', 'ClientB2C', 'authenticated-user']
 service CRMService {
 
   // ── Clients B2B ──
@@ -33,9 +34,10 @@ service CRMService {
   @readonly
   entity BusinessPartners as projection on pme.BusinessPartner;
 
-  // ── Produits ──
+  // ── Produits (catalogue synchronisé avec l'Admin) ──
   @readonly
-  entity Produits as projection on pme.Produit;
+  entity Produits as projection on pme.Produit
+    where isActive = true and isDeleted = false;
 
   // ── Devis ──
   entity Devis as projection on doc.Devis {
@@ -84,23 +86,49 @@ service CRMService {
     facture : redirected to Factures
   };
 
-  // ── Actions métier CRM ──
-  action convertDevisToCommande(devisId: UUID) returns Commandes;
-  action convertCommandeToFacture(commandeId: UUID) returns Factures;
+  // ── Actions Panier → Documents ──
+  // B2B : Panier → Devis (PENDING, en attente de révision admin)
+  type CartItem {
+    productId   : UUID;
+    quantity    : Decimal(13, 3);
+    unitPrice   : Decimal(15, 2);
+    tvaRate     : Decimal(5, 2);
+    description : String(512);
+  }
+  action submitCartAsDevis(
+    clientB2B_ID : UUID,
+    items        : array of CartItem,
+    notes        : String(2000)
+  ) returns Devis;
+
+  // B2C : Panier → Commande directe (après paiement simulé)
+  action submitCartAsOrder(
+    clientB2C_ID    : UUID,
+    items           : array of CartItem,
+    paymentMethod   : String(20),
+    paymentRef      : String(128)
+  ) returns Commandes;
+
+  // ── Actions Workflow Devis ──
   action approveDevis(devisId: UUID) returns Devis;
   action rejectDevis(devisId: UUID, reason: String) returns Devis;
-  action recordPayment(factureId: UUID, amount: Decimal, method: String, reference: String) returns Paiements;
+  action convertQuoteToOrder(devisId: UUID) returns Commandes;
+
+  // ── Actions Workflow Commande ──
+  action convertCommandeToFacture(commandeId: UUID) returns Factures;
   action sendOrderToClient(commandeId: UUID) returns Commandes;
   action acceptOrder(commandeId: UUID) returns Commandes;
   action rejectOrder(commandeId: UUID) returns Commandes;
 
-  // ── PDF Actions ──
-  // Returns base64 encoded PDF
+  // ── Paiement ──
+  action recordPayment(factureId: UUID, amount: Decimal, method: String, reference: String) returns Paiements;
+
+  // ── PDF ──
   function downloadDevisPDF(devisId: UUID) returns String;
   function downloadFacturePDF(factureId: UUID) returns String;
   function downloadCommandePDF(commandeId: UUID) returns String;
 
-  // ── Email Actions ──
+  // ── Email ──
   action sendDevisByEmail(devisId: UUID) returns Boolean;
   action sendFactureByEmail(factureId: UUID) returns Boolean;
 }

@@ -1,215 +1,289 @@
 // ============================================================
 // SRM Service Handlers — Business Logic
+// PME Connect — Portail Fournisseur
 // ============================================================
 
+'use strict';
 const cds = require('@sap/cds');
 
 module.exports = class SRMService extends cds.ApplicationService {
 
   async init() {
     const {
-      Fournisseurs, Evaluations, RFQs, BonsCommande, POItems,
-      Receptions, FacturesFournisseur
+      Fournisseurs, FournisseurDocuments, Evaluations,
+      RFQs, RFQItems, RFQResponses, RFQResponseItems,
+      BonsCommande, POItems, Receptions, ReceptionItems,
+      FacturesFournisseur
     } = this.entities;
-    const { NumberRange } = cds.entities('sap.pme.admin');
-    const { BusinessPartner } = cds.entities('sap.pme');
 
     // ── Auto-generate document numbers ──
-    this.before('CREATE', RFQs, async (req) => {
-      req.data.rfqNumber = await this._generateNumber('RFQ', 'RFQ');
-    });
+    this.before('CREATE', RFQs,         async (req) => { req.data.rfqNumber    = await this._generateNumber('RFQ',  'RFQ'); });
+    this.before('CREATE', BonsCommande, async (req) => { req.data.poNumber     = await this._generateNumber('PO',   'PO');  });
+    this.before('CREATE', Receptions,   async (req) => { req.data.receiptNumber = await this._generateNumber('GR',  'GR');  });
+    this.before('CREATE', FacturesFournisseur, async (req) => { req.data.invoiceNumber = await this._generateNumber('SUPINV', 'SINV'); });
 
-    this.before('CREATE', BonsCommande, async (req) => {
-      req.data.poNumber = await this._generateNumber('PO', 'PO');
-    });
+    // ─────────────────────────────────────────
+    // ACTION: Soumettre une réponse à un RFQ
+    // ─────────────────────────────────────────
+    this.on('submitRFQResponse', async (req) => {
+      const { rfqId, fournisseurId, deliveryDays, validUntil, notes, items } = req.data;
 
-    this.before('CREATE', Receptions, async (req) => {
-      req.data.receiptNumber = await this._generateNumber('RECEPTION', 'REC');
-    });
-
-    this.before('CREATE', FacturesFournisseur, async (req) => {
-      req.data.invoiceNumber = await this._generateNumber('FACTURE_FRS', 'FFA');
-    });
-
-    // ── Auto-create BusinessPartner for new suppliers ──
-    this.before('CREATE', Fournisseurs, async (req) => {
-      if (!req.data.bp_ID) {
-        const bpNumber = await this._generateNumber('BP', 'BP');
-        const bp = await INSERT.into(BusinessPartner).entries({
-          bpNumber,
-          bpType: 'FOURNISSEUR',
-          displayName: req.data.companyName,
-          email: req.data.email,
-          phone: req.data.phone,
-          status: 'PENDING'
-        });
-        req.data.bp_ID = bp?.ID;
+      const rfq = await SELECT.one.from(RFQs).where({ ID: rfqId });
+      if (!rfq) return req.error(404, 'Appel d\'offres introuvable');
+      if (rfq.status === 'CLOSED' || rfq.status === 'CANCELLED') {
+        return req.error(400, 'Cet appel d\'offres est clôturé');
       }
-      req.data.status = 'PENDING';
-      req.data.kycStatus = 'PENDING';
+
+      // Check if this supplier already responded
+      const existing = await SELECT.one.from(RFQResponses).where({ rfq_ID: rfqId, fournisseur_ID: fournisseurId });
+      if (existing) return req.error(400, 'Vous avez déjà soumis une offre pour cet appel d\'offres');
+
+      // Build response items and calculate total
+      const rfqItemsList = await SELECT.from(RFQItems).where({ parent_ID: rfqId });
+      const responseItems = [];
+      let totalAmount = 0;
+
+      for (const inputItem of (items || [])) {
+        const rfqItem = rfqItemsList.find(ri => ri.ID === inputItem.rfqItemId);
+        if (!rfqItem) continue;
+        const unitPrice  = parseFloat(inputItem.unitPrice);
+        const totalPrice = unitPrice * parseFloat(rfqItem.quantity);
+        totalAmount += totalPrice;
+        responseItems.push({
+          rfqItem_ID : inputItem.rfqItemId,
+          unitPrice,
+          totalPrice : parseFloat(totalPrice.toFixed(2)),
+          notes      : inputItem.notes || ''
+        });
+      }
+
+      const [response] = await INSERT.into(RFQResponses).entries({
+        rfq_ID          : rfqId,
+        fournisseur_ID  : fournisseurId,
+        date            : new Date().toISOString().split('T')[0],
+        totalAmount     : parseFloat(totalAmount.toFixed(2)),
+        deliveryDays    : deliveryDays || 7,
+        validUntil      : validUntil || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+        selected        : false,
+        notes           : notes || '',
+        items           : responseItems
+      });
+
+      return SELECT.one.from(RFQResponses).where({ ID: response.ID });
+    });
+
+    // ─────────────────────────────────────────
+    // ACTION: Mettre à jour le profil fournisseur (KYC)
+    // ─────────────────────────────────────────
+    this.on('updateProfile', async (req) => {
+      const { fournisseurId, bankName, rib, bankAccount, street, city, wilaya, phone, paymentTerms, deliveryTerms } = req.data;
+
+      const fournisseur = await SELECT.one.from(Fournisseurs).where({ ID: fournisseurId });
+      if (!fournisseur) return req.error(404, 'Fournisseur introuvable');
+
+      const updates = {};
+      if (bankName     !== undefined) updates.bankName     = bankName;
+      if (rib          !== undefined) updates.rib          = rib;
+      if (bankAccount  !== undefined) updates.bankAccount  = bankAccount;
+      if (street       !== undefined) updates.street       = street;
+      if (city         !== undefined) updates.city         = city;
+      if (wilaya       !== undefined) updates.wilaya       = wilaya;
+      if (phone        !== undefined) updates.phone        = phone;
+      if (paymentTerms !== undefined) updates.paymentTerms = paymentTerms;
+      if (deliveryTerms !== undefined) updates.deliveryTerms = deliveryTerms;
+
+      await UPDATE(Fournisseurs).set(updates).where({ ID: fournisseurId });
+      return SELECT.one.from(Fournisseurs).where({ ID: fournisseurId });
+    });
+
+    // ─────────────────────────────────────────
+    // ACTION: Admin sélectionne une offre gagnante
+    // ─────────────────────────────────────────
+    this.on('selectRFQResponse', async (req) => {
+      const { rfqId, responseId } = req.data;
+
+      const rfq = await SELECT.one.from(RFQs).where({ ID: rfqId });
+      if (!rfq) return req.error(404, 'RFQ introuvable');
+
+      // Unselect all previous responses
+      await UPDATE(RFQResponses).set({ selected: false }).where({ rfq_ID: rfqId });
+      // Select the winner
+      await UPDATE(RFQResponses).set({ selected: true }).where({ ID: responseId });
+      // Update RFQ with selected response and close it
+      await UPDATE(RFQs).set({
+        selectedResponse_ID : responseId,
+        status              : 'CLOSED',
+        statusDate          : new Date().toISOString()
+      }).where({ ID: rfqId });
+
+      return SELECT.one.from(RFQs).where({ ID: rfqId });
+    });
+
+    // ─────────────────────────────────────────
+    // ACTION: Convertir RFQ → Bon de Commande
+    // ─────────────────────────────────────────
+    this.on('convertRFQToPO', async (req) => {
+      const { rfqId } = req.data;
+
+      const rfq = await SELECT.one.from(RFQs).where({ ID: rfqId });
+      if (!rfq || !rfq.selectedResponse_ID) return req.error(400, 'Aucune offre sélectionnée pour ce RFQ');
+
+      const response  = await SELECT.one.from(RFQResponses).where({ ID: rfq.selectedResponse_ID });
+      const respItems = await SELECT.from(RFQResponseItems).where({ parent_ID: rfq.selectedResponse_ID });
+      const rfqItems  = await SELECT.from(RFQItems).where({ parent_ID: rfqId });
+
+      const poNum = await this._generateNumber('PO', 'PO');
+      const delivDate = new Date();
+      delivDate.setDate(delivDate.getDate() + (response.deliveryDays || 14));
+
+      let totalHT = 0, totalTVA = 0, totalTTC = 0;
+      const poItems = respItems.map((ri, i) => {
+        const rfqItem   = rfqItems.find(rfi => rfi.ID === ri.rfqItem_ID) || {};
+        const qty       = parseFloat(rfqItem.quantity || 1);
+        const price     = parseFloat(ri.unitPrice);
+        const tvaRate   = 19;
+        const ht        = qty * price;
+        const tva       = ht * tvaRate / 100;
+        totalHT  += ht;
+        totalTVA += tva;
+        totalTTC += ht + tva;
+        return {
+          lineNumber   : i + 1,
+          product_ID   : rfqItem.product_ID,
+          description  : rfqItem.description || '',
+          quantity     : qty,
+          unit         : rfqItem.unit || 'PIECE',
+          unitPrice    : parseFloat(price.toFixed(2)),
+          tvaRate,
+          totalHT      : parseFloat(ht.toFixed(2)),
+          totalTVA     : parseFloat(tva.toFixed(2)),
+          totalTTC     : parseFloat((ht + tva).toFixed(2))
+        };
+      });
+
+      const [po] = await INSERT.into(BonsCommande).entries({
+        poNumber     : poNum,
+        fournisseur_ID : rfq.fournisseur_ID || response.fournisseur_ID,
+        rfq_ID       : rfqId,
+        date         : new Date().toISOString().split('T')[0],
+        deliveryDate : delivDate.toISOString().split('T')[0],
+        status       : 'CONFIRMED',
+        totalHT      : parseFloat(totalHT.toFixed(2)),
+        totalTVA     : parseFloat(totalTVA.toFixed(2)),
+        totalTTC     : parseFloat(totalTTC.toFixed(2)),
+        items        : poItems
+      });
+
+      return SELECT.one.from(BonsCommande).where({ ID: po.ID });
+    });
+
+    // ─────────────────────────────────────────
+    // ACTION: 3-Way Match — Facture/PO/Réception
+    // ─────────────────────────────────────────
+    this.on('performThreeWayMatch', async (req) => {
+      const { factureId } = req.data;
+
+      const facture = await SELECT.one.from(FacturesFournisseur).where({ ID: factureId });
+      if (!facture) return req.error(404, 'Facture introuvable');
+      if (!facture.bonCommande_ID) return req.error(400, 'Facture non liée à un bon de commande');
+
+      const po          = await SELECT.one.from(BonsCommande).where({ ID: facture.bonCommande_ID });
+      const poItems     = await SELECT.from(POItems).where({ parent_ID: facture.bonCommande_ID });
+      const factItems   = await SELECT.from(FacturesFournisseur).where({ ID: factureId });
+      const receptions  = facture.reception_ID
+        ? await SELECT.from(ReceptionItems).where({ parent_ID: facture.reception_ID })
+        : [];
+
+      // Match logic: compare quantities and prices
+      let hasDiscrepancy = false;
+      for (const fi of factItems) {
+        const poi = poItems.find(p => p.product_ID === fi.product_ID);
+        const gri = receptions.find(r => r.product_ID === fi.product_ID);
+        if (!poi || Math.abs(parseFloat(fi.unitPrice) - parseFloat(poi.unitPrice)) > 0.01) {
+          hasDiscrepancy = true; break;
+        }
+        if (gri && parseFloat(fi.quantity) > parseFloat(gri.acceptedQty || gri.receivedQty || 0)) {
+          hasDiscrepancy = true; break;
+        }
+      }
+
+      const matchStatus = hasDiscrepancy ? 'DISCREPANCY' : 'MATCHED';
+      await UPDATE(FacturesFournisseur).set({
+        matchStatus,
+        matchDate : new Date().toISOString(),
+        matchBy   : req.user?.id || 'system',
+        status    : matchStatus === 'MATCHED' ? 'APPROVED' : 'SENT'
+      }).where({ ID: factureId });
+
+      return SELECT.one.from(FacturesFournisseur).where({ ID: factureId });
+    });
+
+    // ─────────────────────────────────────────
+    // ACTION: Évaluer un fournisseur
+    // ─────────────────────────────────────────
+    this.on('evaluateSupplier', async (req) => {
+      const { fournisseurId, quality, delivery, price, service, compliance, comments } = req.data;
+      const total = Math.round(((quality || 0) + (delivery || 0) + (price || 0) + (service || 0) + (compliance || 0)) / 5);
+      const rating = total >= 80 ? 'A' : total >= 60 ? 'B' : total >= 40 ? 'C' : 'D';
+
+      const [eval_] = await INSERT.into(Evaluations).entries({
+        fournisseur_ID  : fournisseurId,
+        date            : new Date().toISOString().split('T')[0],
+        evaluatedBy     : req.user?.id || 'admin',
+        qualityScore    : quality    || 0,
+        deliveryScore   : delivery   || 0,
+        priceScore      : price      || 0,
+        serviceScore    : service    || 0,
+        complianceScore : compliance || 0,
+        totalScore      : total,
+        comments        : comments   || '',
+        rating
+      });
+
+      await UPDATE(Fournisseurs).set({ rating, score: total }).where({ ID: fournisseurId });
+      return SELECT.one.from(Evaluations).where({ ID: eval_.ID });
     });
 
     // ── Action: Validate KYC ──
     this.on('validateKYC', async (req) => {
       const { fournisseurId } = req.data;
       await UPDATE(Fournisseurs).set({
-        kycStatus: 'VALIDATED',
-        kycDate: new Date().toISOString().split('T')[0],
-        kycBy: req.user.id,
-        status: 'ACTIVE'
+        kycStatus : 'VALIDATED',
+        kycDate   : new Date().toISOString().split('T')[0],
+        kycBy     : req.user?.id || 'admin',
+        status    : 'ACTIVE'
       }).where({ ID: fournisseurId });
-
-      // Also activate the BusinessPartner
-      const frs = await SELECT.one.from(Fournisseurs, fournisseurId).columns('bp_ID');
-      if (frs?.bp_ID) {
-        await UPDATE(BusinessPartner).set({ status: 'ACTIVE' }).where({ ID: frs.bp_ID });
-      }
-
-      return SELECT.one.from(Fournisseurs, fournisseurId);
+      return SELECT.one.from(Fournisseurs).where({ ID: fournisseurId });
     });
 
     // ── Action: Reject KYC ──
     this.on('rejectKYC', async (req) => {
       const { fournisseurId, reason } = req.data;
       await UPDATE(Fournisseurs).set({
-        kycStatus: 'REJECTED',
-        kycDate: new Date().toISOString().split('T')[0],
-        kycBy: req.user.id,
-        status: 'REJECTED',
-        notes: reason
+        kycStatus : 'REJECTED',
+        kycDate   : new Date().toISOString().split('T')[0],
+        kycBy     : req.user?.id || 'admin',
+        status    : 'BLOCKED'
       }).where({ ID: fournisseurId });
-
-      return SELECT.one.from(Fournisseurs, fournisseurId);
-    });
-
-    // ── Action: Select RFQ Response → generates PO ──
-    this.on('selectRFQResponse', async (req) => {
-      const { rfqId, responseId } = req.data;
-      await UPDATE(RFQs).set({
-        selectedResponse_ID: responseId,
-        status: 'APPROVED'
-      }).where({ ID: rfqId });
-
-      // Mark the selected response
-      const { RFQResponses } = this.entities;
-      await UPDATE(RFQResponses).set({ selected: true }).where({ ID: responseId });
-
-      return SELECT.one.from(RFQs, rfqId);
-    });
-
-    // ── Action: Convert RFQ → Purchase Order ──
-    this.on('convertRFQToPO', async (req) => {
-      const { rfqId } = req.data;
-      const rfq = await SELECT.one.from(RFQs).where({ ID: rfqId });
-
-      if (!rfq) req.error(404, 'RFQ not found');
-      if (!rfq.selectedResponse_ID) req.error(400, 'No response selected');
-
-      const { RFQResponses, RFQResponseItems } = this.entities;
-      const response = await SELECT.one.from(RFQResponses).where({ ID: rfq.selectedResponse_ID });
-      const responseItems = await SELECT.from(RFQResponseItems).where({ parent_ID: rfq.selectedResponse_ID });
-
-      const poNumber = await this._generateNumber('PO', 'PO');
-      const po = {
-        poNumber,
-        fournisseur_ID: response.fournisseur_ID,
-        rfq_ID: rfqId,
-        date: new Date().toISOString().split('T')[0],
-        status: 'DRAFT',
-        totalHT: response.totalAmount,
-        currency_code: rfq.currency_code,
-        items: responseItems.map((item, idx) => ({
-          lineNumber: idx + 1,
-          product_ID: item.product_ID,
-          description: item.notes,
-          unitPrice: item.unitPrice,
-          totalHT: item.totalPrice
-        }))
-      };
-
-      return INSERT.into(BonsCommande).entries(po);
-    });
-
-    // ── Action: 3-Way Match (PO ↔ Receipt ↔ Invoice) ──
-    this.on('performThreeWayMatch', async (req) => {
-      const { factureId } = req.data;
-      const facture = await SELECT.one.from(FacturesFournisseur).where({ ID: factureId });
-
-      if (!facture) req.error(404, 'Facture not found');
-      if (!facture.bonCommande_ID) req.error(400, 'No PO linked');
-
-      const po = await SELECT.one.from(BonsCommande).where({ ID: facture.bonCommande_ID });
-      let matchStatus = 'MATCHED';
-
-      // Compare totals (with 1% tolerance)
-      const tolerance = 0.01;
-      if (Math.abs(parseFloat(facture.totalTTC) - parseFloat(po.totalTTC)) / parseFloat(po.totalTTC) > tolerance) {
-        matchStatus = 'DISCREPANCY';
-      }
-
-      await UPDATE(FacturesFournisseur).set({
-        matchStatus,
-        matchDate: new Date().toISOString(),
-        matchBy: req.user.id,
-        status: matchStatus === 'MATCHED' ? 'APPROVED' : 'SUBMITTED'
-      }).where({ ID: factureId });
-
-      return SELECT.one.from(FacturesFournisseur, factureId);
-    });
-
-    // ── Action: Evaluate Supplier ──
-    this.on('evaluateSupplier', async (req) => {
-      const { fournisseurId, quality, delivery, price, service, compliance, comments } = req.data;
-      const totalScore = Math.round((quality + delivery + price + service + compliance) / 5);
-
-      let rating = 'D';
-      if (totalScore >= 16) rating = 'A';
-      else if (totalScore >= 12) rating = 'B';
-      else if (totalScore >= 8) rating = 'C';
-
-      const evaluation = {
-        fournisseur_ID: fournisseurId,
-        date: new Date().toISOString().split('T')[0],
-        evaluatedBy: req.user.id,
-        qualityScore: quality,
-        deliveryScore: delivery,
-        priceScore: price,
-        serviceScore: service,
-        complianceScore: compliance,
-        totalScore,
-        comments,
-        rating
-      };
-
-      const result = await INSERT.into(Evaluations).entries(evaluation);
-
-      // Update supplier overall rating
-      await UPDATE(Fournisseurs).set({
-        score: totalScore,
-        rating
-      }).where({ ID: fournisseurId });
-
-      return result;
+      return SELECT.one.from(Fournisseurs).where({ ID: fournisseurId });
     });
 
     await super.init();
   }
 
-  // ── Helper: Generate sequential number ──
   async _generateNumber(objectType, prefix) {
-    const { NumberRange } = cds.entities('sap.pme.admin');
-
-    let range = await SELECT.one.from(NumberRange).where({ objectType });
-    if (!range) {
-      await INSERT.into(NumberRange).entries({
-        objectType, prefix, currentNumber: 0, padLength: 5
-      });
-      range = { currentNumber: 0, padLength: 5, prefix };
+    try {
+      const { NumberRange } = cds.entities('sap.pme.admin');
+      let range = await SELECT.one.from(NumberRange).where({ objectType });
+      if (!range) {
+        await INSERT.into(NumberRange).entries({ objectType, prefix, currentNumber: 0, padLength: 5 });
+        range = { currentNumber: 0, padLength: 5, prefix };
+      }
+      const next = (range.currentNumber || 0) + 1;
+      await UPDATE(NumberRange).set({ currentNumber: next }).where({ objectType });
+      return `${prefix}-${String(next).padStart(range.padLength || 5, '0')}`;
+    } catch (e) {
+      return `${prefix}-${Date.now()}`;
     }
-
-    const nextNumber = (range.currentNumber || 0) + 1;
-    await UPDATE(NumberRange).set({ currentNumber: nextNumber }).where({ objectType });
-
-    return `${prefix}-${String(nextNumber).padStart(range.padLength, '0')}`;
   }
 };

@@ -173,6 +173,12 @@
 
       .invalid-feedback {
         font-size: 0.8rem;
+        display: none;
+      }
+      .form-control.is-invalid ~ .invalid-feedback,
+      .form-select.is-invalid ~ .invalid-feedback,
+      .invalid-feedback.d-block {
+        display: block;
       }
 
       .card-type-selector {
@@ -372,7 +378,7 @@
             <div class="col-md-6 mb-4">
               <label class="form-label">Wilaya *</label>
               <select class="form-select" id="wilaya" name="wilaya" required>
-                <option value="" selected disabled>Choisir une wilaya...</option>
+                <option value="" disabled selected>Choisir une wilaya...</option>
                 <option value="Adrar">01 - Adrar</option><option value="Chlef">02 - Chlef</option><option value="Laghouat">03 - Laghouat</option>
                 <option value="Oum El Bouaghi">04 - Oum El Bouaghi</option><option value="Batna">05 - Batna</option><option value="Béjaïa">06 - Béjaïa</option>
                 <option value="Biskra">07 - Biskra</option><option value="Béchar">08 - Béchar</option><option value="Blida">09 - Blida</option>
@@ -394,18 +400,20 @@
                 <option value="In Salah">53 - In Salah</option><option value="In Guezzam">54 - In Guezzam</option><option value="Touggourt">55 - Touggourt</option>
                 <option value="Djanet">56 - Djanet</option><option value="El M'Ghair">57 - El M'Ghair</option><option value="El Meniaa">58 - El Meniaa</option>
               </select>
+              <div class="invalid-feedback" id="wilayaError">Veuillez sélectionner une wilaya.</div>
             </div>
             
             <div class="col-md-6 mb-4">
               <label class="form-label">Secteur d'activité *</label>
             <select class="form-select" id="sector" onchange="toggleCustomSector()" required>
-              <option value="" selected disabled>Choisir un secteur...</option>
+              <option value="" disabled selected>Choisir un secteur...</option>
               <option value="Informatique & Tech">Informatique & Tech</option>
               <option value="Industrie & Manufacture">Industrie & Manufacture</option>
               <option value="BTP & Construction">BTP & Construction</option>
               <option value="Commerce & Distribution">Commerce & Distribution</option>
               <option value="Autre">Autre</option>
               </select>
+              <div class="invalid-feedback" id="sectorError">Veuillez sélectionner un secteur.</div>
             </div>
           </div>
 
@@ -419,7 +427,7 @@
             <button
               type="button"
               class="btn btn-primary"
-              onclick="validateAndNext(2)"
+              onclick="validateAndNext(2, this)"
             >
               Suivant
             </button>
@@ -495,7 +503,7 @@
             <button
               type="button"
               class="btn btn-primary"
-              onclick="validateAndNext(3)"
+              onclick="validateAndNext(3, this)"
             >
               Suivant
             </button>
@@ -611,7 +619,7 @@
         input.classList.remove("is-invalid");
         if (errorDiv) {
             errorDiv.textContent = "";
-            errorDiv.style.display = "none";
+            errorDiv.classList.remove("d-block");
         }
 
         if (!value) return; // Ne rien faire si le champ est vide
@@ -639,7 +647,7 @@
             input.classList.add("is-invalid");
             if (errorDiv) {
               errorDiv.textContent = data.blockReason;
-              errorDiv.style.display = "block";
+              errorDiv.classList.add("d-block");
             }
           }
         } catch (e) {
@@ -670,148 +678,147 @@
         element.querySelector("input").checked = true;
       }
 
-      async function validateAndNext(step) {
-        const currentStepEl = document.querySelector(".step-content.active");
-        const inputs = currentStepEl.querySelectorAll("input, select");
+      function getRegType() {
+        const typeValue = document.querySelector('input[name="regType"]:checked').value;
+        return typeValue === "b2b" ? "CLIENT_B2B" : typeValue === "b2c" ? "CLIENT_B2C" : "FOURNISSEUR";
+      }
+
+      function odataEscape(value) {
+        return String(value || "").replace(/'/g, "''");
+      }
+
+      async function callCheckAvailability(params) {
+        const parts = Object.entries(params).map(
+          ([key, val]) => `${key}='${odataEscape(val)}'`,
+        );
+        const res = await fetch(
+          `/odata/v4/registration/checkAvailability(${parts.join(",")})`,
+        );
+        if (!res.ok) {
+          console.warn("checkAvailability HTTP", res.status);
+          return { status: "AVAILABLE" };
+        }
+        const raw = await res.json();
+        return raw.value || raw;
+      }
+
+      function validateCurrentStep(stepNum) {
+        const currentStepEl = document.getElementById("step" + stepNum);
+        const fields = currentStepEl.querySelectorAll(
+          "input:not([type='radio']):not([type='file']), select",
+        );
         let valid = true;
+        let firstInvalid = null;
 
-        inputs.forEach((input) => {
-          const errorDiv = document.getElementById(input.id + "Error");
-          const hasConflict = errorDiv && errorDiv.style.display === "block";
+        fields.forEach((input) => {
+          if (input.offsetParent === null && input.id !== "customSector") return;
+          if (input.id === "customSector" && !input.required) return;
 
-          if (!input.checkValidity()) {
+          const errorDiv = input.id
+            ? document.getElementById(input.id + "Error")
+            : null;
+          const hasConflict =
+            errorDiv &&
+            (errorDiv.classList.contains("d-block") ||
+              errorDiv.style.display === "block") &&
+            errorDiv.textContent.trim();
+
+          if (!input.checkValidity() || hasConflict) {
             input.classList.add("is-invalid");
+            if (errorDiv && !hasConflict) {
+              errorDiv.classList.add("d-block");
+            }
             valid = false;
-          } else if (hasConflict) {
-            input.classList.add("is-invalid");
-            valid = false;
+            if (!firstInvalid) firstInvalid = input;
           } else {
             input.classList.remove("is-invalid");
+            if (errorDiv) {
+              errorDiv.classList.remove("d-block");
+              if (!errorDiv.textContent.trim()) errorDiv.style.display = "";
+            }
           }
         });
 
-        if (step === 3) {
+        if (stepNum === 2) {
           const pass = document.getElementById("password").value;
           const confirm = document.getElementById("confirmPassword").value;
           if (pass !== confirm) {
-            document
-              .getElementById("confirmPassword")
-              .classList.add("is-invalid");
-            document.getElementById("passError").style.display = "block";
+            document.getElementById("confirmPassword").classList.add("is-invalid");
+            document.getElementById("passError").classList.add("d-block");
             valid = false;
+            if (!firstInvalid) firstInvalid = document.getElementById("confirmPassword");
           } else {
-            document.getElementById("passError").style.display = "none";
+            document.getElementById("passError").classList.remove("d-block");
           }
         }
 
-        if (!valid) return;
-
-        if (step === 1) {
-          const btn = event.target;
-          const originalText = btn.innerHTML;
-          btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Vérification...';
-          btn.disabled = true;
-
-          try {
-            const typeValue = document.querySelector('input[name="regType"]:checked').value;
-            const type = typeValue === "b2b" ? "CLIENT_B2B" : typeValue === "b2c" ? "CLIENT_B2C" : "FOURNISSEUR";
-            const companyName = document.getElementById("companyName").value;
-            const rcNumber = document.getElementById("rc").value;
-            const nif = document.getElementById("nif").value;
-            const ai = document.getElementById("ai").value;
-            const ribNumber = document.getElementById("ribNumber").value;
-            
-            const query = `/odata/v4/registration/checkAvailability(type='${type}',companyName='${encodeURIComponent(companyName)}',rcNumber='${encodeURIComponent(rcNumber)}',nif='${encodeURIComponent(nif)}',ai='${encodeURIComponent(ai)}',ribNumber='${encodeURIComponent(ribNumber)}',email='',phone='')`;
-            
-            const res = await fetch(query);
-            const data = await res.json();
-            
-            if (data.status === "CONFLICT") {
-              showCustomAlert(data.blockReason, "Conflit détecté");
-              btn.innerHTML = originalText;
-              btn.disabled = false;
-              return;
-            }
-          } catch (e) {
-            console.error("Erreur de vérification backend", e);
-          }
-          btn.innerHTML = originalText;
-          btn.disabled = false;
+        if (!valid) {
+          document.getElementById("registrationForm").classList.add("was-validated");
+          showCustomAlert(
+            "Veuillez remplir correctement tous les champs obligatoires (en rouge) avant de continuer.<br><small class='text-muted'>RC : format 00/00-1234567B26 — NIF : 15 chiffres — AI : 11 chiffres — RIB : 20 chiffres</small>",
+            "Formulaire incomplet",
+          );
+          firstInvalid?.focus();
+          firstInvalid?.scrollIntoView({ behavior: "smooth", block: "center" });
         }
 
-        if (step === 2) {
-          const btn = event.target;
-          const originalText = btn.innerHTML;
-          btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Vérification...';
-          btn.disabled = true;
+        return valid;
+      }
 
-          try {
-            const typeValue = document.querySelector('input[name="regType"]:checked').value;
-            const type = typeValue === "b2b" ? "CLIENT_B2B" : typeValue === "b2c" ? "CLIENT_B2C" : "FOURNISSEUR";
-            const email = document.getElementById("email").value;
-            const phone = document.getElementById("phone").value;
-            
-            const query = `/odata/v4/registration/checkAvailability(type='${type}',email='${encodeURIComponent(email)}',phone='${encodeURIComponent(phone)}',companyName='',rcNumber='',nif='',ai='',ribNumber='')`;
-            
-            const res = await fetch(query);
-            const data = await res.json();
-            
-            if (data.status === "CONFLICT") {
-              showCustomAlert(data.blockReason, "Conflit détecté");
-              btn.innerHTML = originalText;
-              btn.disabled = false;
-              return;
-            }
-          } catch (e) {
-            console.error("Erreur de vérification backend", e);
-          }
-          btn.innerHTML = originalText;
-          btn.disabled = false;
-        }
+      async function validateAndNext(nextStep, btn) {
+        const currentStep = nextStep - 1;
 
-        // --- CONTRÔLE SERVEUR ---
-        const regTypeRaw = document.querySelector(
-          'input[name="regType"]:checked',
-        ).value;
-        const type = regTypeRaw === "b2b" ? "CLIENT_B2B" : regTypeRaw === "b2c" ? "CLIENT_B2C" : "FOURNISSEUR";
-        const companyName = document.getElementById("companyName").value;
-        const email = document.getElementById("email").value;
+        if (!validateCurrentStep(currentStep)) return;
+
+        const originalText = btn.innerHTML;
+        btn.innerHTML =
+          '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Vérification...';
+        btn.disabled = true;
 
         try {
-          let checkUrl = "";
-          if (step === 2) {
-            // Sortie étape 1
-            checkUrl = `/odata/v4/registration/checkAvailability(companyName='${encodeURIComponent(companyName)}',type='${type}',email='')`;
-          } else if (step === 3) {
-            // Sortie étape 2
-            checkUrl = `/odata/v4/registration/checkAvailability(email='${encodeURIComponent(email)}',companyName='',type='')`;
-          }
+          const type = getRegType();
 
-          if (checkUrl) {
-            const res = await fetch(checkUrl);
-            const raw = await res.json();
-            const data = raw.value || raw;
-            if (data && data.status === "CONFLICT") {
-              if (step === 2) {
-                const input = document.getElementById("companyName");
-                const error = document.getElementById("companyError");
-                input.classList.add("is-invalid");
-                error.innerText = data.blockReason;
-                error.style.display = "block";
-              } else {
-                const input = document.getElementById("email");
-                const error = document.getElementById("emailError");
-                input.classList.add("is-invalid");
-                error.innerText = data.blockReason;
-                error.style.display = "block";
-              }
+          if (nextStep === 2) {
+            const data = await callCheckAvailability({
+              type,
+              companyName: document.getElementById("companyName").value.trim(),
+              rcNumber: document.getElementById("rc").value.trim(),
+              nif: document.getElementById("nif").value.trim(),
+              ai: document.getElementById("ai").value.trim(),
+              ribNumber: document.getElementById("ribNumber").value.trim(),
+              email: "",
+              phone: "",
+            });
+            if (data.status === "CONFLICT") {
+              showCustomAlert(data.blockReason, "Conflit détecté");
               return;
             }
           }
-          goToStep(step);
+
+          if (nextStep === 3) {
+            const data = await callCheckAvailability({
+              type,
+              email: document.getElementById("email").value.trim(),
+              phone: document.getElementById("phone").value.trim(),
+              companyName: "",
+              rcNumber: "",
+              nif: "",
+              ai: "",
+              ribNumber: "",
+            });
+            if (data.status === "CONFLICT") {
+              showCustomAlert(data.blockReason, "Conflit détecté");
+              return;
+            }
+          }
+
+          goToStep(nextStep);
         } catch (e) {
-          console.error("Check error:", e);
-          goToStep(step);
+          console.error("Erreur de vérification:", e);
+          goToStep(nextStep);
+        } finally {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
         }
       }
 
