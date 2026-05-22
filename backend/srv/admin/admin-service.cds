@@ -81,4 +81,10 @@ service AdminService {
   action downloadFacturePDF(factId: UUID)                                               returns String;
   action downloadDevisPDF(devisId: UUID)                                                returns String;
   action downloadCommandePDF(commandeId: UUID)                                          returns String;
+
+  // ── Admin Commande Actions ──
+  action validateCashOrder(commandeId: UUID) returns AllCommandes;
+
+  // ── Admin Dispute Actions ──
+  action resolveDispute(invoiceId: UUID) returns AllFacturesFournisseur;
 }

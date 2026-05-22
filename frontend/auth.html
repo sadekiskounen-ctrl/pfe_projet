@@ -205,7 +205,7 @@
 
             <div class="form-group">
                 <label for="username">Email ou Identifiant</label>
-                <input type="text" id="username" placeholder="votre@email.com" required>
+                <input type="text" id="username" placeholder="votre@email.com" required oninput="this.value = this.value.toLowerCase()">
             </div>
 
             <div class="form-group">
@@ -369,8 +369,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const targetApp = urlParams.get('app');
             
-            if (finalRole === 'client_b2b') window.location.href = '/crm/index.html';
-            else if (finalRole === 'client_b2c') window.location.href = '/crm/b2c.html';
+            if (finalRole === 'client_b2b' || finalRole === 'client_b2c') window.location.href = '/crm/index.html';
             else if (targetApp === 'srm' || finalRole === 'fournisseur') window.location.href = '/srm/index.html';
             else if (targetApp === 'admin' || finalRole === 'admin') window.location.href = '/admin/dashboard.html';
             else window.location.href = '/index.html';

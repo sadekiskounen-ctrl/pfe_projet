@@ -3,7 +3,7 @@
 // Portail Client B2B & B2C — PME Connect
 // ============================================================
 
-using { sap.pme as pme }           from '../../db/schema/common';
+using { sap.pme as pme }           from '../../db/index';
 using { sap.pme.crm as crm }       from '../../db/schema/crm';
 using { sap.pme.doc as doc }        from '../../db/schema/documents';
 
@@ -89,7 +89,7 @@ service CRMService {
   // ── Actions Panier → Documents ──
   // B2B : Panier → Devis (PENDING, en attente de révision admin)
   type CartItem {
-    productId   : UUID;
+    product_ID  : UUID;
     quantity    : Decimal(13, 3);
     unitPrice   : Decimal(15, 2);
     tvaRate     : Decimal(5, 2);
@@ -106,7 +106,8 @@ service CRMService {
     clientB2C_ID    : UUID,
     items           : array of CartItem,
     paymentMethod   : String(20),
-    paymentRef      : String(128)
+    paymentRef      : String(128),
+    deliveryAddress : String(512)
   ) returns Commandes;
 
   // ── Actions Workflow Devis ──
@@ -119,6 +120,7 @@ service CRMService {
   action sendOrderToClient(commandeId: UUID) returns Commandes;
   action acceptOrder(commandeId: UUID) returns Commandes;
   action rejectOrder(commandeId: UUID) returns Commandes;
+  action payOrder(commandeId: UUID, paymentMethod: String(20), paymentRef: String(128)) returns Commandes;
 
   // ── Paiement ──
   action recordPayment(factureId: UUID, amount: Decimal, method: String, reference: String) returns Paiements;

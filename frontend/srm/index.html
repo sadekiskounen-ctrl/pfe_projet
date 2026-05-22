@@ -168,6 +168,21 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
 .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
 .empty-state i { font-size: 2.5rem; margin-bottom: 16px; opacity: 0.3; display: block; }
+
+/* PULSING BADGE */
+.noti-badge-pulse { animation: badgePulse 1.5s ease-in-out infinite; }
+@keyframes badgePulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.15);opacity:0.85} }
+
+/* STARS */
+.stars { display:inline-flex; gap:2px; }
+.stars .fa-star { font-size:0.95rem; }
+.star-gold { color:#f5a623; }
+.star-grey { color:#3a3f50; }
+
+/* PDF VIEWER */
+.pdf-modal-box { max-width:900px; width:95vw; height:85vh; display:flex; flex-direction:column; }
+.pdf-icon-btn { background:none; border:none; cursor:pointer; color:var(--accent); font-size:1rem; padding:4px; transition:all var(--transition); vertical-align:middle; margin-left:4px; }
+.pdf-icon-btn:hover { color:var(--accent2); transform:scale(1.15); }
 </style>
 </head>
 <body>
@@ -191,13 +206,15 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     <div class="nav-section-label">Achats</div>
     <div class="nav-item" id="nav-rfqs" onclick="showView('rfqs',this)">
       <span class="nav-icon"><i class="fas fa-file-contract"></i></span> Appels d'Offres
-      <span class="nav-badge" id="rfqBadge" style="display:none">0</span>
+      <span class="nav-badge noti-badge-pulse" id="rfqBadge" style="display:none">0</span>
     </div>
     <div class="nav-item" id="nav-pos" onclick="showView('pos',this)">
       <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span> Bons de Commande
+      <span class="nav-badge noti-badge-pulse" id="poBadge" style="display:none">0</span>
     </div>
     <div class="nav-item" id="nav-match" onclick="showView('match',this)">
       <span class="nav-icon"><i class="fas fa-layer-group"></i></span> 3-Way Match
+      <span class="nav-badge noti-badge-pulse" id="matchBadge" style="display:none;background:var(--accent-gold)">0</span>
     </div>
     <div class="nav-section-label">Mon compte</div>
     <div class="nav-item" id="nav-profil" onclick="showView('profil',this)">
@@ -381,6 +398,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
       <div class="form-group"><label>Wilaya</label><input type="text" class="form-input" id="edit-wilaya" placeholder="Ex: Alger"></div>
       <div class="form-group"><label>Adresse</label><input type="text" class="form-input" id="edit-street" placeholder="Rue, N°..."></div>
       <div class="form-group"><label>Ville</label><input type="text" class="form-input" id="edit-city" placeholder="Alger..."></div>
+      <div class="form-group"><label>Article d'Imposition</label><input type="text" class="form-input" id="edit-ai" placeholder="AI N°..."></div>
     </div>
     <div style="padding-bottom:12px;margin-bottom:16px;border-bottom:1px solid var(--border-light);font-size:0.8rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Informations Bancaires</div>
     <div class="form-grid-2">
@@ -402,6 +420,62 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     <div class="modal-title"><i class="fas fa-clipboard-list" style="color:var(--accent2)"></i> Détails du Bon de Commande</div>
     <div id="poModalContent"></div>
     <div class="modal-actions"><button class="btn btn-ghost" onclick="closePOModal()">Fermer</button></div>
+  </div>
+</div>
+
+<!-- MODAL: CRÉER RÉCEPTION MARCHANDISE (GR) -->
+<div class="modal-overlay" id="grModal">
+  <div class="modal-box" style="max-width:750px">
+    <div class="modal-title"><i class="fas fa-truck" style="color:var(--accent)"></i> Enregistrer la Réception (GR)</div>
+    <div class="modal-subtitle" id="grModalSubtitle">PO N° —</div>
+    <div id="grItemsContainer"></div>
+    <div class="form-group">
+      <label>Notes de réception</label>
+      <textarea class="form-input" id="gr-notes" rows="3" placeholder="Remarques sur la livraison..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeGRModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="submitGR()"><i class="fas fa-check"></i> Valider la réception</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CRÉER FACTURE FOURNISSEUR -->
+<div class="modal-overlay" id="supplierInvoiceModal">
+  <div class="modal-box" style="max-width:750px">
+    <div class="modal-title"><i class="fas fa-file-invoice" style="color:var(--accent-gold)"></i> Créer une Facture Fournisseur</div>
+    <div class="modal-subtitle" id="invoiceModalSubtitle">PO N° —</div>
+    <div id="invoiceItemsContainer"></div>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label>Date d'échéance</label>
+        <input type="date" class="form-input" id="inv-dueDate">
+      </div>
+      <div class="form-group">
+        <label>Notes</label>
+        <input type="text" class="form-input" id="inv-notes" placeholder="Référence facture...">
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:16px;padding:14px;background:var(--bg-card2);border-radius:10px;margin-bottom:16px">
+      <div><span style="color:var(--text-dim);font-size:0.82rem">Total HT : </span><strong id="inv-totalHT">0,00</strong> DA</div>
+      <div><span style="color:var(--text-dim);font-size:0.82rem">TVA : </span><strong id="inv-totalTVA">0,00</strong> DA</div>
+      <div style="font-size:1.1rem"><span style="color:var(--text-dim);font-size:0.82rem">Total TTC : </span><strong style="color:var(--accent)" id="inv-totalTTC">0,00</strong> DA</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeInvoiceModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="submitSupplierInvoice()"><i class="fas fa-paper-plane"></i> Soumettre la facture</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PDF VIEWER (Inline) -->
+<div class="modal-overlay" id="pdfViewerModal" onclick="if(event.target===this) closePDFViewer()">
+  <div class="modal-box pdf-modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="modal-title" style="margin-bottom:0"><i class="fas fa-file-pdf" style="color:var(--accent2)"></i> <span id="pdfViewerTitle">Document PDF</span></div>
+      <button class="btn btn-ghost btn-sm" onclick="closePDFViewer()"><i class="fas fa-times"></i></button>
+    </div>
+    <iframe id="pdfViewerFrame" style="flex:1;width:100%;border:none;border-radius:10px;background:#fff;" src="about:blank"></iframe>
   </div>
 </div>
 
@@ -459,7 +533,7 @@ async function init() {
 
 async function loadProfile() {
   const enc = encodeURIComponent(`tolower(email) eq '${EMAIL.toLowerCase()}'`);
-  const res  = await fetch(`/odata/v4/srm/Fournisseurs?$filter=${enc}`);
+  const res  = await fetch(`/odata/v4/srm/Fournisseurs?$filter=${enc}&$expand=bp`);
   const data = await res.json();
   if (data.value?.length > 0) {
     profile = data.value[0];
@@ -467,7 +541,8 @@ async function loadProfile() {
     document.getElementById('userDisplayName').textContent = name;
     document.getElementById('userEmailDisplay').textContent = profile.email;
     document.getElementById('avatarInitial').textContent = name.charAt(0).toUpperCase();
-    document.getElementById('kpi-rating').textContent = profile.rating || '—';
+    const bpRating = profile.bp?.rating || 0;
+    document.getElementById('kpi-rating').innerHTML = bpRating > 0 ? renderStars(bpRating) : '—';
   }
 }
 
@@ -646,16 +721,25 @@ async function loadPOs() {
     posList = data.value || [];
     if (!posList.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>Aucun bon de commande.</td></tr>'; return; }
     const statusMap = { CONFIRMED:'badge-confirmed', DELIVERED:'badge-matched', CANCELLED:'badge-closed' };
-    tbody.innerHTML = posList.map(po => `
+    tbody.innerHTML = posList.map(po => {
+      let actionBtns = `<button class="btn btn-ghost btn-sm" onclick="viewPO('${po.ID}')"><i class="fas fa-eye"></i> Voir</button>`;
+      if (po.status === 'CONFIRMED') {
+        actionBtns += ` <button class="btn btn-primary btn-sm" onclick="openGRModal('${po.ID}', '${po.poNumber}')"><i class="fas fa-truck"></i> GR</button>`;
+      }
+      if (po.status === 'DELIVERED') {
+        actionBtns += ` <button class="btn btn-primary btn-sm" onclick="openCreateInvoiceModal('${po.ID}', '${po.poNumber}')"><i class="fas fa-file-invoice"></i> Facture</button>`;
+      }
+      return `
       <tr>
         <td style="font-family:monospace;font-weight:600">${po.poNumber||'—'}</td>
         <td>${fmtDate(po.date)}</td>
         <td>${fmtDate(po.deliveryDate)}</td>
         <td style="font-weight:700;color:var(--accent-gold)">${fmt(po.totalTTC)} DA</td>
         <td><span class="badge ${statusMap[po.status]||'badge-pending'}">${po.status||'—'}</span></td>
-        <td><button class="btn btn-ghost btn-sm" onclick="viewPO('${po.ID}')"><i class="fas fa-eye"></i> Voir</button></td>
+        <td style="white-space:nowrap;">${actionBtns}</td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
   } catch(e) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6" style="color:var(--accent-red)">${e.message}</td></tr>`; }
 }
 
@@ -696,6 +780,165 @@ async function viewPO(poId) {
 function closePOModal() { document.getElementById('poModal').classList.remove('open'); }
 
 // ═══════════════════════════════════════════════════════
+// CRÉER GR (RÉCEPTION MARCHANDISE)
+// ═══════════════════════════════════════════════════════
+let grPoId = null;
+let grPoItems = [];
+
+async function openGRModal(poId, poNumber) {
+  grPoId = poId;
+  document.getElementById('grModalSubtitle').textContent = `PO N° ${poNumber || '—'}`;
+  document.getElementById('gr-notes').value = '';
+  showLoader(true);
+  try {
+    const res = await fetch(`/odata/v4/srm/BonsCommande(ID=${poId})?$expand=items`);
+    const data = await res.json();
+    grPoItems = data.items || [];
+    document.getElementById('grItemsContainer').innerHTML = `
+      <table class="offer-items-table">
+        <thead><tr><th>#</th><th>Description</th><th>Qté commandée</th><th>Qté reçue</th><th>Qté acceptée</th><th>Qté rejetée</th></tr></thead>
+        <tbody>${grPoItems.map((item, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${item.description || '—'}</td>
+            <td style="font-family:monospace">${item.quantity} ${item.unit || ''}</td>
+            <td><input type="number" class="price-input gr-receivedQty" data-idx="${i}" value="${item.quantity}" min="0" step="0.001"></td>
+            <td><input type="number" class="price-input gr-acceptedQty" data-idx="${i}" value="${item.quantity}" min="0" step="0.001"></td>
+            <td><input type="number" class="price-input gr-rejectedQty" data-idx="${i}" value="0" min="0" step="0.001"></td>
+          </tr>
+        `).join('')}</tbody>
+      </table>
+    `;
+    document.getElementById('grModal').classList.add('open');
+  } catch(e) { toast('error', e.message); }
+  finally { showLoader(false); }
+}
+function closeGRModal() { document.getElementById('grModal').classList.remove('open'); }
+
+async function submitGR() {
+  if (!grPoId || !grPoItems.length) return;
+  showLoader(true);
+  try {
+    const items = grPoItems.map((item, i) => ({
+      poItemId    : item.ID,
+      receivedQty : parseFloat(document.querySelector(`.gr-receivedQty[data-idx="${i}"]`).value || 0),
+      acceptedQty : parseFloat(document.querySelector(`.gr-acceptedQty[data-idx="${i}"]`).value || 0),
+      rejectedQty : parseFloat(document.querySelector(`.gr-rejectedQty[data-idx="${i}"]`).value || 0),
+      notes       : ''
+    }));
+    const body = { poId: grPoId, items, notes: document.getElementById('gr-notes').value };
+    const res = await fetch('/odata/v4/srm/createGoodsReceipt', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Erreur serveur');
+    closeGRModal();
+    toast('success', `Réception ${data.receiptNumber || ''} enregistrée avec succès`);
+    loadPOs();
+  } catch(e) { toast('error', e.message); }
+  finally { showLoader(false); }
+}
+
+// ═══════════════════════════════════════════════════════
+// CRÉER FACTURE FOURNISSEUR
+// ═══════════════════════════════════════════════════════
+let invPoId = null;
+let invPoItems = [];
+let invReceptionId = null;
+
+async function openCreateInvoiceModal(poId, poNumber) {
+  invPoId = poId;
+  document.getElementById('invoiceModalSubtitle').textContent = `PO N° ${poNumber || '—'}`;
+  document.getElementById('inv-notes').value = '';
+  document.getElementById('inv-dueDate').value = new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+  showLoader(true);
+  try {
+    // Fetch PO with items and receptions
+    const res = await fetch(`/odata/v4/srm/BonsCommande(ID=${poId})?$expand=items,receptions`);
+    const data = await res.json();
+    invPoItems = data.items || [];
+    const receptions = data.receptions || [];
+    invReceptionId = receptions.length > 0 ? receptions[receptions.length - 1].ID : null;
+
+    document.getElementById('invoiceItemsContainer').innerHTML = `
+      <table class="offer-items-table">
+        <thead><tr><th>#</th><th>Description</th><th>Qté</th><th>Prix unitaire HT</th><th>TVA %</th><th>Total TTC</th></tr></thead>
+        <tbody>${invPoItems.map((item, i) => `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${item.description || '—'}</td>
+            <td><input type="number" class="price-input inv-qty" data-idx="${i}" value="${item.quantity}" min="0" step="0.001" oninput="recalcInvoice()"></td>
+            <td><input type="number" class="price-input inv-price" data-idx="${i}" value="${parseFloat(item.unitPrice).toFixed(2)}" min="0" step="0.01" oninput="recalcInvoice()"></td>
+            <td><input type="number" class="price-input inv-tva" data-idx="${i}" value="${item.tvaRate || 19}" min="0" max="100" step="0.5" oninput="recalcInvoice()" style="width:70px"></td>
+            <td style="font-family:monospace;font-weight:700;color:var(--accent)" class="inv-line-ttc" data-idx="${i}">0,00</td>
+          </tr>
+        `).join('')}</tbody>
+      </table>
+    `;
+    recalcInvoice();
+    document.getElementById('supplierInvoiceModal').classList.add('open');
+  } catch(e) { toast('error', e.message); }
+  finally { showLoader(false); }
+}
+function closeInvoiceModal() { document.getElementById('supplierInvoiceModal').classList.remove('open'); }
+
+function recalcInvoice() {
+  let totalHT = 0, totalTVA = 0, totalTTC = 0;
+  invPoItems.forEach((_, i) => {
+    const qty   = parseFloat(document.querySelector(`.inv-qty[data-idx="${i}"]`)?.value || 0);
+    const price = parseFloat(document.querySelector(`.inv-price[data-idx="${i}"]`)?.value || 0);
+    const tva   = parseFloat(document.querySelector(`.inv-tva[data-idx="${i}"]`)?.value || 19);
+    const ht    = qty * price;
+    const tvaAmt = ht * (tva / 100);
+    const ttc   = ht + tvaAmt;
+    totalHT  += ht;
+    totalTVA += tvaAmt;
+    totalTTC += ttc;
+    const cell = document.querySelector(`.inv-line-ttc[data-idx="${i}"]`);
+    if (cell) cell.textContent = fmt(ttc);
+  });
+  document.getElementById('inv-totalHT').textContent  = fmt(totalHT);
+  document.getElementById('inv-totalTVA').textContent = fmt(totalTVA);
+  document.getElementById('inv-totalTTC').textContent = fmt(totalTTC);
+}
+
+async function submitSupplierInvoice() {
+  if (!invPoId || !invPoItems.length) return;
+  showLoader(true);
+  try {
+    const items = invPoItems.map((item, i) => ({
+      poItemId    : item.ID,
+      quantity    : parseFloat(document.querySelector(`.inv-qty[data-idx="${i}"]`).value || 0),
+      unitPrice   : parseFloat(document.querySelector(`.inv-price[data-idx="${i}"]`).value || 0),
+      tvaRate     : parseFloat(document.querySelector(`.inv-tva[data-idx="${i}"]`).value || 19),
+      description : item.description || ''
+    }));
+    const body = {
+      poId        : invPoId,
+      receptionId : invReceptionId,
+      items,
+      dueDate     : document.getElementById('inv-dueDate').value,
+      notes       : document.getElementById('inv-notes').value
+    };
+    const res = await fetch('/odata/v4/srm/createSupplierInvoice', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Erreur serveur');
+    closeInvoiceModal();
+    const matchMsg = data.matchStatus === 'MATCHED'
+      ? '✓ Apparié automatiquement (conforme)'
+      : '⚠ Écart détecté — en attente de résolution';
+    toast(data.matchStatus === 'MATCHED' ? 'success' : 'info', `Facture ${data.invoiceNumber || ''} créée. ${matchMsg}`);
+    loadPOs();
+    loadMatch();
+  } catch(e) { toast('error', e.message); }
+  finally { showLoader(false); }
+}
+
+// ═══════════════════════════════════════════════════════
 // 3-WAY MATCH
 // ═══════════════════════════════════════════════════════
 async function loadMatch() {
@@ -713,9 +956,12 @@ async function loadMatch() {
     tbody.innerHTML = matchList.map(f => {
       const po  = f.bonCommande;
       const gr  = f.reception;
-      const poIcon  = po ? `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${po.poNumber}` : `<span class="match-status-err"><i class="fas fa-times-circle"></i></span> Aucun PO`;
-      const grIcon  = gr ? `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${gr.receiptNumber}` : `<span class="match-status-warn"><i class="fas fa-clock"></i></span> En attente`;
-      const invIcon = `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${f.invoiceNumber}`;
+      const poPdf  = po ? ` <button class="pdf-icon-btn" onclick="viewPOPDF('${po.ID}','${po.poNumber}')" title="PDF Bon de Commande"><i class="fas fa-file-pdf"></i></button>` : '';
+      const grPdf  = gr ? ` <button class="pdf-icon-btn" onclick="viewGRPDF('${gr.ID}','${gr.receiptNumber}')" title="PDF Bon de R\u00e9ception"><i class="fas fa-file-pdf"></i></button>` : '';
+      const invPdf = ` <button class="pdf-icon-btn" onclick="viewInvoicePDF('${f.ID}','${f.invoiceNumber}')" title="PDF Facture"><i class="fas fa-file-pdf"></i></button>`;
+      const poIcon  = po ? `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${po.poNumber}${poPdf}` : `<span class="match-status-err"><i class="fas fa-times-circle"></i></span> Aucun PO`;
+      const grIcon  = gr ? `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${gr.receiptNumber}${grPdf}` : `<span class="match-status-warn"><i class="fas fa-clock"></i></span> En attente`;
+      const invIcon = `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${f.invoiceNumber}${invPdf}`;
       return `<tr>
         <td style="font-family:monospace;font-weight:600">${f.invoiceNumber||'—'}</td>
         <td style="font-size:0.82rem">${poIcon}</td>
@@ -742,8 +988,12 @@ function renderProfileView() {
     <div class="profile-field"><label>Téléphone</label><p>${profile.phone||'—'}</p></div>
     <div class="profile-field"><label>RC</label><p style="font-family:monospace">${profile.rc||'—'}</p></div>
     <div class="profile-field"><label>NIF</label><p style="font-family:monospace">${profile.nif||'—'}</p></div>
+    <div class="profile-field"><label>RIB</label><p style="font-family:monospace">${profile.rib||'—'}</p></div>
+    <div class="profile-field"><label>Article d'Imposition</label><p style="font-family:monospace">${profile.ai||'—'}</p></div>
     <div class="profile-field"><label>Adresse</label><p>${profile.street||'—'}</p></div>
+    <div class="profile-field"><label>Ville</label><p>${profile.city||'—'}</p></div>
     <div class="profile-field"><label>Wilaya</label><p>${profile.wilaya||'—'}</p></div>
+    <div class="profile-field"><label>Note Fournisseur</label><p>${(profile.bp?.rating > 0) ? renderStars(profile.bp.rating) : '—'}</p></div>
   `;
   g2.innerHTML = `
     <div class="profile-field"><label>Banque</label><p>${profile.bankName||'—'}</p></div>
@@ -776,6 +1026,7 @@ function openEditProfile() {
   document.getElementById('edit-wilaya').value        = profile.wilaya || '';
   document.getElementById('edit-street').value        = profile.street || '';
   document.getElementById('edit-city').value          = profile.city || '';
+  document.getElementById('edit-ai').value            = profile.ai || '';
   document.getElementById('edit-bankName').value      = profile.bankName || '';
   document.getElementById('edit-rib').value           = profile.rib || '';
   document.getElementById('edit-paymentTerms').value  = profile.paymentTerms || '';
@@ -794,6 +1045,7 @@ async function saveProfile() {
       wilaya        : document.getElementById('edit-wilaya').value,
       street        : document.getElementById('edit-street').value,
       city          : document.getElementById('edit-city').value,
+      ai            : document.getElementById('edit-ai').value,
       bankName      : document.getElementById('edit-bankName').value,
       rib           : document.getElementById('edit-rib').value,
       paymentTerms  : document.getElementById('edit-paymentTerms').value,
@@ -819,6 +1071,91 @@ async function saveProfile() {
 function fmt(v) { return parseFloat(v||0).toLocaleString('fr-FR', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
 function fmtDate(d) { if (!d) return '—'; try { return new Date(d).toLocaleDateString('fr-FR'); } catch { return d; } }
 function logout() { if (confirm('Déconnexion ?')) { sessionStorage.clear(); window.location.href = '/auth.html'; } }
+
+// ═══════════════════════════════════════════════════════
+// RENDER STARS (1-5)
+// ═══════════════════════════════════════════════════════
+function renderStars(val) {
+  const v = parseInt(val) || 0;
+  let html = '<span class="stars">';
+  for (let i = 1; i <= 5; i++) {
+    html += `<i class="fas fa-star ${i <= v ? 'star-gold' : 'star-grey'}"></i>`;
+  }
+  html += '</span>';
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════
+// PDF VIEWER (Inline)
+// ═══════════════════════════════════════════════════════
+function openPDFViewer(base64, title) {
+  document.getElementById('pdfViewerTitle').textContent = title || 'Document PDF';
+  document.getElementById('pdfViewerFrame').src = 'data:application/pdf;base64,' + base64;
+  document.getElementById('pdfViewerModal').classList.add('open');
+}
+function closePDFViewer() {
+  document.getElementById('pdfViewerModal').classList.remove('open');
+  document.getElementById('pdfViewerFrame').src = 'about:blank';
+}
+
+async function viewPOPDF(poId, poNumber) {
+  showLoader(true);
+  try {
+    const res = await fetch(`/odata/v4/srm/downloadPOPDF(poId=${poId})`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Erreur serveur');
+    openPDFViewer(data.value || data, `Bon de Commande ${poNumber || ''}`);
+  } catch(e) { toast('error', 'PDF : ' + e.message); }
+  finally { showLoader(false); }
+}
+
+async function viewGRPDF(grId, grNumber) {
+  showLoader(true);
+  try {
+    const res = await fetch(`/odata/v4/srm/downloadGRPDF(grId=${grId})`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Erreur serveur');
+    openPDFViewer(data.value || data, `Bon de Réception ${grNumber || ''}`);
+  } catch(e) { toast('error', 'PDF : ' + e.message); }
+  finally { showLoader(false); }
+}
+
+async function viewInvoicePDF(factureId, invoiceNumber) {
+  showLoader(true);
+  try {
+    const res = await fetch(`/odata/v4/srm/downloadSupplierInvoicePDF(factureId=${factureId})`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Erreur serveur');
+    openPDFViewer(data.value || data, `Facture ${invoiceNumber || ''}`);
+  } catch(e) { toast('error', 'PDF : ' + e.message); }
+  finally { showLoader(false); }
+}
+
+// ═══════════════════════════════════════════════════════
+// POLLING (5s) — Auto-refresh badges & KPIs
+// ═══════════════════════════════════════════════════════
+setInterval(async () => {
+  if (!profile) return;
+  try {
+    const [rfqRes, poRes, matchRes] = await Promise.all([
+      fetch(`/odata/v4/srm/RFQs?$filter=status eq 'OPEN'&$select=ID`),
+      fetch(`/odata/v4/srm/BonsCommande?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID}`)}&$select=ID`),
+      fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID} and matchStatus eq 'PENDING'`)}&$select=ID`)
+    ]);
+    const rfqCount   = ((await rfqRes.json()).value || []).length;
+    const poCount    = ((await poRes.json()).value || []).length;
+    const matchCount = ((await matchRes.json()).value || []).length;
+    document.getElementById('kpi-rfqs').textContent          = rfqCount;
+    document.getElementById('kpi-pos').textContent           = poCount;
+    document.getElementById('kpi-pending-match').textContent = matchCount;
+    const rfqB = document.getElementById('rfqBadge');
+    rfqB.textContent = rfqCount; rfqB.style.display = rfqCount > 0 ? '' : 'none';
+    const poB = document.getElementById('poBadge');
+    poB.textContent = poCount; poB.style.display = poCount > 0 ? '' : 'none';
+    const matchB = document.getElementById('matchBadge');
+    matchB.textContent = matchCount; matchB.style.display = matchCount > 0 ? '' : 'none';
+  } catch(e) { /* silent polling error */ }
+}, 5000);
 
 init();
 </script>

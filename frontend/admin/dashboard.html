@@ -586,6 +586,19 @@
                 <span class="nav-text">Inscriptions</span>
                 <span class="noti-badge noti-badge-pulse" id="reg-alert-badge" style="display: none; background: #f87171; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); padding: 2px 6px; font-size: 0.7rem; border-radius: 10px; font-weight: 700; color: white; box-shadow: 0 0 0 0 rgba(248,113,113,0.5);">0</span>
             </div>
+            <div class="nav-item" onclick="switchView('commandes', this)" style="position: relative;">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                </span>
+                <span class="nav-text">Commandes</span>
+                <span class="noti-badge noti-badge-pulse" id="cmd-alert-badge" style="display: none; background: #f87171; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); padding: 2px 6px; font-size: 0.7rem; border-radius: 10px; font-weight: 700; color: white; box-shadow: 0 0 0 0 rgba(248,113,113,0.5);">0</span>
+            </div>
+            <div class="nav-item" onclick="switchView('factures', this)" style="position: relative;">
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </span>
+                <span class="nav-text">Factures</span>
+            </div>
             <div class="nav-item" onclick="switchView('catalogue', this)" style="position: relative;">
                 <span class="nav-icon">
                     <svg viewBox="0 0 24 24"><polyline points="21 16 12 21 3 16 12 11 21 16"/><polyline points="21 7.5 12 12.5 3 7.5 12 2.5 21 7.5"/><line x1="12" y1="22.5" x2="12" y2="12.5"/><line x1="12" y1="12" x2="12" y2="2.5"/><line x1="3" y1="7.6" x2="3" y2="16.1"/><line x1="21" y1="7.6" x2="21" y2="16.1"/></svg>
@@ -693,6 +706,69 @@
                 </div>
 
                 <div class="alerts-container" id="alerts-list"></div>
+            </div>
+
+            <!-- VIEW: COMMANDES -->
+            <div id="commandes" class="view-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2 style="font-size:1.5rem; font-weight:700;">📦 GESTION DES COMMANDES</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="filter-cmd-search" placeholder="Rechercher une commande..." style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main);">
+                        <select id="filter-cmd-type" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main);" onchange="loadAdminCommandes()">
+                            <option value="">Tous les types</option>
+                            <option value="B2B">B2B</option>
+                            <option value="B2C">B2C</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-wrap" style="background: var(--card-bg); border-radius: 20px; padding: 1px;">
+                    <table class="custom-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>N° Commande</th>
+                                <th>Client / Type</th>
+                                <th>Date</th>
+                                <th>Montant TTC</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-commandes-tbody">
+                            <tr><td colspan="6" style="text-align: center;"><i class="fas fa-spinner fa-spin"></i> Chargement...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- VIEW: FACTURES -->
+            <div id="factures" class="view-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2 style="font-size:1.5rem; font-weight:700;">📄 GESTION DES FACTURES</h2>
+                    <div style="display: flex; gap: 10px;">
+                        <select id="filter-fac-type" style="padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main);" onchange="loadAdminFactures()">
+                            <option value="">Tous (Clients & Fournisseurs)</option>
+                            <option value="CLIENT">Clients (B2B/B2C)</option>
+                            <option value="FOURNISSEUR">Fournisseurs</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-wrap" style="background: var(--card-bg); border-radius: 20px; padding: 1px;">
+                    <table class="custom-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>N° Facture</th>
+                                <th>Type / Partenaire</th>
+                                <th>Date Emission</th>
+                                <th>Montant TTC</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-factures-tbody">
+                            <tr><td colspan="6" style="text-align: center;"><i class="fas fa-spinner fa-spin"></i> Chargement...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- VIEW: RFQS -->
@@ -955,6 +1031,10 @@
                                 <label>Statut</label>
                                 <p id="rev-devis-status">-</p>
                             </div>
+                            <div class="info-group" id="rev-devis-notes-group" style="display:none;">
+                                <label>Notes / Message Client</label>
+                                <p id="rev-devis-notes" style="font-style:italic; color:var(--accent2);">-</p>
+                            </div>
                         </div>
                         
                         <div style="font-weight:600; margin-bottom:10px; color:var(--text-dim);">Lignes du devis</div>
@@ -987,8 +1067,7 @@
                         </div>
 
                         <div class="decision-btns" id="devis-modal-actions">
-                            <button class="btn-reject" onclick="saveDevisRevision()">💾 Enregistrer les modifications</button>
-                            <button class="btn-approve" onclick="approveDevis()">✅ Approuver le Devis</button>
+                            <button class="btn-approve" onclick="approveAndSaveDevis()">✅ Approuver</button>
                         </div>
                     </div>
                 </div>
@@ -1667,6 +1746,8 @@
             if(viewId === 'catalogue') loadCatalogue();
             if(viewId === 'rfqs') loadRfqs();
             if(viewId === 'devis') loadDevis();
+            if(viewId === 'commandes') loadAdminCommandes();
+            if(viewId === 'factures') loadAdminFactures();
         }
 
         // INIT & PERIODS (DYNAMIQUE)
@@ -1880,16 +1961,34 @@
             } catch(e) {}
         }
 
-        function loadAlerts(count) {
+        function navigateToView(viewId) {
+            const el = document.querySelector(`[onclick*="switchView('${viewId}'"]`);
+            switchView(viewId, el);
+        }
+
+        async function loadAlerts(count) {
             const list = document.getElementById('alerts-list');
             list.innerHTML = '';
             if(count > 0) {
                 list.innerHTML += `
                     <div class="alert-row">
                         <div class="alert-msg"><span>⚠️</span> <strong>${count} inscriptions</strong> en attente de validation.</div>
-                        <button class="btn-resolve" onclick="switchView('registrations', document.querySelectorAll('.nav-item')[2])">RÉSOUDRE</button>
+                        <button class="btn-resolve" onclick="navigateToView('registrations')">RÉSOUDRE</button>
                     </div>`;
             }
+
+            try {
+                const res = await fetch("/odata/v4/admin/AllFacturesFournisseur?$filter=matchStatus eq 'DISCREPANCY'", { headers: adminHeaders });
+                const data = await res.json();
+                const disputes = data.value || [];
+                if(disputes.length > 0) {
+                    list.innerHTML += `
+                        <div class="alert-row" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
+                            <div class="alert-msg"><span style="color:#ef4444">⚖️</span> <strong style="color:#ef4444">${disputes.length} factures fournisseurs</strong> en litige (écart de prix/quantité).</div>
+                            <button class="btn-resolve" style="background:#ef4444" onclick="navigateToView('factures')">RÉSOUDRE</button>
+                        </div>`;
+                }
+            } catch(e) {}
         }
 
         let currentClientFilter = '';
@@ -2769,7 +2868,7 @@
 
                     tbody.innerHTML += `
                         <tr>
-                            <td style="font-family:monospace;">${d.documentNumber || '-'}</td>
+                            <td style="font-family:monospace;">${d.devisNumber || '-'}</td>
                             <td style="font-weight:600;">${clientName}</td>
                             <td>${dDate}</td>
                             <td style="font-family:monospace; font-weight:700; color:var(--accent);">${parseFloat(d.totalTTC || 0).toFixed(2)} DA</td>
@@ -2814,6 +2913,14 @@
                 
                 document.getElementById('rev-devis-discount').value = parseFloat(data.discount || 0);
                 
+                if(data.notes) {
+                    document.getElementById('rev-devis-notes-group').style.display = 'block';
+                    document.getElementById('rev-devis-notes').innerText = data.notes;
+                } else {
+                    document.getElementById('rev-devis-notes-group').style.display = 'none';
+                    document.getElementById('rev-devis-notes').innerText = '-';
+                }
+                
                 const tbody = document.getElementById('devis-items-tbody');
                 tbody.innerHTML = '';
                 
@@ -2821,10 +2928,11 @@
                     const isPending = status === 'PENDING';
                     const priceInp = isPending ? `<input type="number" id="item-price-${idx}" data-itemid="${item.ID}" data-qty="${item.quantity}" data-tva="${item.tvaRate}" class="period-selector" value="${parseFloat(item.unitPrice||0).toFixed(2)}" style="width:100px; text-align:right;" oninput="recalcDevisTotals()">` : `${parseFloat(item.unitPrice||0).toFixed(2)}`;
                     const discInp = isPending ? `<input type="number" id="item-disc-${idx}" class="period-selector" value="${parseFloat(item.discount||0).toFixed(2)}" style="width:70px; text-align:right;" oninput="recalcDevisTotals()">` : `${parseFloat(item.discount||0).toFixed(2)}`;
+                    const prodName = item.description || `Article #${idx+1}`;
                     
                     tbody.innerHTML += `
                         <tr class="rev-item-row" data-idx="${idx}">
-                            <td>Article #${idx+1}</td>
+                            <td>${prodName}</td>
                             <td style="font-family:monospace;">${item.quantity}</td>
                             <td>${priceInp}</td>
                             <td>${discInp}</td>
@@ -2883,10 +2991,11 @@
             document.getElementById('rev-total-ttc').innerText = finalTTC.toFixed(2) + ' DA';
         }
 
-        async function saveDevisRevision() {
+        async function approveAndSaveDevis() {
             const id = document.getElementById('rev-devis-id').value;
-            const discountGlobal = parseFloat(document.getElementById('rev-devis-discount').value || 0);
+            if(!await Dialog.confirm("Approuver ce devis ? Les prix et remises seront sauvegardés et le devis sera validé.")) return;
             
+            const discountGlobal = parseFloat(document.getElementById('rev-devis-discount').value || 0);
             const items = [];
             document.querySelectorAll('.rev-item-row').forEach(row => {
                 const idx = row.getAttribute('data-idx');
@@ -2902,50 +3011,37 @@
             });
             
             try {
-                const btn = document.querySelector('.btn-reject');
+                const btn = document.querySelector('.btn-approve');
                 btn.innerHTML = '⏳ ...';
                 btn.disabled = true;
 
-                const res = await fetch('/odata/v4/admin/reviseDevis', {
+                // 1. Sauvegarde des prix et remises
+                const resRevise = await fetch('/odata/v4/admin/reviseDevis', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ devisId: id, discountGlobal, items })
                 });
-                
-                if(!res.ok) {
-                    const err = await res.json();
-                    throw new Error(err.error?.message || "Erreur de révision");
+                if(!resRevise.ok) {
+                    const err = await resRevise.json();
+                    throw new Error(err.error?.message || "Erreur lors de la sauvegarde des prix");
                 }
                 
-                Toast.success("Succès", "Prix et remises enregistrés.");
-                closeDevisModal();
-                loadDevis();
-            } catch(e) {
-                Toast.error("Erreur", e.message);
-            } finally {
-                const btn = document.querySelector('.btn-reject');
-                btn.innerHTML = '💾 Enregistrer les modifications';
-                btn.disabled = false;
-            }
-        }
-
-        async function approveDevis() {
-            const id = document.getElementById('rev-devis-id').value;
-            if(!await Dialog.confirm("Approuver ce devis ? Le client pourra alors le convertir en commande.")) return;
-            
-            try {
-                const res = await fetch(`/odata/v4/crm/approveDevis`, {
+                // 2. Approbation
+                const resApprove = await fetch(`/odata/v4/crm/approveDevis`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ devisId: id })
                 });
-                if(!res.ok) throw new Error("Impossible d'approuver le devis");
+                if(!resApprove.ok) throw new Error("Impossible d'approuver le devis");
                 
-                Toast.success("Approuvé", "Devis validé.");
+                Toast.success("Succès", "Devis sauvegardé et approuvé.");
                 closeDevisModal();
                 loadDevis();
-            } catch (e) {
+            } catch(e) {
                 Toast.error("Erreur", e.message);
+                const btn = document.querySelector('.btn-approve');
+                btn.innerHTML = '✅ Approuver';
+                btn.disabled = false;
             }
         }
 
@@ -3672,6 +3768,253 @@
                 alert("Erreur lors de la génération du PO : " + e.message);
             }
         }
+
+        /* ═══════════════════════════════════════════
+           COMMANDES ADMIN — loadAdminCommandes()
+        ═══════════════════════════════════════════ */
+        async function loadAdminCommandes() {
+            const tbody = document.getElementById('admin-commandes-tbody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Chargement…</td></tr>';
+            try {
+                const filterType = document.getElementById('filter-cmd-type')?.value || '';
+                let url = '/odata/v4/crm/Commandes?$orderby=createdAt desc&$top=200';
+                if (filterType === 'B2B') url += '&$filter=clientB2B_ID ne null';
+                if (filterType === 'B2C') url += '&$filter=clientB2C_ID ne null';
+
+                const res = await fetch(url, { headers: adminHeaders });
+                const data = await res.json();
+                const list = data.value || [];
+
+                // Count pending for badge
+                const pendingCount = list.filter(c => c.status === 'PENDING').length;
+                const badge = document.getElementById('cmd-alert-badge');
+                if (badge) { badge.style.display = pendingCount > 0 ? '' : 'none'; badge.textContent = pendingCount; }
+
+                if (!list.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:30px;">Aucune commande trouvée.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = list.map(cmd => {
+                    const type = cmd.clientB2B_ID ? '<span style="color:#38bdf8;font-weight:600;">B2B</span>' : '<span style="color:#a78bfa;font-weight:600;">B2C</span>';
+                    const statusColors = { 'PENDING': '#fb923c', 'CONFIRMED': '#38bdf8', 'PAID': '#4ade80', 'DRAFT': '#94a3b8', 'SENT_TO_CLIENT': '#38bdf8' };
+                    const statusLabels = { 'PENDING': 'En attente', 'CONFIRMED': 'Confirmée', 'PAID': 'Payée', 'DRAFT': 'Brouillon', 'SENT_TO_CLIENT': 'Envoyée' };
+                    const sColor = statusColors[cmd.status] || '#94a3b8';
+                    const sLabel = statusLabels[cmd.status] || cmd.status;
+
+                    let actions = `<button class="btn-action" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="openCommandeDetailModal('${cmd.ID}', event)">👁 Détails</button>`;
+                    if (cmd.status === 'PENDING') {
+                        actions += ` <button class="btn-action" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; background:#4ade80; color:black;" onclick="adminValidateCashOrder('${cmd.ID}')">✅ Valider Espèces</button>`;
+                    }
+
+                    return `<tr>
+                        <td style="font-weight:700;">${cmd.orderNumber || '-'}</td>
+                        <td>${type}</td>
+                        <td>${cmd.date || '-'}</td>
+                        <td style="font-weight:700; color:var(--accent);">${new Intl.NumberFormat('fr-FR').format(cmd.totalTTC || 0)} DA</td>
+                        <td><span style="color:${sColor}; font-weight:700;">${sLabel}</span></td>
+                        <td style="white-space:nowrap;">${actions}</td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                console.error('loadAdminCommandes error:', e);
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#f87171;">${e.message}</td></tr>`;
+            }
+        }
+
+        async function adminValidateCashOrder(commandeId) {
+            if (!await Dialog.confirm("Valider cette commande en espèces ?\nCela générera la facture et décrémentera le stock.")) return;
+            try {
+                Toast.info("Traitement…", "Validation de la commande en espèces…");
+                const res = await fetch('/odata/v4/admin/validateCashOrder', {
+                    method: 'POST',
+                    headers: { ...adminHeaders, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ commandeId })
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err?.error?.message || 'Erreur serveur');
+                }
+                Toast.success("Succès !", "Commande validée, facture générée et stock mis à jour.");
+                loadAdminCommandes();
+            } catch (e) {
+                Toast.error("Erreur", e.message);
+            }
+        }
+
+        /* ═══════════════════════════════════════════
+           FACTURES ADMIN — loadAdminFactures()
+        ═══════════════════════════════════════════ */
+        async function loadAdminFactures() {
+            const tbody = document.getElementById('admin-factures-tbody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Chargement…</td></tr>';
+            try {
+                const filterType = document.getElementById('filter-fac-type')?.value || '';
+                
+                let clientFactures = [];
+                let fournisseurFactures = [];
+
+                if (filterType !== 'FOURNISSEUR') {
+                    const res = await fetch('/odata/v4/crm/Factures?$orderby=createdAt desc&$top=200', { headers: adminHeaders });
+                    const data = await res.json();
+                    clientFactures = (data.value || []).map(f => ({ ...f, _type: 'CLIENT' }));
+                }
+
+                if (filterType !== 'CLIENT') {
+                    try {
+                        const res = await fetch('/odata/v4/srm/FacturesFournisseur?$orderby=createdAt desc&$top=200', { headers: adminHeaders });
+                        const data = await res.json();
+                        fournisseurFactures = (data.value || []).map(f => ({ ...f, _type: 'FOURNISSEUR' }));
+                    } catch(e) { /* SRM factures may not exist yet */ }
+                }
+
+                const allFactures = [...clientFactures, ...fournisseurFactures].sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
+
+                if (!allFactures.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:30px;">Aucune facture trouvée.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = allFactures.map(f => {
+                    const typeLabel = f._type === 'FOURNISSEUR'
+                        ? '<span style="color:#fb923c;font-weight:600;">Fournisseur</span>'
+                        : '<span style="color:#38bdf8;font-weight:600;">Client</span>';
+                    const statusColors = { 'PAID': '#4ade80', 'UNPAID': '#f87171', 'PARTIAL': '#fb923c', 'MATCHED': '#4ade80', 'LITIGE': '#f87171' };
+                    
+                    let sLabel = f.status || '-';
+                    if (f._type === 'FOURNISSEUR' && f.matchStatus === 'DISCREPANCY') {
+                        sLabel = 'LITIGE';
+                    }
+                    const sColor = statusColors[sLabel] || '#94a3b8';
+
+                    let actionsHtml = `<button class="btn-action" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="openPdfViewer('facture', '${f.ID}')">📄 Voir PDF</button>`;
+                    if (f._type === 'FOURNISSEUR' && f.matchStatus === 'DISCREPANCY') {
+                        actionsHtml += ` <button class="btn-resolve" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; margin-left:5px;" onclick="adminResolveDispute('${f.ID}', '${f.invoiceNumber || ''}')">⚖️ Résoudre</button>`;
+                    }
+
+                    return `<tr>
+                        <td style="font-weight:700;">${f.invoiceNumber || f.factureNumber || '-'}</td>
+                        <td>${typeLabel}</td>
+                        <td>${f.date || '-'}</td>
+                        <td style="font-weight:700; color:var(--accent);">${new Intl.NumberFormat('fr-FR').format(f.totalTTC || 0)} DA</td>
+                        <td><span style="color:${sColor}; font-weight:700;">${sLabel}</span></td>
+                        <td>${actionsHtml}</td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                console.error('loadAdminFactures error:', e);
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#f87171;">${e.message}</td></tr>`;
+            }
+        }
+
+        async function adminResolveDispute(invoiceId, invoiceNumber) {
+            if (!await Dialog.confirm(`Résoudre le litige pour la facture fournisseur ${invoiceNumber} ?\nCela forcera le statut à Payé (PAID) et marquera la facture comme appariée (MATCHED).`)) return;
+            try {
+                Toast.info("Traitement…", "Résolution du litige en cours…");
+                const res = await fetch('/odata/v4/admin/resolveDispute', {
+                    method: 'POST',
+                    headers: { ...adminHeaders, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ invoiceId })
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err?.error?.message || 'Erreur serveur');
+                }
+                Toast.success("Succès !", "Le litige a été résolu. Le paiement est forcé.");
+                loadAdminFactures();
+                loadStats();
+            } catch (e) {
+                Toast.error("Erreur", e.message);
+            }
+        }
+
+        /* ═══════════════════════════════════════════
+           PDF INLINE VIEWER — Modale
+        ═══════════════════════════════════════════ */
+        async function openPdfViewer(docType, docId) {
+            let url = '';
+            let bodyData = {};
+            if (docType === 'facture') {
+                url = '/odata/v4/admin/downloadFacturePDF';
+                bodyData = { factId: docId };
+            } else if (docType === 'devis') {
+                url = '/odata/v4/admin/downloadDevisPDF';
+                bodyData = { devisId: docId };
+            } else if (docType === 'commande') {
+                url = '/odata/v4/admin/downloadCommandePDF';
+                bodyData = { commandeId: docId };
+            } else return;
+
+            try {
+                Toast.info("Chargement…", "Génération du PDF en cours…");
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        ...adminHeaders,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(bodyData)
+                });
+                const data = await res.json();
+                const pdfData = data.value || data.pdf;
+                if (!pdfData) throw new Error(data.error?.message || 'Pas de données PDF');
+
+                // Show modal with inline iframe
+                let modal = document.getElementById('pdf-viewer-modal');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'pdf-viewer-modal';
+                    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);backdrop-filter:blur(8px);z-index:5000;display:flex;align-items:center;justify-content:center;';
+                    modal.innerHTML = `
+                        <div style="width:85%;height:90%;background:var(--card-bg);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--border);">
+                            <div style="padding:15px 25px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02);">
+                                <span style="font-weight:700;font-size:1.1rem;">📄 Aperçu du Document</span>
+                                <button onclick="closePdfViewer()" style="background:none;border:none;color:var(--text-dim);font-size:1.5rem;cursor:pointer;">✕</button>
+                            </div>
+                            <div style="flex:1;padding:0;" id="pdf-viewer-container"></div>
+                        </div>`;
+                    document.body.appendChild(modal);
+                }
+                const container = document.getElementById('pdf-viewer-container');
+                container.innerHTML = `<iframe src="data:application/pdf;base64,${pdfData}" style="width:100%;height:100%;border:none;" title="PDF Viewer"></iframe>`;
+                modal.style.display = 'flex';
+            } catch (e) {
+                console.error('PDF viewer error:', e);
+                Toast.error("Erreur PDF", e.message);
+            }
+        }
+
+        function closePdfViewer() {
+            const modal = document.getElementById('pdf-viewer-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        /* ═══════════════════════════════════════════
+           NOTIFICATION POLLING (5s)
+        ═══════════════════════════════════════════ */
+        let _notifInterval = null;
+        function startNotificationPolling() {
+            if (_notifInterval) clearInterval(_notifInterval);
+            _notifInterval = setInterval(async () => {
+                try {
+                    const res = await fetch('/odata/v4/admin/Notifications?$filter=isRead eq false&$orderby=createdAt desc&$top=20', { headers: adminHeaders });
+                    const data = await res.json();
+                    const notifs = data.value || [];
+                    const bellBadge = document.querySelector('.noti-badge');
+                    if (bellBadge) {
+                        bellBadge.textContent = notifs.length;
+                        bellBadge.style.display = notifs.length > 0 ? '' : 'none';
+                        if (notifs.length > 0) {
+                            const bell = document.querySelector('.bell-ring');
+                            if (bell) { bell.classList.remove('bell-ring'); void bell.offsetWidth; bell.classList.add('bell-ring'); }
+                        }
+                    }
+                } catch (e) { /* silent */ }
+            }, 5000);
+        }
+
+        // Start polling on page load
+        startNotificationPolling();
 
     </script>
 </body>

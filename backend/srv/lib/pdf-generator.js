@@ -28,9 +28,10 @@ async function generateDevisPDF(devis) {
     doc.moveDown(0.5);
     doc.fontSize(10).fillColor('#333333');
     doc.text('CLIENT', { underline: true });
-    doc.text(devis.clientB2B?.companyName || devis.clientB2C?.fullName || '');
-    doc.text(`Email: ${devis.clientB2B?.email || devis.clientB2C?.email || ''}`);
-    doc.text(`Téléphone: ${devis.clientB2B?.phone || devis.clientB2C?.phone || ''}`);
+    const devisClientName = devis.clientB2B?.companyName || (devis.clientB2C ? `${devis.clientB2C.firstName || ''} ${devis.clientB2C.lastName || ''}`.trim() : '') || 'Client';
+    doc.text(devisClientName);
+    doc.text(`Email: ${devis.clientB2B?.email || devis.clientB2C?.email || 'N/A'}`);
+    doc.text(`Téléphone: ${devis.clientB2B?.phone || devis.clientB2C?.phone || 'N/A'}`);
     if (devis.clientB2B?.rc) doc.text(`RC: ${devis.clientB2B.rc}`);
 
     // ── Document Info ──
@@ -75,8 +76,9 @@ async function generateFacturePDF(facture) {
     doc.moveDown(0.5);
     doc.fontSize(10).fillColor('#333333');
     doc.text('CLIENT', { underline: true });
-    doc.text(facture.clientB2B?.companyName || facture.clientB2C?.fullName || '');
-    doc.text(`Email: ${facture.clientB2B?.email || facture.clientB2C?.email || ''}`);
+    const factClientName = facture.clientB2B?.companyName || (facture.clientB2C ? `${facture.clientB2C.firstName || ''} ${facture.clientB2C.lastName || ''}`.trim() : '') || 'Client';
+    doc.text(factClientName);
+    doc.text(`Email: ${facture.clientB2B?.email || facture.clientB2C?.email || 'N/A'}`);
     if (facture.clientB2B?.rc) doc.text(`RC: ${facture.clientB2B.rc}`);
     if (facture.clientB2B?.nif) doc.text(`NIF: ${facture.clientB2B.nif}`);
 
@@ -84,9 +86,9 @@ async function generateFacturePDF(facture) {
     doc.moveDown();
     doc.text(`Date de facturation: ${_formatDate(facture.date)}`);
     doc.text(`Date d'échéance: ${_formatDate(facture.dueDate)}`);
-    doc.text(`Statut: ${facture.status}`);
-    doc.text(`Montant payé: ${_formatAmount(facture.paidAmount)} ${facture.currency_code}`);
-    doc.text(`Reste à payer: ${_formatAmount(facture.remainingAmount)} ${facture.currency_code}`);
+    doc.text(`Statut: ${facture.status || 'N/A'}`);
+    doc.text(`Montant payé: ${_formatAmount(facture.paidAmount)} ${facture.currency_code || 'DZD'}`);
+    doc.text(`Reste à payer: ${_formatAmount(facture.remainingAmount)} ${facture.currency_code || 'DZD'}`);
 
     // ── Items Table ──
     doc.moveDown();
@@ -186,19 +188,20 @@ async function generateRegistrationPDF(reg) {
 
 // ── Private Helpers ──
 
-function _drawHeader(doc, type, number) {
+function _drawHeader(doc, type, number, companyInfo) {
+  const ci = companyInfo || {};
   // Company info (top left)
   doc.fontSize(18).fillColor('#1a3a5c').font('Helvetica-Bold');
-  doc.text('GESTION PME', 50, 50);
+  doc.text(ci.companyName || 'GESTION PME', 50, 50);
   doc.fontSize(9).fillColor('#666666').font('Helvetica');
-  doc.text('Solution de Gestion Cloud');
-  doc.text('contact@gestionpme.dz | +213 21 00 00 00');
+  doc.text(ci.tagline || 'Solution de Gestion Cloud');
+  doc.text(`${ci.email || 'contact@gestionpme.dz'} | ${ci.phone || '+213 21 00 00 00'}`);
 
   // Document type (top right)
-  doc.fontSize(24).fillColor('#1a3a5c').font('Helvetica-Bold');
-  doc.text(type, 350, 50, { align: 'right', width: 200 });
-  doc.fontSize(12).fillColor('#333333').font('Helvetica');
-  doc.text(`N° ${number}`, 350, 80, { align: 'right', width: 200 });
+  doc.fontSize(type.length > 12 ? 16 : 22).fillColor('#1a3a5c').font('Helvetica-Bold');
+  doc.text(type, 290, 50, { align: 'right', width: 255 });
+  doc.fontSize(11).fillColor('#333333').font('Helvetica');
+  doc.text(`N° ${number}`, 290, doc.y + 4, { align: 'right', width: 255 });
 
   // Horizontal line
   doc.moveDown(2);
@@ -224,8 +227,13 @@ function _drawItemsTable(doc, items) {
     const bg = idx % 2 === 0 ? '#f5f7fa' : '#ffffff';
     doc.rect(50, rowY, 495, 18).fill(bg);
 
+    let desc = item.description || (item.product && item.product.name) || `Article #${idx + 1}`;
+    if (item.discount > 0) {
+      desc += ` (Remise -${parseFloat(item.discount).toFixed(0)}%)`;
+    }
+
     doc.fontSize(8).fillColor('#333333');
-    doc.text(item.description || '', 55, rowY + 4, { width: 200 });
+    doc.text(desc, 55, rowY + 4, { width: 200 });
     doc.text(String(item.quantity || 0), 260, rowY + 4, { width: 50, align: 'right' });
     doc.text(_formatAmount(item.unitPrice), 315, rowY + 4, { width: 70, align: 'right' });
     doc.text(`${item.tvaRate || 19}%`, 390, rowY + 4, { width: 40, align: 'right' });
@@ -249,9 +257,15 @@ function _drawTotals(doc, data) {
   doc.fillColor('#333333').text('Total HT:', x, y);
   doc.text(`${_formatAmount(data.totalHT)} ${data.currency_code || 'DZD'}`, x + 100, y, { align: 'right', width: 100 });
 
+  if (data.discount > 0) {
+    y += 16;
+    doc.fillColor('#d97706').font('Helvetica-Bold').text(`Remise Globale (${parseFloat(data.discount).toFixed(0)}%):`, x, y);
+    doc.text('Appliquée', x + 100, y, { align: 'right', width: 100 });
+  }
+
   // TVA
   y += 16;
-  doc.text('TVA (19%):', x, y);
+  doc.fillColor('#333333').font('Helvetica').text('TVA (19%):', x, y);
   doc.text(`${_formatAmount(data.totalTVA)} ${data.currency_code || 'DZD'}`, x + 100, y, { align: 'right', width: 100 });
 
   // TTC
@@ -264,11 +278,13 @@ function _drawTotals(doc, data) {
   doc.y = y + 30;
 }
 
-function _drawFooter(doc) {
+function _drawFooter(doc, companyInfo) {
+  const ci = companyInfo || {};
   doc.fontSize(8).fillColor('#888888').font('Helvetica');
   const footerY = 780;
   doc.moveTo(50, footerY - 10).lineTo(545, footerY - 10).strokeColor('#cccccc').lineWidth(0.5).stroke();
-  doc.text('Gestion PME — Solution Cloud | contact@gestionpme.dz | RC: 16/00-0000000A25', 50, footerY, {
+  const footerText = `${ci.companyName || 'Gestion PME'} — ${ci.tagline || 'Solution Cloud'} | ${ci.email || 'contact@gestionpme.dz'} | RC: ${ci.rc || 'N/A'}`;
+  doc.text(footerText, 50, footerY, {
     align: 'center', width: 495
   });
 }
@@ -280,11 +296,11 @@ function _formatDate(dateStr) {
 }
 
 function _formatAmount(amount) {
-  if (amount == null) return '0,00';
-  return parseFloat(amount).toLocaleString('fr-DZ', {
+  if (amount == null || isNaN(parseFloat(amount))) return '0,00';
+  return parseFloat(amount).toLocaleString('fr-FR', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
-  });
+  }).replace(/[\u202f\u00a0\u2009\/\\]/g, ' ').trim();
 }
 
 /**
@@ -308,9 +324,10 @@ async function generateCommandePDF(commande) {
     doc.moveDown(0.5);
     doc.fontSize(10).fillColor('#333333');
     doc.text('CLIENT', { underline: true });
-    doc.text(commande.clientB2B?.companyName || commande.clientB2C?.fullName || '');
-    doc.text(`Email: ${commande.clientB2B?.email || commande.clientB2C?.email || ''}`);
-    doc.text(`Téléphone: ${commande.clientB2B?.phone || commande.clientB2C?.phone || ''}`);
+    const cmdClientName = commande.clientB2B?.companyName || (commande.clientB2C ? `${commande.clientB2C.firstName || ''} ${commande.clientB2C.lastName || ''}`.trim() : '') || 'Client';
+    doc.text(cmdClientName);
+    doc.text(`Email: ${commande.clientB2B?.email || commande.clientB2C?.email || 'N/A'}`);
+    doc.text(`Téléphone: ${commande.clientB2B?.phone || commande.clientB2C?.phone || 'N/A'}`);
     if (commande.clientB2B?.rc) doc.text(`RC: ${commande.clientB2B.rc}`);
 
     // ── Document Info ──
@@ -334,5 +351,148 @@ async function generateCommandePDF(commande) {
   });
 }
 
-module.exports = { generateDevisPDF, generateFacturePDF, generateRegistrationPDF, generateCommandePDF };
+/**
+ * Generate a PO Fournisseur PDF buffer
+ */
+async function generatePOFournisseurPDF(po) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    const buffers = [];
+    doc.on('data', chunk => buffers.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(buffers)));
+    doc.on('error', reject);
+
+    _drawHeader(doc, 'BON DE COMMANDE FOURNISSEUR', po.poNumber);
+
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor('#333333');
+    doc.text('FOURNISSEUR', { underline: true });
+    doc.text(po.fournisseur?.companyName || 'Fournisseur');
+    doc.text(`Email: ${po.fournisseur?.email || 'N/A'}`);
+    doc.text(`Téléphone: ${po.fournisseur?.phone || 'N/A'}`);
+    if (po.fournisseur?.rc) doc.text(`RC: ${po.fournisseur.rc}`);
+    if (po.fournisseur?.nif) doc.text(`NIF: ${po.fournisseur.nif}`);
+
+    doc.moveDown();
+    doc.text(`Date de commande: ${_formatDate(po.date)}`);
+    if (po.deliveryDate) doc.text(`Date de livraison prévue: ${_formatDate(po.deliveryDate)}`);
+    doc.text(`Statut: ${po.status}`);
+
+    doc.moveDown();
+    _drawItemsTable(doc, po.items || []);
+
+    doc.moveDown();
+    _drawTotals(doc, po);
+
+    _drawFooter(doc);
+    doc.end();
+  });
+}
+
+/**
+ * Generate a GR Fournisseur PDF buffer
+ */
+async function generateGRFournisseurPDF(gr) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    const buffers = [];
+    doc.on('data', chunk => buffers.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(buffers)));
+    doc.on('error', reject);
+
+    _drawHeader(doc, 'BON DE RECEPTION', gr.receiptNumber);
+
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor('#333333');
+    doc.text('FOURNISSEUR', { underline: true });
+    doc.text(gr.bonCommande?.fournisseur?.companyName || 'Fournisseur');
+    doc.text(`Email: ${gr.bonCommande?.fournisseur?.email || 'N/A'}`);
+
+    doc.moveDown();
+    doc.text(`Date de réception: ${_formatDate(gr.date)}`);
+    doc.text(`Réceptionné par: ${gr.receivedBy || 'N/A'}`);
+    if (gr.notes) doc.text(`Notes: ${gr.notes}`);
+
+    doc.moveDown();
+    
+    // Draw GR Items Table
+    const startY = doc.y + 10;
+    doc.rect(50, startY, 495, 20).fill('#1a3a5c');
+    doc.fontSize(9).fillColor('#ffffff').font('Helvetica-Bold');
+    doc.text('Description', 55, startY + 5, { width: 180 });
+    doc.text('Commandé', 245, startY + 5, { width: 70, align: 'right' });
+    doc.text('Reçu', 320, startY + 5, { width: 70, align: 'right' });
+    doc.text('Accepté', 395, startY + 5, { width: 70, align: 'right' });
+    doc.text('Rejeté', 470, startY + 5, { width: 70, align: 'right' });
+
+    let rowY = startY + 22;
+    doc.font('Helvetica').fillColor('#333333');
+    (gr.items || []).forEach((item, idx) => {
+      const bg = idx % 2 === 0 ? '#f5f7fa' : '#ffffff';
+      doc.rect(50, rowY, 495, 18).fill(bg);
+      const desc = item.product?.name || item.description || `Article #${idx + 1}`;
+      doc.fontSize(8).fillColor('#333333');
+      doc.text(desc, 55, rowY + 4, { width: 180 });
+      doc.text(String(item.orderedQty || 0), 245, rowY + 4, { width: 70, align: 'right' });
+      doc.text(String(item.receivedQty || 0), 320, rowY + 4, { width: 70, align: 'right' });
+      doc.text(String(item.acceptedQty || 0), 395, rowY + 4, { width: 70, align: 'right' });
+      doc.text(String(item.rejectedQty || 0), 470, rowY + 4, { width: 70, align: 'right' });
+      rowY += 20;
+    });
+    doc.moveTo(50, rowY).lineTo(545, rowY).strokeColor('#cccccc').lineWidth(1).stroke();
+    doc.y = rowY + 10;
+
+    _drawFooter(doc);
+    doc.end();
+  });
+}
+
+/**
+ * Generate a Facture Fournisseur PDF buffer
+ */
+async function generateInvoiceFournisseurPDF(invoice) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    const buffers = [];
+    doc.on('data', chunk => buffers.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(buffers)));
+    doc.on('error', reject);
+
+    _drawHeader(doc, 'FACTURE FOURNISSEUR', invoice.invoiceNumber);
+
+    doc.moveDown(0.5);
+    doc.fontSize(10).fillColor('#333333');
+    doc.text('FOURNISSEUR', { underline: true });
+    doc.text(invoice.fournisseur?.companyName || 'Fournisseur');
+    doc.text(`Email: ${invoice.fournisseur?.email || 'N/A'}`);
+    doc.text(`Téléphone: ${invoice.fournisseur?.phone || 'N/A'}`);
+    if (invoice.fournisseur?.rc) doc.text(`RC: ${invoice.fournisseur.rc}`);
+    if (invoice.fournisseur?.nif) doc.text(`NIF: ${invoice.fournisseur.nif}`);
+
+    doc.moveDown();
+    doc.text(`Date de facture: ${_formatDate(invoice.date)}`);
+    doc.text(`Date d'échéance: ${_formatDate(invoice.dueDate)}`);
+    doc.text(`Statut: ${invoice.status || 'N/A'}`);
+    doc.text(`Statut appariement: ${invoice.matchStatus || 'N/A'}`);
+
+    doc.moveDown();
+    _drawItemsTable(doc, invoice.items || []);
+
+    doc.moveDown();
+    _drawTotals(doc, invoice);
+
+    _drawFooter(doc);
+    doc.end();
+  });
+}
+
+module.exports = {
+  generateDevisPDF,
+  generateFacturePDF,
+  generateRegistrationPDF,
+  generateCommandePDF,
+  generatePOFournisseurPDF,
+  generateGRFournisseurPDF,
+  generateInvoiceFournisseurPDF
+};
 

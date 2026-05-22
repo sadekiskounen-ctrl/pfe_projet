@@ -59,11 +59,13 @@ entity CommandeClient : cuid, managed, pme.StatusTracking, pme.Annotatable {
   devis        : Association to Devis;
   date         : Date      @mandatory;
   deliveryDate : Date;
+  deliveryAddress : String(512);
   items        : Composition of many CommandeItem on items.parent = $self;
   totalHT      : pme.Amount default 0;
   totalTVA     : pme.Amount default 0;
   totalTTC     : pme.Amount default 0;
   currency     : Currency;
+  discount     : pme.Percent default 0;
   // Facturation
   invoiced     : Boolean default false;
   facture      : Association to FactureClient;

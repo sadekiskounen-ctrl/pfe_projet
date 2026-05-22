@@ -145,12 +145,41 @@ module.exports = class AdminService extends cds.ApplicationService {
     // ── PDF: Download Facture ──
     this.on('downloadFacturePDF', async (req) => {
       const { factId } = req.data;
-      const { FactureClient } = cds.entities('sap.pme.doc');
-      const fact = await SELECT.one.from(FactureClient, factId);
-      if (!fact) return req.error(404, `Facture ${factId} not found`);
+      const { FactureClient, FactureClientItem, FactureFournisseur, FactureFournisseurItem } = cds.entities('sap.pme.doc');
+      
+      let fact = await SELECT.one.from(FactureClient, factId);
+      if (fact) {
+        const items = await SELECT.from(FactureClientItem).where({ parent_ID: factId });
+        const client = fact.clientB2B_ID
+          ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B).where({ ID: fact.clientB2B_ID })
+          : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C).where({ ID: fact.clientB2C_ID });
+        const pdfBuffer = await generateFacturePDF({
+          ...fact,
+          items,
+          clientB2B: fact.clientB2B_ID ? client : null,
+          clientB2C: !fact.clientB2B_ID ? client : null
+        });
+        return pdfBuffer.toString('base64');
+      }
 
-      const pdfBuffer = await generateFacturePDF(fact);
-      return pdfBuffer.toString('base64');
+      let suppFact = await SELECT.one.from(FactureFournisseur, factId);
+      if (suppFact) {
+        const items = await SELECT.from(FactureFournisseurItem).where({ parent_ID: factId });
+        const supplier = await SELECT.one.from(cds.entities('sap.pme.srm').Fournisseur).where({ ID: suppFact.fournisseur_ID });
+        const pdfBuffer = await generateFacturePDF({
+          ...suppFact,
+          items,
+          clientB2B: {
+            companyName: supplier ? supplier.companyName : 'Fournisseur',
+            email: supplier ? supplier.email : '',
+            phone: supplier ? supplier.phone : '',
+            rc: supplier ? supplier.rc : ''
+          }
+        });
+        return pdfBuffer.toString('base64');
+      }
+
+      return req.error(404, `Facture ${factId} not found`);
     });
 
     // ── PDF: Download Devis ──
@@ -181,6 +210,112 @@ module.exports = class AdminService extends cds.ApplicationService {
 
       const pdfBuffer = await generateCommandePDF({ ...commande, items, clientB2B: commande.clientB2B_ID ? client : null, clientB2C: !commande.clientB2B_ID ? client : null });
       return pdfBuffer.toString('base64');
+    });
+
+    // ── Action: Validate Cash (Espèces) Order ──
+    this.on('validateCashOrder', async (req) => {
+      const { commandeId } = req.data;
+      const { CommandeClient, CommandeItem, FactureClient, Paiement } = cds.entities('sap.pme.doc');
+      const { NumberRange } = cds.entities('sap.pme.admin');
+      const { Produit } = cds.entities('sap.pme');
+
+      const commande = await SELECT.one.from(CommandeClient).where({ ID: commandeId });
+      if (!commande) return req.error(404, 'Commande introuvable');
+      if (commande.status === 'PAID') return req.error(400, 'Commande déjà payée');
+      if (commande.status !== 'PENDING' && commande.status !== 'CONFIRMED') return req.error(400, `Impossible de valider une commande au statut ${commande.status}`);
+
+      const lineItems = await SELECT.from(CommandeItem).where({ parent_ID: commandeId });
+
+      // Generate Invoice Number
+      let invNum = 'FAC-0001';
+      const invRange = await SELECT.one.from(NumberRange).where({ objectType: 'FACTURE' });
+      if (invRange) {
+        const next = (invRange.lastNumber || 0) + 1;
+        invNum = `FAC-${String(next).padStart(4, '0')}`;
+        await UPDATE(NumberRange).set({ lastNumber: next }).where({ objectType: 'FACTURE' });
+      }
+
+      // Create Invoice
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + 30);
+      
+      await INSERT.into(FactureClient).entries({
+        invoiceNumber : invNum,
+        commande_ID   : commande.ID,
+        clientB2B_ID  : commande.clientB2B_ID,
+        clientB2C_ID  : commande.clientB2C_ID,
+        date          : new Date().toISOString().split('T')[0],
+        dueDate       : dueDate.toISOString().split('T')[0],
+        status        : 'PAID',
+        totalHT       : commande.totalHT,
+        totalTVA      : commande.totalTVA,
+        totalTTC      : commande.totalTTC,
+        discount      : commande.discount || 0,
+        paidAmount    : commande.totalTTC,
+        remainingAmount : 0,
+        currency_code   : 'DZD'
+      });
+
+      // Get new facture ID
+      const facture = await SELECT.one.from(FactureClient).where({ invoiceNumber: invNum });
+
+      // Generate Payment Number
+      let payNum = 'PAY-0001';
+      const payRange = await SELECT.one.from(NumberRange).where({ objectType: 'PAIEMENT' });
+      if (payRange) {
+        const next = (payRange.lastNumber || 0) + 1;
+        payNum = `PAY-${String(next).padStart(4, '0')}`;
+        await UPDATE(NumberRange).set({ lastNumber: next }).where({ objectType: 'PAIEMENT' });
+      }
+
+      // Record Payment
+      await INSERT.into(Paiement).entries({
+        paymentNumber : payNum,
+        facture_ID    : facture.ID,
+        date          : new Date().toISOString().split('T')[0],
+        amount        : commande.totalTTC,
+        method        : 'ESPECES',
+        reference     : `CASH-ADMIN-${Date.now()}`
+      });
+
+      // Update Order Status
+      await UPDATE(CommandeClient).set({ 
+        invoiced: true, 
+        facture_ID: facture.ID, 
+        status: 'PAID' 
+      }).where({ ID: commande.ID });
+
+      // Deduct stock
+      for (const item of lineItems) {
+        await UPDATE(Produit).where({ ID: item.product_ID }).with({ stock: { '-=': item.quantity } });
+      }
+
+      await this._logAudit(req, 'VALIDATE_CASH_ORDER', 'CommandeClient', commandeId, `Order validated + paid via espèces. Invoice ${invNum}`);
+
+      return SELECT.one.from(CommandeClient).where({ ID: commande.ID });
+    });
+
+    // ── Action: Resolve Dispute ──
+    this.on('resolveDispute', async (req) => {
+      const { invoiceId } = req.data;
+      const { FactureFournisseur } = cds.entities('sap.pme.doc');
+
+      const invoice = await SELECT.one.from(FactureFournisseur).where({ ID: invoiceId });
+      if (!invoice) return req.error(404, 'Facture introuvable');
+      if (invoice.matchStatus !== 'DISCREPANCY') {
+        return req.error(400, "Cette facture n'est pas en litige/écart");
+      }
+
+      await UPDATE(FactureFournisseur).set({
+        matchStatus : 'MATCHED',
+        status      : 'PAID',
+        matchDate   : new Date().toISOString(),
+        matchBy     : req.user?.id || 'admin'
+      }).where({ ID: invoiceId });
+
+      await this._logAudit(req, 'RESOLVE_DISPUTE', 'FactureFournisseur', invoiceId, `Dispute resolved for invoice ${invoice.invoiceNumber}. Status forced to PAID.`);
+
+      return SELECT.one.from(FactureFournisseur).where({ ID: invoiceId });
     });
 
     await super.init();

@@ -16,7 +16,7 @@ module.exports = class CRMService extends cds.ApplicationService {
       ClientsB2B, ClientsB2C, Devis, DevisItems,
       Commandes, CommandeItems, Factures, FactureItems, Paiements
     } = this.entities;
-    const { BusinessPartner } = cds.entities('sap.pme');
+    const { BusinessPartner, Produit } = cds.entities('sap.pme');
 
     // ── Auto-generate document numbers ──
     this.before('CREATE', Devis,     async (req) => { req.data.devisNumber   = await this._generateNumber('DEVIS',    'DEV'); });
@@ -76,8 +76,9 @@ module.exports = class CRMService extends cds.ApplicationService {
         const ht    = qty * price * (1 - disc / 100);
         const tvaAmt = ht * (tva / 100);
         return {
+          ID          : cds.utils.uuid(),
           lineNumber  : i + 1,
-          product_ID  : item.productId,
+          product_ID  : item.product_ID,
           description : item.description || '',
           quantity    : qty,
           unit        : 'PIECE',
@@ -95,7 +96,9 @@ module.exports = class CRMService extends cds.ApplicationService {
       const totalTTC = lineItems.reduce((s, i) => s + i.totalTTC, 0);
 
       const devNum = await this._generateNumber('DEVIS', 'DEV');
-      const [devis] = await INSERT.into(Devis).entries({
+      const devisId = cds.utils.uuid();
+      await INSERT.into(Devis).entries({
+        ID           : devisId,
         devisNumber  : devNum,
         clientB2B_ID : clientB2B_ID,
         date         : new Date().toISOString().split('T')[0],
@@ -105,38 +108,39 @@ module.exports = class CRMService extends cds.ApplicationService {
         totalHT      : parseFloat(totalHT.toFixed(2)),
         totalTVA     : parseFloat(totalTVA.toFixed(2)),
         totalTTC     : parseFloat(totalTTC.toFixed(2)),
+        currency_code: 'DZD',
         items        : lineItems
       });
 
-      return SELECT.one.from(Devis).where({ ID: devis.ID });
+      return SELECT.one.from(Devis).where({ ID: devisId });
     });
 
     // ─────────────────────────────────────────
     // ACTION: B2C — Submit Cart as Order (after payment)
     // Client B2C paie et obtient une commande directement
     // ─────────────────────────────────────────
-    this.on('submitCartAsOrder', async (req) => {
-      const { clientB2C_ID, items, paymentMethod, paymentRef } = req.data;
+      this.on('submitCartAsOrder', async (req) => {
+      const { clientB2C_ID, items, paymentMethod, paymentRef, deliveryAddress } = req.data;
+      if (!items || items.length === 0) return req.error(400, 'Panier vide');
 
-      if (!clientB2C_ID) return req.error(400, 'clientB2C_ID est requis');
-      if (!items || items.length === 0) return req.error(400, 'Le panier est vide');
+      const productIds = items.map(i => i.product_ID);
+      const { Produit } = cds.entities('sap.pme');
+      const products = await SELECT.from(Produit).where({ ID: { 'in': productIds } });
 
-      const client = await SELECT.one.from(ClientsB2C).where({ ID: clientB2C_ID });
-      if (!client) return req.error(404, 'Client B2C introuvable');
-
-      const lineItems = items.map((item, i) => {
-        const qty    = parseFloat(item.quantity);
-        const price  = parseFloat(item.unitPrice);
-        const tva    = parseFloat(item.tvaRate || 19);
-        const ht     = qty * price;
+      const lineItems = items.map((cartItem, idx) => {
+        const prod = products.find(p => p.ID === cartItem.product_ID);
+        if (!prod) throw new Error(`Produit ${cartItem.product_ID} introuvable`);
+        const ht = prod.unitPrice * cartItem.quantity;
+        const tva = prod.tvaRate || 19;
         const tvaAmt = ht * (tva / 100);
         return {
-          lineNumber  : i + 1,
-          product_ID  : item.productId,
-          description : item.description || '',
-          quantity    : qty,
-          unit        : 'PIECE',
-          unitPrice   : price,
+          ID          : cds.utils.uuid(),
+          lineNumber  : idx + 1,
+          product_ID  : prod.ID,
+          description : prod.name,
+          quantity    : cartItem.quantity,
+          unit        : prod.unit,
+          unitPrice   : prod.unitPrice,
           tvaRate     : tva,
           totalHT     : parseFloat(ht.toFixed(2)),
           totalTVA    : parseFloat(tvaAmt.toFixed(2)),
@@ -148,48 +152,118 @@ module.exports = class CRMService extends cds.ApplicationService {
       const totalTVA = lineItems.reduce((s, i) => s + i.totalTVA, 0);
       const totalTTC = lineItems.reduce((s, i) => s + i.totalTTC, 0);
 
+      const isCash = paymentMethod === 'ESPECES';
+      const status = isCash ? 'PENDING' : 'CONFIRMED';
+
       const cmdNum = await this._generateNumber('COMMANDE', 'CMD');
-      const [commande] = await INSERT.into(Commandes).entries({
-        orderNumber  : cmdNum,
-        clientB2C_ID : clientB2C_ID,
-        date         : new Date().toISOString().split('T')[0],
-        status       : 'CONFIRMED',
-        totalHT      : parseFloat(totalHT.toFixed(2)),
-        totalTVA     : parseFloat(totalTVA.toFixed(2)),
-        totalTTC     : parseFloat(totalTTC.toFixed(2)),
-        items        : lineItems
+      const commandeId = cds.utils.uuid();
+      await INSERT.into(Commandes).entries({
+        ID             : commandeId,
+        orderNumber    : cmdNum,
+        clientB2C_ID   : clientB2C_ID,
+        date           : new Date().toISOString().split('T')[0],
+        deliveryAddress: deliveryAddress,
+        status         : status,
+        totalHT        : parseFloat(totalHT.toFixed(2)),
+        totalTVA       : parseFloat(totalTVA.toFixed(2)),
+        totalTTC       : parseFloat(totalTTC.toFixed(2)),
+        currency_code  : 'DZD',
+        items          : lineItems
       });
 
-      // Auto-generate invoice
+      if (!isCash) {
+        // Auto-generate invoice
+        const invNum  = await this._generateNumber('FACTURE', 'FAC');
+        const dueDate = new Date(); dueDate.setDate(dueDate.getDate() + 30);
+        const factureId = cds.utils.uuid();
+        await INSERT.into(Factures).entries({
+          ID              : factureId,
+          invoiceNumber   : invNum,
+          commande_ID     : commandeId,
+          clientB2C_ID    : clientB2C_ID,
+          date            : new Date().toISOString().split('T')[0],
+          dueDate         : dueDate.toISOString().split('T')[0],
+          status          : 'PAID',
+          totalHT         : parseFloat(totalHT.toFixed(2)),
+          totalTVA        : parseFloat(totalTVA.toFixed(2)),
+          totalTTC        : parseFloat(totalTTC.toFixed(2)),
+          paidAmount      : parseFloat(totalTTC.toFixed(2)),
+          remainingAmount : 0,
+          currency_code   : 'DZD',
+          items           : lineItems.map(l => ({ ...l }))
+        });
+
+        // Record the payment
+        const payNum = await this._generateNumber('PAIEMENT', 'PAY');
+        await INSERT.into(Paiements).entries({
+          paymentNumber : payNum,
+          facture_ID    : factureId,
+          date          : new Date().toISOString().split('T')[0],
+          amount        : parseFloat(totalTTC.toFixed(2)),
+          method        : paymentMethod || 'CARTE',
+          reference     : paymentRef || `SIM-${Date.now()}`
+        });
+
+        await UPDATE(Commandes).set({ invoiced: true, facture_ID: factureId, status: 'PAID' }).where({ ID: commandeId });
+
+        // Deduct stock
+        for (let item of lineItems) {
+          await UPDATE(Produit).where({ ID: item.product_ID }).with({ stock: { '-=': item.quantity } });
+        }
+      }
+
+      return SELECT.one.from(Commandes).where({ ID: commandeId });
+    });
+
+    // ── Action: Pay Order (Client B2B / B2C post-creation) ──
+    this.on('payOrder', async (req) => {
+      const { commandeId, paymentMethod, paymentRef } = req.data;
+      const commande = await SELECT.one.from(Commandes).where({ ID: commandeId });
+      if (!commande) return req.error(404, 'Commande introuvable');
+      if (commande.status === 'PAID') return req.error(400, 'Commande déjà payée');
+
+      const lineItems = await SELECT.from(CommandeItems).where({ parent_ID: commandeId });
+
+      // Generate Invoice
       const invNum  = await this._generateNumber('FACTURE', 'FAC');
       const dueDate = new Date(); dueDate.setDate(dueDate.getDate() + 30);
       const [facture] = await INSERT.into(Factures).entries({
         invoiceNumber : invNum,
         commande_ID   : commande.ID,
-        clientB2C_ID  : clientB2C_ID,
+        clientB2B_ID  : commande.clientB2B_ID,
+        clientB2C_ID  : commande.clientB2C_ID,
         date          : new Date().toISOString().split('T')[0],
         dueDate       : dueDate.toISOString().split('T')[0],
         status        : 'PAID',
-        totalHT       : parseFloat(totalHT.toFixed(2)),
-        totalTVA      : parseFloat(totalTVA.toFixed(2)),
-        totalTTC      : parseFloat(totalTTC.toFixed(2)),
-        paidAmount    : parseFloat(totalTTC.toFixed(2)),
+        totalHT       : commande.totalHT,
+        totalTVA      : commande.totalTVA,
+        totalTTC      : commande.totalTTC,
+        discount      : commande.discount || 0,
+        paidAmount    : commande.totalTTC,
         remainingAmount : 0,
-        items         : lineItems.map(l => ({ ...l }))
+        currency_code : 'DZD',
+        items         : lineItems.map(l => ({ ...l, parent_ID: null, ID: cds.utils.uuid() }))
       });
 
-      // Record the payment
+      // Record Payment
       const payNum = await this._generateNumber('PAIEMENT', 'PAY');
       await INSERT.into(Paiements).entries({
         paymentNumber : payNum,
         facture_ID    : facture.ID,
         date          : new Date().toISOString().split('T')[0],
-        amount        : parseFloat(totalTTC.toFixed(2)),
+        amount        : commande.totalTTC,
         method        : paymentMethod || 'CARTE',
         reference     : paymentRef || `SIM-${Date.now()}`
       });
 
+      // Update Order Status
       await UPDATE(Commandes).set({ invoiced: true, facture_ID: facture.ID, status: 'PAID' }).where({ ID: commande.ID });
+
+      // Deduct stock
+      const { Produit } = cds.entities('sap.pme');
+      for (let item of lineItems) {
+        await UPDATE(Produit).where({ ID: item.product_ID }).with({ stock: { '-=': item.quantity } });
+      }
 
       return SELECT.one.from(Commandes).where({ ID: commande.ID });
     });
@@ -218,8 +292,10 @@ module.exports = class CRMService extends cds.ApplicationService {
 
       const items = await SELECT.from(DevisItems).where({ parent_ID: devisId });
       const orderNum = await this._generateNumber('COMMANDE', 'CMD');
+      const commandeId = cds.utils.uuid();
 
-      const [commande] = await INSERT.into(Commandes).entries({
+      await INSERT.into(Commandes).entries({
+        ID           : commandeId,
         orderNumber  : orderNum,
         clientB2B_ID : devis.clientB2B_ID,
         clientB2C_ID : devis.clientB2C_ID,
@@ -229,13 +305,17 @@ module.exports = class CRMService extends cds.ApplicationService {
         totalHT      : devis.totalHT,
         totalTVA     : devis.totalTVA,
         totalTTC     : devis.totalTTC,
+        discount     : devis.discount || 0,
+        currency_code: 'DZD',
         items        : items.map((item, i) => ({
+          ID          : cds.utils.uuid(),
           lineNumber  : i + 1,
           product_ID  : item.product_ID,
           description : item.description,
           quantity    : item.quantity,
           unit        : item.unit,
           unitPrice   : item.unitPrice,
+          discount    : item.discount || 0,
           tvaRate     : item.tvaRate,
           totalHT     : item.totalHT,
           totalTVA    : item.totalTVA,
@@ -243,8 +323,8 @@ module.exports = class CRMService extends cds.ApplicationService {
         }))
       });
 
-      await UPDATE(Devis).set({ convertedToOrder: true, commande_ID: commande.ID, status: 'APPROVED' }).where({ ID: devisId });
-      return SELECT.one.from(Commandes).where({ ID: commande.ID });
+      await UPDATE(Devis).set({ convertedToOrder: true, commande_ID: commandeId, status: 'APPROVED' }).where({ ID: devisId });
+      return SELECT.one.from(Commandes).where({ ID: commandeId });
     });
 
     // ── Action: Send Order to Client ──
@@ -278,6 +358,7 @@ module.exports = class CRMService extends cds.ApplicationService {
         totalTTC      : cmd.totalTTC,
         remainingAmount : cmd.totalTTC,
         items         : items.map((item, i) => ({
+          ID          : cds.utils.uuid(),
           lineNumber  : i + 1, product_ID: item.product_ID,
           description : item.description, quantity: item.quantity,
           unit        : item.unit, unitPrice: item.unitPrice,
@@ -319,6 +400,7 @@ module.exports = class CRMService extends cds.ApplicationService {
         totalTTC      : commande.totalTTC,
         remainingAmount : commande.totalTTC,
         items         : items.map((item, i) => ({
+          ID          : cds.utils.uuid(),
           lineNumber  : i + 1, product_ID: item.product_ID,
           description : item.description, quantity: item.quantity,
           unit        : item.unit, unitPrice: item.unitPrice,
@@ -359,6 +441,9 @@ module.exports = class CRMService extends cds.ApplicationService {
       const { devisId } = req.data;
       const devis = await SELECT.one.from(Devis).where({ ID: devisId });
       if (!devis) return req.error(404, 'Devis introuvable');
+      if (devis.status === 'PENDING') {
+        return req.error(403, 'Le devis est en cours de révision et ne peut pas encore être téléchargé.');
+      }
       const items = await SELECT.from(DevisItems).where({ parent_ID: devisId });
       const client = devis.clientB2B_ID
         ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B).where({ ID: devis.clientB2B_ID })
@@ -373,7 +458,15 @@ module.exports = class CRMService extends cds.ApplicationService {
       const facture = await SELECT.one.from(Factures).where({ ID: factureId });
       if (!facture) return req.error(404, 'Facture introuvable');
       const items = await SELECT.from(FactureItems).where({ parent_ID: factureId });
-      const pdfBuffer = await generateFacturePDF({ ...facture, items });
+      const client = facture.clientB2B_ID
+        ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B).where({ ID: facture.clientB2B_ID })
+        : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C).where({ ID: facture.clientB2C_ID });
+      const pdfBuffer = await generateFacturePDF({
+        ...facture,
+        items,
+        clientB2B: facture.clientB2B_ID ? client : null,
+        clientB2C: !facture.clientB2B_ID ? client : null
+      });
       return pdfBuffer.toString('base64');
     });
 
@@ -382,7 +475,7 @@ module.exports = class CRMService extends cds.ApplicationService {
       const { commandeId } = req.data;
       const commande = await SELECT.one.from(Commandes).where({ ID: commandeId });
       if (!commande) return req.error(404, 'Commande introuvable');
-      const items = await SELECT.from(CommandeItems).where({ parent_ID: commandeId });
+      const items = await SELECT.from(CommandeItems).columns(i => { i('*'), i.product(p => p('*')) }).where({ parent_ID: commandeId });
       const client = commande.clientB2B_ID
         ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B).where({ ID: commande.clientB2B_ID })
         : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C).where({ ID: commande.clientB2C_ID });

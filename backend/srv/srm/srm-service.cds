@@ -3,7 +3,7 @@
 // Portail Fournisseur — PME Connect
 // ============================================================
 
-using { sap.pme as pme }           from '../../db/schema/common';
+using { sap.pme as pme }           from '../../db/index';
 using { sap.pme.srm as srm }       from '../../db/schema/srm';
 using { sap.pme.doc as doc }        from '../../db/schema/documents';
 
@@ -105,7 +105,8 @@ service SRMService {
     wilaya        : String(64),
     phone         : String(30),
     paymentTerms  : String(128),
-    deliveryTerms : String(128)
+    deliveryTerms : String(128),
+    ai            : String(30)
   ) returns Fournisseurs;
 
   // Réponse aux Appels d'Offres
@@ -140,4 +141,38 @@ service SRMService {
     compliance     : Integer,
     comments       : String
   ) returns Evaluations;
+
+  // Réception Marchandise (GR)
+  type GRItem_Input {
+    poItemId    : UUID;
+    receivedQty : Decimal(13, 3);
+    acceptedQty : Decimal(13, 3);
+    rejectedQty : Decimal(13, 3);
+    notes       : String(500);
+  }
+  action createGoodsReceipt(
+    poId  : UUID,
+    items : array of GRItem_Input,
+    notes : String(2000)
+  ) returns Receptions;
+
+  // Facture Fournisseur
+  type SupplierInvoiceItem_Input {
+    poItemId    : UUID;
+    quantity    : Decimal(13, 3);
+    unitPrice   : Decimal(15, 2);
+    tvaRate     : Decimal(5, 2);
+    description : String(512);
+  }
+  action createSupplierInvoice(
+    poId        : UUID,
+    receptionId : UUID,
+    items       : array of SupplierInvoiceItem_Input,
+    dueDate     : Date,
+    notes       : String(2000)
+  ) returns FacturesFournisseur;
+
+  function downloadPOPDF(poId: UUID) returns String;
+  function downloadGRPDF(grId: UUID) returns String;
+  function downloadSupplierInvoicePDF(factureId: UUID) returns String;
 }

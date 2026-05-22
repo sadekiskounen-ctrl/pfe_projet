@@ -5,6 +5,7 @@
 
 'use strict';
 const cds = require('@sap/cds');
+const { generatePOFournisseurPDF, generateGRFournisseurPDF, generateInvoiceFournisseurPDF } = require('../lib/pdf-generator');
 
 module.exports = class SRMService extends cds.ApplicationService {
 
@@ -13,7 +14,7 @@ module.exports = class SRMService extends cds.ApplicationService {
       Fournisseurs, FournisseurDocuments, Evaluations,
       RFQs, RFQItems, RFQResponses, RFQResponseItems,
       BonsCommande, POItems, Receptions, ReceptionItems,
-      FacturesFournisseur
+      FacturesFournisseur, FactureFournisseurItems
     } = this.entities;
 
     // ── Auto-generate document numbers ──
@@ -50,6 +51,7 @@ module.exports = class SRMService extends cds.ApplicationService {
         const totalPrice = unitPrice * parseFloat(rfqItem.quantity);
         totalAmount += totalPrice;
         responseItems.push({
+          ID         : cds.utils.uuid(),
           rfqItem_ID : inputItem.rfqItemId,
           unitPrice,
           totalPrice : parseFloat(totalPrice.toFixed(2)),
@@ -76,7 +78,7 @@ module.exports = class SRMService extends cds.ApplicationService {
     // ACTION: Mettre à jour le profil fournisseur (KYC)
     // ─────────────────────────────────────────
     this.on('updateProfile', async (req) => {
-      const { fournisseurId, bankName, rib, bankAccount, street, city, wilaya, phone, paymentTerms, deliveryTerms } = req.data;
+      const { fournisseurId, bankName, rib, bankAccount, street, city, wilaya, phone, paymentTerms, deliveryTerms, ai } = req.data;
 
       const fournisseur = await SELECT.one.from(Fournisseurs).where({ ID: fournisseurId });
       if (!fournisseur) return req.error(404, 'Fournisseur introuvable');
@@ -91,6 +93,7 @@ module.exports = class SRMService extends cds.ApplicationService {
       if (phone        !== undefined) updates.phone        = phone;
       if (paymentTerms !== undefined) updates.paymentTerms = paymentTerms;
       if (deliveryTerms !== undefined) updates.deliveryTerms = deliveryTerms;
+      if (ai            !== undefined) updates.ai            = ai;
 
       await UPDATE(Fournisseurs).set(updates).where({ ID: fournisseurId });
       return SELECT.one.from(Fournisseurs).where({ ID: fournisseurId });
@@ -148,6 +151,7 @@ module.exports = class SRMService extends cds.ApplicationService {
         totalTVA += tva;
         totalTTC += ht + tva;
         return {
+          ID           : cds.utils.uuid(),
           lineNumber   : i + 1,
           product_ID   : rfqItem.product_ID,
           description  : rfqItem.description || '',
@@ -266,6 +270,179 @@ module.exports = class SRMService extends cds.ApplicationService {
         status    : 'BLOCKED'
       }).where({ ID: fournisseurId });
       return SELECT.one.from(Fournisseurs).where({ ID: fournisseurId });
+    });
+
+    // ─────────────────────────────────────────
+    // ACTION: Créer une Réception Marchandise (GR)
+    // ─────────────────────────────────────────
+    this.on('createGoodsReceipt', async (req) => {
+      const { poId, items: grItems, notes } = req.data;
+
+      const po = await SELECT.one.from(BonsCommande).where({ ID: poId });
+      if (!po) return req.error(404, 'Bon de commande introuvable');
+      if (po.status !== 'CONFIRMED') return req.error(400, `Impossible de réceptionner un PO au statut ${po.status}`);
+
+      const poItemsList = await SELECT.from(POItems).where({ parent_ID: poId });
+
+      const receptionItems = (grItems || []).map(gi => {
+        const poItem = poItemsList.find(p => p.ID === gi.poItemId);
+        if (!poItem) return null;
+        return {
+          ID           : cds.utils.uuid(),
+          poItem_ID    : gi.poItemId,
+          product_ID   : poItem.product_ID,
+          orderedQty   : parseFloat(poItem.quantity),
+          receivedQty  : parseFloat(gi.receivedQty),
+          acceptedQty  : parseFloat(gi.acceptedQty != null ? gi.acceptedQty : gi.receivedQty),
+          rejectedQty  : parseFloat(gi.rejectedQty || 0),
+          notes        : gi.notes || ''
+        };
+      }).filter(Boolean);
+
+      const grNum = await this._generateNumber('GR', 'GR');
+      const [gr] = await INSERT.into(Receptions).entries({
+        receiptNumber : grNum,
+        bonCommande_ID: poId,
+        date          : new Date().toISOString().split('T')[0],
+        receivedBy    : req.user?.id || 'fournisseur',
+        notes         : notes || '',
+        status        : 'CONFIRMED',
+        items         : receptionItems
+      });
+
+      // Update PO item receivedQty
+      for (const gi of receptionItems) {
+        await UPDATE(POItems).set({
+          receivedQty: gi.receivedQty
+        }).where({ ID: gi.poItem_ID });
+      }
+
+      // Update PO status to DELIVERED
+      await UPDATE(BonsCommande).set({
+        status     : 'DELIVERED',
+        statusDate : new Date().toISOString()
+      }).where({ ID: poId });
+
+      return SELECT.one.from(Receptions).where({ ID: gr.ID });
+    });
+
+    // ─────────────────────────────────────────
+    // ACTION: Créer une Facture Fournisseur
+    // ─────────────────────────────────────────
+    this.on('createSupplierInvoice', async (req) => {
+      const { poId, receptionId, items: invoiceItems, dueDate, notes } = req.data;
+
+      const po = await SELECT.one.from(BonsCommande).where({ ID: poId });
+      if (!po) return req.error(404, 'Bon de commande introuvable');
+      if (po.status !== 'DELIVERED') return req.error(400, 'Le PO doit être livré avant de facturer');
+
+      const poItemsList = await SELECT.from(POItems).where({ parent_ID: poId });
+
+      let totalHT = 0, totalTVA = 0, totalTTC = 0;
+      const factItems = (invoiceItems || []).map((fi, idx) => {
+        const poItem = poItemsList.find(p => p.ID === fi.poItemId);
+        const qty      = parseFloat(fi.quantity || (poItem && poItem.quantity) || 0);
+        const price    = parseFloat(fi.unitPrice || (poItem && poItem.unitPrice) || 0);
+        const tvaRate  = parseFloat(fi.tvaRate || 19);
+        const ht       = qty * price;
+        const tva      = ht * (tvaRate / 100);
+        totalHT  += ht;
+        totalTVA += tva;
+        totalTTC += ht + tva;
+        return {
+          ID          : cds.utils.uuid(),
+          lineNumber  : idx + 1,
+          poItem_ID   : fi.poItemId,
+          product_ID  : poItem ? poItem.product_ID : null,
+          description : fi.description || (poItem && poItem.description) || '',
+          quantity    : qty,
+          unitPrice   : parseFloat(price.toFixed(2)),
+          tvaRate,
+          totalHT     : parseFloat(ht.toFixed(2)),
+          totalTVA    : parseFloat(tva.toFixed(2)),
+          totalTTC    : parseFloat((ht + tva).toFixed(2))
+        };
+      });
+
+      const invNum = await this._generateNumber('SUPINV', 'SINV');
+      const [facture] = await INSERT.into(FacturesFournisseur).entries({
+        invoiceNumber  : invNum,
+        fournisseur_ID : po.fournisseur_ID,
+        bonCommande_ID : poId,
+        reception_ID   : receptionId || null,
+        date           : new Date().toISOString().split('T')[0],
+        dueDate        : dueDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
+        status         : 'SENT',
+        matchStatus    : 'PENDING',
+        totalHT        : parseFloat(totalHT.toFixed(2)),
+        totalTVA       : parseFloat(totalTVA.toFixed(2)),
+        totalTTC       : parseFloat(totalTTC.toFixed(2)),
+        notes          : notes || '',
+        items          : factItems
+      });
+
+      // ── Auto 3-Way Match (Tolérance 2%) ──
+      const poTotalTTC = parseFloat(po.totalTTC || 0);
+      const invTotalTTC = parseFloat(totalTTC.toFixed(2));
+      const tolerance = poTotalTTC * 0.02; // 2%
+      const diff = Math.abs(invTotalTTC - poTotalTTC);
+
+      let matchStatus = 'MATCHED';
+      let docStatus   = 'APPROVED';
+
+      if (diff > tolerance) {
+        matchStatus = 'DISCREPANCY';
+        docStatus   = 'SENT'; // Litige → reste en attente
+      }
+
+      await UPDATE(FacturesFournisseur).set({
+        matchStatus,
+        matchDate : new Date().toISOString(),
+        matchBy   : 'system',
+        status    : docStatus
+      }).where({ ID: facture.ID });
+
+      return SELECT.one.from(FacturesFournisseur).where({ ID: facture.ID });
+    });
+
+    // ─────────────────────────────────────────
+    // FUNCTION: Download PO PDF
+    // ─────────────────────────────────────────
+    this.on('downloadPOPDF', async (req) => {
+      const { poId } = req.data;
+      const po = await SELECT.one.from(BonsCommande).where({ ID: poId });
+      if (!po) return req.error(404, 'Bon de commande introuvable');
+      const fournisseur = await SELECT.one.from(Fournisseurs).where({ ID: po.fournisseur_ID });
+      const items = await SELECT.from(POItems).columns(i => { i('*'), i.product(p => p('*')) }).where({ parent_ID: poId });
+      const pdfBuffer = await generatePOFournisseurPDF({ ...po, items, fournisseur });
+      return pdfBuffer.toString('base64');
+    });
+
+    // ─────────────────────────────────────────
+    // FUNCTION: Download GR PDF
+    // ─────────────────────────────────────────
+    this.on('downloadGRPDF', async (req) => {
+      const { grId } = req.data;
+      const gr = await SELECT.one.from(Receptions).where({ ID: grId });
+      if (!gr) return req.error(404, 'Bon de réception introuvable');
+      const po = await SELECT.one.from(BonsCommande).where({ ID: gr.bonCommande_ID });
+      const fournisseur = po ? await SELECT.one.from(Fournisseurs).where({ ID: po.fournisseur_ID }) : null;
+      const items = await SELECT.from(ReceptionItems).columns(i => { i('*'), i.product(p => p('*')) }).where({ parent_ID: grId });
+      const pdfBuffer = await generateGRFournisseurPDF({ ...gr, items, bonCommande: { ...po, fournisseur } });
+      return pdfBuffer.toString('base64');
+    });
+
+    // ─────────────────────────────────────────
+    // FUNCTION: Download Supplier Invoice PDF
+    // ─────────────────────────────────────────
+    this.on('downloadSupplierInvoicePDF', async (req) => {
+      const { factureId } = req.data;
+      const facture = await SELECT.one.from(FacturesFournisseur).where({ ID: factureId });
+      if (!facture) return req.error(404, 'Facture introuvable');
+      const fournisseur = await SELECT.one.from(Fournisseurs).where({ ID: facture.fournisseur_ID });
+      const items = await SELECT.from(FactureFournisseurItems).columns(i => { i('*'), i.product(p => p('*')) }).where({ parent_ID: factureId });
+      const pdfBuffer = await generateInvoiceFournisseurPDF({ ...facture, items, fournisseur });
+      return pdfBuffer.toString('base64');
     });
 
     await super.init();
