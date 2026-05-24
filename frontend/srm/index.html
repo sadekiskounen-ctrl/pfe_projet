@@ -609,11 +609,13 @@ async function loadRFQs() {
     tbody.innerHTML = rfqsList.map(r => {
       const isOpen = r.status === 'OPEN' || !r.status;
       const action = isOpen ? `<button class="btn btn-primary btn-sm" onclick="openRFQModal('${r.ID}')"><i class="fas fa-reply"></i> Répondre</button>` : '<span style="color:var(--text-dim);font-size:0.8rem">Clôturé</span>';
+      // Budget : affiche totalBudget si disponible, sinon 0.00
+      const budgetDisplay = (r.totalBudget > 0) ? `${fmt(r.totalBudget)} DA` : '<span style="color:var(--text-dim)">Non défini</span>';
       return `<tr>
         <td style="font-family:monospace;font-weight:600">${r.rfqNumber||'—'}</td>
-        <td style="font-weight:600">${r.title||'—'}</td>
+        <td style="font-weight:700">${r.title||'—'}</td>
         <td>${fmtDate(r.deadline)}</td>
-        <td style="color:var(--accent-gold);font-weight:700">${fmt(r.totalBudget)} DA</td>
+        <td style="color:var(--accent-gold);font-weight:700">${budgetDisplay}</td>
         <td><span class="badge ${isOpen?'badge-open':'badge-closed'}">${isOpen?'Ouvert':'Clôturé'}</span></td>
         <td>${action}</td>
       </tr>`;
@@ -628,28 +630,38 @@ async function openRFQModal(rfqId) {
     if (!res.ok) throw new Error('Chargement RFQ échoué');
     currentRFQ = await res.json();
 
-    document.getElementById('rfqModalSubtitle').textContent = `${currentRFQ.title} · Limite : ${fmtDate(currentRFQ.deadline)}`;
+    // Titre en gras, sans "Limite : XX/XX"
+    document.getElementById('rfqModalSubtitle').innerHTML = `<strong style="font-size:1rem;color:var(--text)">${currentRFQ.title}</strong>`;
     document.getElementById('resp-delivery').value = 7;
-    const d = new Date(); d.setDate(d.getDate() + 30);
-    document.getElementById('resp-validUntil').value = d.toISOString().split('T')[0];
+    // "Offre valide jusqu'au" = date limite du RFQ
+    document.getElementById('resp-validUntil').value = currentRFQ.deadline
+      ? currentRFQ.deadline.split('T')[0]
+      : new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0];
+    // date min = aujourd'hui
+    document.getElementById('resp-validUntil').min = new Date().toISOString().split('T')[0];
     document.getElementById('resp-notes').value = '';
 
     const tbody = document.getElementById('offerItemsBody');
     const items = currentRFQ.items || [];
     if (!items.length) { toast('error', 'Cet appel d\'offres n\'a pas d\'articles.'); return; }
+    // Prix unitaire fourni par l'admin (targetPrice) — read-only, total auto
     tbody.innerHTML = items.map((item, i) => `
       <tr>
         <td>${i+1}</td>
-        <td style="font-weight:600">${item.description||'Article '+( i+1)}</td>
+        <td style="font-weight:600">${item.description||'Article '+(i+1)}</td>
         <td style="font-family:monospace">${item.quantity} ${item.unit||''}</td>
         <td>
-          <input type="number" class="price-input" id="price-${item.ID}" data-qty="${item.quantity}"
-            placeholder="0.00" min="0" step="0.01" oninput="recalcOffer()">
+          <input type="number" class="price-input" id="price-${item.ID}"
+            value="${item.targetPrice > 0 ? parseFloat(item.targetPrice).toFixed(2) : ''}" 
+            data-qty="${item.quantity}" data-targetprice="${item.targetPrice || 0}"
+            placeholder="${item.targetPrice > 0 ? parseFloat(item.targetPrice).toFixed(2) : '0.00'}"
+            min="0" step="0.01" ${item.targetPrice > 0 ? 'readonly style="background:rgba(0,201,167,0.07);border-color:rgba(0,201,167,0.3);cursor:not-allowed"' : 'oninput="recalcOffer()"'}>
         </td>
-        <td style="font-family:monospace;font-weight:600;color:var(--accent)" id="line-total-${item.ID}">0.00 DA</td>
+        <td style="font-family:monospace;font-weight:600;color:var(--accent)" id="line-total-${item.ID}">${item.targetPrice > 0 ? fmt(item.targetPrice * item.quantity) : '0.00'} DA</td>
       </tr>
     `).join('');
 
+    recalcOffer();
     document.getElementById('rfqModal').classList.add('open');
   } catch(e) { toast('error', e.message); }
   finally { showLoader(false); }
@@ -675,9 +687,11 @@ async function submitOffer() {
   if (!profile) { toast('error', 'Profil non chargé'); return; }
   const items = (currentRFQ?.items || []).map(item => {
     const priceEl = document.getElementById(`price-${item.ID}`);
-    return { rfqItemId: item.ID, unitPrice: parseFloat(priceEl?.value || 0), notes: '' };
+    // Si prix admin (targetPrice) disponible, on l'utilise directement
+    const price = item.targetPrice > 0 ? parseFloat(item.targetPrice) : parseFloat(priceEl?.value || 0);
+    return { rfqItemId: item.ID, unitPrice: price, notes: '' };
   });
-  if (items.some(i => i.unitPrice <= 0)) { toast('error', 'Veuillez saisir un prix pour chaque article.'); return; }
+  if (items.some(i => i.unitPrice <= 0)) { toast('error', 'Veuillez vérifier les prix — certains sont à 0.'); return; }
 
   const btn = document.getElementById('submitOfferBtn');
   btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';

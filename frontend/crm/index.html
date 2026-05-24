@@ -1466,14 +1466,16 @@
 
         <!-- VIEW: PROFIL -->
         <div class="view" id="view-profil">
-          <div class="section-header">
+          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
             <span class="section-title">
               <i
                 class="fas fa-user-circle"
                 style="color: var(--accent); margin-right: 8px"
-              ></i
-              >Mon Profil
+              ></i>Mon Profil
             </span>
+            <button class="btn btn-primary" onclick="openProfileEditModal()" style="padding: 8px 16px; font-size: 0.85rem;">
+              <i class="fas fa-edit"></i> Modifier
+            </button>
           </div>
           <div
             style="
@@ -1665,14 +1667,27 @@
             </div>
             <div class="form-group">
               <label>Date d'expiration</label>
-              <input
-                type="text"
-                class="form-input"
-                id="cardExp"
-                placeholder="MM/AA"
-                maxlength="5"
-                oninput="formatExp(this)"
-              />
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <select class="form-input" id="cardExpMonth" onchange="updateCardExpFromDropdowns()">
+                  <option value="">Mois</option>
+                  <option value="01">01</option>
+                  <option value="02">02</option>
+                  <option value="03">03</option>
+                  <option value="04">04</option>
+                  <option value="05">05</option>
+                  <option value="06">06</option>
+                  <option value="07">07</option>
+                  <option value="08">08</option>
+                  <option value="09">09</option>
+                  <option value="10">10</option>
+                  <option value="11">11</option>
+                  <option value="12">12</option>
+                </select>
+                <select class="form-input" id="cardExpYear" onchange="updateCardExpFromDropdowns()">
+                  <option value="">Année</option>
+                </select>
+              </div>
+              <input type="hidden" id="cardExp" value="" />
             </div>
           </div>
           <div class="form-group">
@@ -1862,6 +1877,37 @@
       </div>
     </div>
 
+    <!-- ══════ MODAL: MODIFIER PROFIL (B2C/B2B) ══════ -->
+    <div class="modal-overlay" id="profileEditModal">
+      <div class="modal-box" style="max-width: 420px">
+        <div class="modal-title">
+          <i class="fas fa-user-edit" style="color: var(--accent)"></i>
+          Modifier mon profil
+        </div>
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input
+            type="text"
+            class="form-input"
+            id="edit-profile-phone"
+            placeholder="Ex : 0555 12 34 56"
+          />
+        </div>
+        <div class="form-group">
+          <label>Wilaya</label>
+          <select class="form-input" id="edit-profile-wilaya">
+            <option value="">Sélectionnez une wilaya</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" onclick="closeProfileEditModal()">Annuler</button>
+          <button class="btn btn-primary" id="btn-save-profile" onclick="saveProfileEdit()">
+            <i class="fas fa-save"></i> Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ══════════════════════════════════════════
          JAVASCRIPT
     ══════════════════════════════════════════ -->
@@ -2019,6 +2065,88 @@
         `;
       }
 
+      function openProfileEditModal() {
+        if (!profile) return;
+        
+        // Populate Wilaya select options dynamically with standard values and numbered labels
+        const wSelect = document.getElementById("edit-profile-wilaya");
+        if (wSelect && wSelect.options.length <= 1) {
+          const wilayas = [
+            "Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar", "Blida", "Bouira",
+            "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "Sétif", "Saïda",
+            "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma", "Constantine", "Médéa", "Mostaganem", "M'Sila", "Mascara", "Ouargla",
+            "Oran", "El Bayadh", "Illizi", "Bordj Bou Arréridj", "Boumerdès", "El Tarf", "Tindouf", "Tissemsilt", "El Oued", "Khenchela",
+            "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma", "Aïn Témouchent", "Ghardaïa", "Relizane", "El M'Ghair", "El Meniaa",
+            "Ouled Djellal", "Bordj Baji Mokhtar", "Béni Abbès", "Timimoun", "Touggourt", "Djanet", "In Salah", "In Guezzam"
+          ];
+          wilayas.forEach((name, index) => {
+            const num = String(index + 1).padStart(2, "0");
+            const option = document.createElement("option");
+            option.value = name;
+            option.textContent = `${num}. ${name}`;
+            wSelect.appendChild(option);
+          });
+        }
+
+        document.getElementById("edit-profile-phone").value = profile.phone || "";
+        document.getElementById("edit-profile-wilaya").value = profile.wilaya || "";
+        document.getElementById("profileEditModal").classList.add("open");
+      }
+
+      function closeProfileEditModal() {
+        document.getElementById("profileEditModal").classList.remove("open");
+      }
+
+      async function saveProfileEdit() {
+        if (!profile) return;
+        const phone = document.getElementById("edit-profile-phone").value.trim();
+        const wilaya = document.getElementById("edit-profile-wilaya").value;
+        
+        if (!phone) {
+          toast("error", "Le numéro de téléphone est obligatoire.");
+          return;
+        }
+        if (!wilaya) {
+          toast("error", "Veuillez sélectionner une wilaya.");
+          return;
+        }
+
+        const btn = document.getElementById("btn-save-profile");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+
+        try {
+          const entityPath = IS_B2B ? "ClientsB2B" : "ClientsB2C";
+          const res = await fetch(`/odata/v4/crm/${entityPath}(${profile.ID})`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              phone: phone,
+              wilaya: wilaya
+            })
+          });
+
+          if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.error?.message || "Erreur lors de la mise à jour");
+          }
+
+          profile.phone = phone;
+          profile.wilaya = wilaya;
+          
+          renderProfile();
+          closeProfileEditModal();
+          toast("success", "Profil mis à jour avec succès.");
+        } catch (e) {
+          toast("error", e.message);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-save"></i> Enregistrer';
+        }
+      }
+
       async function loadKPIs() {
         if (!profile) return;
         const idField = IS_B2B
@@ -2134,6 +2262,7 @@
       function addToCart(productId) {
         const p = products.find((p) => p.ID === productId);
         if (!p) return;
+        if (p.stock <= 0) { toast('error', 'Produit en rupture de stock.'); return; }
         if (!cart[productId]) {
           cart[productId] = { product: p, qty: 1 };
           toast("info", `${p.name} ajouté au panier`);
@@ -2146,16 +2275,42 @@
       }
 
       function updateQty(productId, delta) {
+        const p = products.find((pr) => pr.ID === productId);
+        if (!p) return;
+
+        // Si produit pas encore dans le panier et on clique +, on l'ajoute
         if (!cart[productId]) {
-          const p = products.find((p) => p.ID === productId);
-          if (p) cart[productId] = { product: p, qty: 0 };
+          if (delta > 0) {
+            if (p.stock <= 0) { toast('error', 'Produit en rupture de stock.'); return; }
+            cart[productId] = { product: p, qty: 0 };
+          } else {
+            return; // rien à diminuer
+          }
         }
-        cart[productId].qty = Math.max(0, (cart[productId].qty || 0) + delta);
-        if (cart[productId].qty === 0) delete cart[productId];
+
+        const maxStock = p.stock || 0;
+        const newQty = Math.max(0, (cart[productId].qty || 0) + delta);
+
+        if (delta > 0 && newQty > maxStock) {
+          toast('error', `Stock insuffisant. Maximum disponible : ${maxStock}`);
+          return;
+        }
+
+        if (newQty === 0) {
+          delete cart[productId];
+        } else {
+          cart[productId].qty = newQty;
+        }
+
+        // Mise à jour du compteur affiché sur la carte
         const qtyEl = document.getElementById("qty-" + productId);
         if (qtyEl) qtyEl.textContent = cart[productId]?.qty || 0;
+
+        // Synchronise le bouton Ajouter / Ajouté et tout le panier
         refreshCartUI();
+        filterProducts();
       }
+
 
       function removeFromCart(productId) {
         delete cart[productId];
@@ -2309,11 +2464,45 @@
         document.getElementById("payStep0").style.display = "";
         document.getElementById("payStep1").style.display = "none";
         document.getElementById("payStep2").style.display = "none";
+        
+        // Reset card form fields
+        document.getElementById("cardNumber").value = "";
+        document.getElementById("cardName").value = "";
+        document.getElementById("cardCvv").value = "";
+        document.getElementById("cardNumDisplay").textContent = "•••• •••• •••• ••••";
+        document.getElementById("cardNameDisplay").textContent = "Nom du titulaire";
+        document.getElementById("cardExpDisplay").textContent = "MM/AA";
+        document.getElementById("cardTypeDisplay").textContent = "CIB";
+        
+        const mSelect = document.getElementById("cardExpMonth");
+        const ySelect = document.getElementById("cardExpYear");
+        if (mSelect) mSelect.value = "";
+        if (ySelect) ySelect.value = "";
+        const expHidden = document.getElementById("cardExp");
+        if (expHidden) expHidden.value = "";
+
         // Hide address for existing orders
         if (currentPaymentOrderId) {
             document.getElementById("addressGroup").style.display = "none";
         } else {
             document.getElementById("addressGroup").style.display = "block";
+        }
+
+        // Populate Years in dropdown dynamically
+        const yearSelect = document.getElementById("cardExpYear");
+        if (yearSelect) {
+          while (yearSelect.options.length > 1) {
+            yearSelect.remove(1);
+          }
+          const currentYear = new Date().getFullYear();
+          for (let i = 0; i <= 10; i++) {
+            const fullYear = currentYear + i;
+            const shortYear = String(fullYear).slice(-2);
+            const option = document.createElement("option");
+            option.value = shortYear;
+            option.textContent = fullYear;
+            yearSelect.appendChild(option);
+          }
         }
       }
       
@@ -2346,24 +2535,47 @@
         document.getElementById("cardNumDisplay").textContent =
           v || "•••• •••• •••• ••••";
       }
-      function formatExp(input) {
-        let v = input.value.replace(/\D/g, "").substring(0, 4);
-        if (v.length >= 2) v = v.substring(0, 2) + "/" + v.substring(2);
-        input.value = v;
-        document.getElementById("cardExpDisplay").textContent = v || "MM/AA";
+      function updateCardExpFromDropdowns() {
+        const month = document.getElementById("cardExpMonth").value;
+        const year = document.getElementById("cardExpYear").value;
+        const cardExpDisplay = document.getElementById("cardExpDisplay");
+        const cardExpHidden = document.getElementById("cardExp");
+        
+        if (month && year) {
+          const val = month + "/" + year;
+          cardExpHidden.value = val;
+          cardExpDisplay.textContent = val;
+        } else {
+          cardExpHidden.value = "";
+          cardExpDisplay.textContent = "MM/AA";
+        }
       }
 
       function goToOTP() {
-        const num = document
-          .getElementById("cardNumber")
-          .value.replace(/\s/g, "");
+        const num = document.getElementById("cardNumber").value.replace(/\s/g, "");
+        const expVal = document.getElementById("cardExp").value;
         if (
           num.length < 16 ||
           !document.getElementById("cardName").value ||
-          document.getElementById("cardExp").value.length < 5 ||
+          expVal.length < 5 ||
           document.getElementById("cardCvv").value.length < 3
         ) {
           toast("error", "Veuillez remplir tous les champs.");
+          return;
+        }
+        // Valider mois (01-12) et année (>= année courante)
+        const parts = expVal.split('/');
+        const month = parseInt(parts[0], 10);
+        const year = parseInt('20' + (parts[1] || '00'), 10);
+        const now = new Date();
+        const curYear = now.getFullYear();
+        const curMonth = now.getMonth() + 1;
+        if (month < 1 || month > 12) {
+          toast('error', 'Mois d\'expiration invalide (01 à 12).');
+          return;
+        }
+        if (year < curYear || (year === curYear && month < curMonth)) {
+          toast('error', 'Carte expirée. Veuillez utiliser une carte valide.');
           return;
         }
         document.getElementById("payStep1").style.display = "none";
@@ -2515,8 +2727,36 @@
         }
       }
 
-      async function acceptDevis(devisId, devisNum) {
-        if (!confirm(`Accepter le devis ${devisNum} ?`)) return;
+      function acceptDevis(devisId, devisNum) {
+        // Notification toast inline au lieu du confirm() natif
+        const notifId = 'devis-confirm-' + devisId;
+        const existing = document.getElementById(notifId);
+        if (existing) { existing.remove(); return; }
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.id = notifId;
+        t.className = 'toast info';
+        t.style.cssText = 'min-width:340px;flex-direction:column;gap:10px;align-items:flex-start;padding:16px 18px;';
+        t.innerHTML = `
+          <div style="display:flex;align-items:center;gap:10px;width:100%">
+            <i class="fas fa-file-check" style="color:var(--accent-green);font-size:1.1rem"></i>
+            <span style="font-weight:600;flex:1">Confirmer le devis ${devisNum} ?</span>
+          </div>
+          <p style="font-size:0.8rem;color:var(--text-dim);margin:0">Cette action créera une commande à partir du devis approuvé.</p>
+          <div style="display:flex;gap:8px;width:100%">
+            <button onclick="_doAcceptDevis('${devisId}','${devisNum}','${notifId}')" style="flex:1;padding:7px;background:var(--accent-green);color:#0a2e23;border:none;border-radius:8px;font-weight:700;cursor:pointer;font-size:0.82rem">
+              <i class="fas fa-check"></i> Confirmer
+            </button>
+            <button onclick="document.getElementById('${notifId}')?.remove()" style="padding:7px 14px;background:rgba(255,255,255,0.06);color:var(--text-dim);border:1px solid var(--border-light);border-radius:8px;cursor:pointer;font-size:0.82rem">
+              Annuler
+            </button>
+          </div>`;
+        c.appendChild(t);
+        setTimeout(() => t?.remove(), 12000);
+      }
+
+      async function _doAcceptDevis(devisId, devisNum, notifId) {
+        document.getElementById(notifId)?.remove();
         showLoader(true);
         try {
           const res = await fetch("/odata/v4/crm/convertQuoteToOrder", {
@@ -2526,7 +2766,7 @@
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error?.message || "Erreur");
-          toast("success", `Commande ${data.orderNumber} créée !`);
+          toast("success", `✓ Commande ${data.orderNumber} créée avec succès !`);
           loadDevis();
           loadKPIs();
         } catch (e) {
@@ -2598,19 +2838,27 @@
               let actionBtn = "";
               if (o.status === "CONFIRMED") {
                 actionBtn = `<button class="btn btn-primary btn-sm" onclick="payOrderUI('${o.ID}')"><i class="fas fa-credit-card"></i> Payer</button>`;
+              } else if (o.status === "PENDING" && IS_B2B) {
+                // Paiement espèces B2B en attente de validation admin
+                actionBtn = `<span style="color:var(--accent-gold);font-size:0.78rem"><i class="fas fa-clock"></i> En attente validation</span>`;
               }
               
               let factureBtn = "";
-              if (o.status === "PAID" && o.facture_ID) {
+              if ((o.status === "PAID" || o.status === "ACCEPTED_BY_CLIENT") && o.facture_ID) {
                 factureBtn = `<button class="btn btn-ghost btn-sm" onclick="downloadFacturePDF('${o.facture_ID}','Facture')" title="Facture"><i class="fas fa-file-invoice-dollar"></i></button>`;
               }
+
+              // Affichage remise
+              const discountBadge = o.discount > 0
+                ? `<span style="font-size:0.72rem;color:var(--accent-gold);display:block">Remise ${parseFloat(o.discount).toFixed(0)}% appliquée</span>`
+                : '';
               
               return `<tr>
 <td style="font-family:monospace;font-weight:600">${o.orderNumber || "—"}</td>
 <td>${fmtDate(o.date)}</td>
-<td style="font-weight:700;color:var(--accent-gold)">${fmt(o.totalTTC)} DA</td>
+<td style="font-weight:700;color:var(--accent-gold)">${fmt(o.totalTTC)} DA${discountBadge}</td>
 <td><span class="badge ${statusMap[o.status] || "badge-draft"}">${labelMap[o.status] || o.status}</span></td>
-<td style="display:flex;gap:5px;">${actionBtn} ${factureBtn} ${dlCommande}</td>
+<td style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">${actionBtn} ${factureBtn} ${dlCommande}</td>
 </tr>`;
             })
             .join("");
@@ -2715,8 +2963,18 @@
         }
       }
 
+      /* ─── TEMPS RÉEL — polling badges ─── */
+      function startRealtimePolling() {
+        // Rafraîchit les KPIs (badges) toutes les 30 secondes sans recharger la page
+        setInterval(async () => {
+          try {
+            await loadKPIs();
+          } catch(e) { /* silencieux */ }
+        }, 30000);
+      }
+
       /* START */
-      init();
+      init().then(() => startRealtimePolling());
     </script>
   </body>
 </html>

@@ -150,6 +150,16 @@ module.exports = class AdminService extends cds.ApplicationService {
       let fact = await SELECT.one.from(FactureClient, factId);
       if (fact) {
         const items = await SELECT.from(FactureClientItem).where({ parent_ID: factId });
+        
+        // Enrich items with product name if description is missing
+        const { Produit } = cds.entities('sap.pme');
+        for (let item of items) {
+          if (!item.description && item.product_ID) {
+            const prod = await SELECT.one.from(Produit).where({ ID: item.product_ID });
+            item.description = prod?.name || `Produit ${item.product_ID}`;
+          }
+        }
+
         const client = fact.clientB2B_ID
           ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B).where({ ID: fact.clientB2B_ID })
           : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C).where({ ID: fact.clientB2C_ID });
@@ -227,13 +237,15 @@ module.exports = class AdminService extends cds.ApplicationService {
       const lineItems = await SELECT.from(CommandeItem).where({ parent_ID: commandeId });
 
       // Generate Invoice Number
-      let invNum = 'FAC-0001';
-      const invRange = await SELECT.one.from(NumberRange).where({ objectType: 'FACTURE' });
-      if (invRange) {
-        const next = (invRange.lastNumber || 0) + 1;
-        invNum = `FAC-${String(next).padStart(4, '0')}`;
-        await UPDATE(NumberRange).set({ lastNumber: next }).where({ objectType: 'FACTURE' });
+      let invNum = 'FAC-00001';
+      let invRange = await SELECT.one.from(NumberRange).where({ objectType: 'FACTURE' });
+      if (!invRange) {
+        await INSERT.into(NumberRange).entries({ objectType: 'FACTURE', prefix: 'FAC', currentNumber: 0, padLength: 5 });
+        invRange = { currentNumber: 0, padLength: 5, prefix: 'FAC' };
       }
+      const invNext = (invRange.currentNumber || 0) + 1;
+      invNum = `FAC-${String(invNext).padStart(invRange.padLength || 5, '0')}`;
+      await UPDATE(NumberRange).set({ currentNumber: invNext }).where({ objectType: 'FACTURE' });
 
       // Create Invoice
       const dueDate = new Date();
@@ -253,20 +265,23 @@ module.exports = class AdminService extends cds.ApplicationService {
         discount      : commande.discount || 0,
         paidAmount    : commande.totalTTC,
         remainingAmount : 0,
-        currency_code   : 'DZD'
+        currency_code   : 'DZD',
+        items         : lineItems.map(l => ({ ...l, parent_ID: null, ID: cds.utils.uuid() }))
       });
 
       // Get new facture ID
       const facture = await SELECT.one.from(FactureClient).where({ invoiceNumber: invNum });
 
       // Generate Payment Number
-      let payNum = 'PAY-0001';
-      const payRange = await SELECT.one.from(NumberRange).where({ objectType: 'PAIEMENT' });
-      if (payRange) {
-        const next = (payRange.lastNumber || 0) + 1;
-        payNum = `PAY-${String(next).padStart(4, '0')}`;
-        await UPDATE(NumberRange).set({ lastNumber: next }).where({ objectType: 'PAIEMENT' });
+      let payNum = 'PAY-00001';
+      let payRange = await SELECT.one.from(NumberRange).where({ objectType: 'PAIEMENT' });
+      if (!payRange) {
+        await INSERT.into(NumberRange).entries({ objectType: 'PAIEMENT', prefix: 'PAY', currentNumber: 0, padLength: 5 });
+        payRange = { currentNumber: 0, padLength: 5, prefix: 'PAY' };
       }
+      const payNext = (payRange.currentNumber || 0) + 1;
+      payNum = `PAY-${String(payNext).padStart(payRange.padLength || 5, '0')}`;
+      await UPDATE(NumberRange).set({ currentNumber: payNext }).where({ objectType: 'PAIEMENT' });
 
       // Record Payment
       await INSERT.into(Paiement).entries({

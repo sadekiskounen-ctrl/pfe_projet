@@ -1434,7 +1434,7 @@
                                 <p id="cmd-det-status" style="font-weight: 700; margin: 4px 0 0 0;">---</p>
                             </div>
                             <div>
-                                <label style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">N° Devis Référence</label>
+                                <label style="font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase;">N° Commande Référence</label>
                                 <p id="cmd-det-devis-ref" style="font-weight: 600; margin: 4px 0 0 0; color: white;">---</p>
                             </div>
                         </div>
@@ -1499,7 +1499,10 @@
                                 </div>
                                 <div class="info-group">
                                     <label>Date clôture</label>
-                                    <input type="date" id="rfq-form-deadline" class="search-input" style="width: 100%; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px;" required>
+                                    <input type="date" id="rfq-form-deadline" class="search-input" style="width: 100%; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px;" required
+                                      oninput=""
+                                      onfocus="this.min=new Date().toISOString().split('T')[0]"
+                                    >
                                 </div>
                                 <div class="info-group" style="grid-column: span 2;">
                                     <label>Objet</label>
@@ -1512,7 +1515,13 @@
                                 
                                 <div class="info-group" style="grid-column: span 2;">
                                     <label>Fournisseurs ciblés</label>
-                                    <div id="rfq-suppliers-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 120px; overflow-y: auto; padding: 12px; border: 1px solid var(--glass-border); border-radius: 8px; background: rgba(0,0,0,0.3);">
+                                    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+                                        <select id="rfq-sector-filter" class="search-input" style="flex:1;background:rgba(255,255,255,0.07);color:white;border:1px solid var(--glass-border);border-radius:8px;padding:8px;" onchange="filterRFQSuppliersBySector()">
+                                            <option value="">Tous secteurs d'activité</option>
+                                        </select>
+                                        <span style="font-size:0.75rem;color:var(--text-dim)" id="rfq-supplier-count"></span>
+                                    </div>
+                                    <div id="rfq-suppliers-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 150px; overflow-y: auto; padding: 12px; border: 1px solid var(--glass-border); border-radius: 8px; background: rgba(0,0,0,0.3);">
                                         <!-- Loaded dynamically -->
                                     </div>
                                 </div>
@@ -2560,7 +2569,7 @@
                 statusEl.className = '';
                 statusEl.style.color = cmd.status === 'DRAFT' ? '#fb923c' : (cmd.status === 'SENT_TO_CLIENT' ? '#38bdf8' : '#4ade80');
                 
-                document.getElementById('cmd-det-devis-ref').innerText = cmd.devis_ID ? "Relié au Devis" : "Aucun";
+                document.getElementById('cmd-det-devis-ref').innerText = cmd.orderNumber || cmd.devisRef || 'N/A';
 
                 // Populate items
                 const itemsTbody = document.getElementById('cmd-det-items-tbody');
@@ -3452,31 +3461,68 @@
             }
         }
 
+        // Liste globale des fournisseurs pour le filtre secteur
+        let _allTargetSuppliers = [];
+
         async function loadTargetSuppliers(selectedIds = []) {
             try {
                 const res = await fetch('/odata/v4/admin/BusinessPartners?$filter=bpType eq \'FOURNISSEUR\' and status eq \'ACTIVE\'', {
                     headers: adminHeaders
                 });
                 const data = await res.json();
-                const container = document.getElementById('rfq-suppliers-container');
+                _allTargetSuppliers = data.value || [];
                 
-                if (!data.value || data.value.length === 0) {
-                    container.innerHTML = `<span style="color:var(--text-dim); font-size:0.8rem;">Aucun fournisseur actif disponible.</span>`;
-                    return;
+                // Peuple le filtre secteur
+                const sectorSel = document.getElementById('rfq-sector-filter');
+                if (sectorSel) {
+                    const sectors = [...new Set(_allTargetSuppliers.map(s => s.sector || s.displayName?.split(' ')[0]).filter(Boolean))];
+                    // Utiliser le secteur du fournisseur s'il est disponible via expand
+                    const uniqueSectors = [...new Set(_allTargetSuppliers.map(s => s.sector).filter(Boolean))];
+                    sectorSel.innerHTML = '<option value="">Tous secteurs d\'activité</option>' +
+                        uniqueSectors.map(s => `<option value="${s}">${s}</option>`).join('');
                 }
 
-                container.innerHTML = data.value.map(bp => {
-                    const isChecked = selectedIds.includes(bp.ID) ? 'checked' : '';
-                    return `
-                        <label style="display:flex; align-items:center; gap:8px; color:white; font-size:0.85rem; cursor:pointer;">
-                            <input type="checkbox" name="rfq-targeted-suppliers" value="${bp.ID}" ${isChecked} style="accent-color:var(--accent);">
-                            ${bp.displayName}
-                        </label>
-                    `;
-                }).join('');
+                renderTargetSuppliersList(selectedIds);
             } catch (e) {
                 console.error("Error loading target suppliers:", e);
             }
+        }
+
+        function renderTargetSuppliersList(selectedIds = []) {
+            const container = document.getElementById('rfq-suppliers-container');
+            const sectorFilter = document.getElementById('rfq-sector-filter')?.value || '';
+            
+            let filtered = _allTargetSuppliers;
+            if (sectorFilter) {
+                filtered = _allTargetSuppliers.filter(bp => bp.sector === sectorFilter);
+            }
+
+            const countEl = document.getElementById('rfq-supplier-count');
+            if (countEl) countEl.textContent = `${filtered.length} fournisseur(s)`;
+
+            if (!filtered.length) {
+                container.innerHTML = `<span style="color:var(--text-dim); font-size:0.8rem;">Aucun fournisseur pour ce secteur.</span>`;
+                return;
+            }
+
+            // Garde les cases cochées actuellement si elles sont tou jours visibles
+            const alreadyChecked = new Set(
+                [...document.querySelectorAll('input[name="rfq-targeted-suppliers"]:checked')].map(el => el.value)
+            );
+
+            container.innerHTML = filtered.map(bp => {
+                const isChecked = selectedIds.includes(bp.ID) || alreadyChecked.has(bp.ID) ? 'checked' : '';
+                return `
+                    <label style="display:flex; align-items:center; gap:8px; color:white; font-size:0.85rem; cursor:pointer;">
+                        <input type="checkbox" name="rfq-targeted-suppliers" value="${bp.ID}" ${isChecked} style="accent-color:var(--accent);">
+                        ${bp.displayName}${bp.sector ? ` <span style="font-size:0.7rem;color:var(--text-dim);">(${bp.sector})</span>` : ''}
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function filterRFQSuppliersBySector() {
+            renderTargetSuppliersList();
         }
 
         function addRfqItemRow(description = '', quantity = '', targetPrice = '') {
@@ -3512,6 +3558,8 @@
             document.getElementById('rfq-form-title').value = '';
             document.getElementById('rfq-form-description').value = '';
             document.getElementById('rfq-form-deadline').value = '';
+            // min = aujourd'hui pour la date de clôture
+            document.getElementById('rfq-form-deadline').min = new Date().toISOString().split('T')[0];
             document.getElementById('rfq-items-tbody').innerHTML = '';
             
             await loadTargetSuppliers();
@@ -3990,31 +4038,64 @@
         }
 
         /* ═══════════════════════════════════════════
-           NOTIFICATION POLLING (5s)
+           NOTIFICATION POLLING (5s) — Admin Temps Réel
         ═══════════════════════════════════════════ */
         let _notifInterval = null;
+        let _lastRFQResponseCount = -1;
+
         function startNotificationPolling() {
             if (_notifInterval) clearInterval(_notifInterval);
             _notifInterval = setInterval(async () => {
                 try {
+                    // 1. Notifications générales (inscriptions, etc.)
                     const res = await fetch('/odata/v4/admin/Notifications?$filter=isRead eq false&$orderby=createdAt desc&$top=20', { headers: adminHeaders });
                     const data = await res.json();
                     const notifs = data.value || [];
-                    const bellBadge = document.querySelector('.noti-badge');
+                    const bellBadge = document.getElementById('noti-count');
                     if (bellBadge) {
                         bellBadge.textContent = notifs.length;
                         bellBadge.style.display = notifs.length > 0 ? '' : 'none';
                         if (notifs.length > 0) {
-                            const bell = document.querySelector('.bell-ring');
+                            const bell = document.getElementById('bell-icon');
                             if (bell) { bell.classList.remove('bell-ring'); void bell.offsetWidth; bell.classList.add('bell-ring'); }
                         }
                     }
+
+                    // 2. Badge RFQ = offres reçues non traitées + délais < 3 jours
+                    const [respRes, rfqRes] = await Promise.all([
+                        fetch('/odata/v4/srm/RFQResponses?$filter=selected eq false&$select=ID,createdAt&$top=50', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) })),
+                        fetch('/odata/v4/srm/RFQs?$filter=status eq \'OPEN\'&$select=ID,deadline&$top=50', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }))
+                    ]);
+                    const respData = await respRes.json().catch(() => ({ value: [] }));
+                    const rfqData = await rfqRes.json().catch(() => ({ value: [] }));
+
+                    const newResponses = (respData.value || []).length;
+                    const now = new Date();
+                    const urgentRfqs = (rfqData.value || []).filter(r => {
+                        if (!r.deadline) return false;
+                        const diff = (new Date(r.deadline) - now) / (1000 * 3600 * 24);
+                        return diff >= 0 && diff <= 3;
+                    }).length;
+
+                    const rfqNotifCount = newResponses + urgentRfqs;
+                    const rfqBadge = document.getElementById('rfq-alert-badge');
+                    if (rfqBadge) {
+                        rfqBadge.textContent = rfqNotifCount;
+                        rfqBadge.style.display = rfqNotifCount > 0 ? '' : 'none';
+                        // Icône enveloppe si nouvelles offres arrivées
+                        if (newResponses > _lastRFQResponseCount && _lastRFQResponseCount >= 0) {
+                            Toast && Toast.show && Toast.show('info', '📩 Nouvelle offre reçue', `${newResponses} offre(s) fournisseur en attente de traitement.`, 5000);
+                        }
+                        _lastRFQResponseCount = newResponses;
+                    }
+
                 } catch (e) { /* silent */ }
-            }, 5000);
+            }, 10000); // toutes les 10s
         }
 
         // Start polling on page load
         startNotificationPolling();
+
 
     </script>
 </body>

@@ -52,6 +52,31 @@ module.exports = class CRMService extends cds.ApplicationService {
       catch (e) { console.warn('Welcome email failed:', e.message); }
     });
 
+    // ── Sync profile updates with BusinessPartner (B2B/B2C) ──
+    this.after('UPDATE', ClientsB2B, async (data, req) => {
+      if (req.data.phone || req.data.wilaya) {
+        const client = await SELECT.one.from(ClientsB2B).where({ ID: req.data.ID });
+        if (client && client.bp_ID) {
+          await UPDATE(BusinessPartner).set({
+            phone: req.data.phone || client.phone,
+            wilaya: req.data.wilaya || client.wilaya
+          }).where({ ID: client.bp_ID });
+        }
+      }
+    });
+
+    this.after('UPDATE', ClientsB2C, async (data, req) => {
+      if (req.data.phone || req.data.wilaya) {
+        const client = await SELECT.one.from(ClientsB2C).where({ ID: req.data.ID });
+        if (client && client.bp_ID) {
+          await UPDATE(BusinessPartner).set({
+            phone: req.data.phone || client.phone,
+            wilaya: req.data.wilaya || client.wilaya
+          }).where({ ID: client.bp_ID });
+        }
+      }
+    });
+
     // ─────────────────────────────────────────
     // ACTION: B2B — Submit Cart as Devis (RFQ)
     // Client B2B soumet son panier → Devis PENDING
@@ -223,6 +248,13 @@ module.exports = class CRMService extends cds.ApplicationService {
       if (commande.status === 'PAID') return req.error(400, 'Commande déjà payée');
 
       const lineItems = await SELECT.from(CommandeItems).where({ parent_ID: commandeId });
+
+      if (paymentMethod === 'ESPECES') {
+        // Pour un paiement en espèces, la commande passe au statut 'PENDING' 
+        // et attend que l'administrateur confirme de son côté (via validateCashOrder).
+        await UPDATE(Commandes).set({ status: 'PENDING' }).where({ ID: commande.ID });
+        return SELECT.one.from(Commandes).where({ ID: commande.ID });
+      }
 
       // Generate Invoice
       const invNum  = await this._generateNumber('FACTURE', 'FAC');
@@ -458,17 +490,27 @@ module.exports = class CRMService extends cds.ApplicationService {
       const facture = await SELECT.one.from(Factures).where({ ID: factureId });
       if (!facture) return req.error(404, 'Facture introuvable');
       const items = await SELECT.from(FactureItems).where({ parent_ID: factureId });
+      // Enrichir les items avec le nom du produit si description manquante
+      const { Produit } = cds.entities('sap.pme');
+      const enrichedItems = await Promise.all(items.map(async item => {
+        if (!item.description && item.product_ID) {
+          const prod = await SELECT.one.from(Produit).where({ ID: item.product_ID });
+          item.description = prod?.name || `Produit ${item.product_ID}`;
+        }
+        return item;
+      }));
       const client = facture.clientB2B_ID
         ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B).where({ ID: facture.clientB2B_ID })
         : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C).where({ ID: facture.clientB2C_ID });
       const pdfBuffer = await generateFacturePDF({
         ...facture,
-        items,
+        items: enrichedItems,
         clientB2B: facture.clientB2B_ID ? client : null,
         clientB2C: !facture.clientB2B_ID ? client : null
       });
       return pdfBuffer.toString('base64');
     });
+
 
     // ── Function: Download Commande PDF ──
     this.on('downloadCommandePDF', async (req) => {

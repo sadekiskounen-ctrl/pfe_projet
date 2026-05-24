@@ -96,6 +96,22 @@ module.exports = class SRMService extends cds.ApplicationService {
       if (ai            !== undefined) updates.ai            = ai;
 
       await UPDATE(Fournisseurs).set(updates).where({ ID: fournisseurId });
+
+      // Synchroniser avec le BusinessPartner associé pour l'affichage Admin
+      if (fournisseur.bp_ID) {
+        const { BusinessPartner } = cds.entities('sap.pme');
+        const bpUpdates = {};
+        if (phone   !== undefined) bpUpdates.phone   = phone;
+        if (wilaya  !== undefined) bpUpdates.wilaya  = wilaya;
+        if (street  !== undefined) bpUpdates.street  = street;
+        if (city    !== undefined) bpUpdates.city    = city;
+        if (ai      !== undefined) bpUpdates.ai      = ai;
+        
+        if (Object.keys(bpUpdates).length > 0) {
+          await UPDATE(BusinessPartner).set(bpUpdates).where({ ID: fournisseur.bp_ID });
+        }
+      }
+
       return SELECT.one.from(Fournisseurs).where({ ID: fournisseurId });
     });
 
@@ -193,7 +209,7 @@ module.exports = class SRMService extends cds.ApplicationService {
 
       const po          = await SELECT.one.from(BonsCommande).where({ ID: facture.bonCommande_ID });
       const poItems     = await SELECT.from(POItems).where({ parent_ID: facture.bonCommande_ID });
-      const factItems   = await SELECT.from(FacturesFournisseur).where({ ID: factureId });
+      const factItems   = await SELECT.from(FactureFournisseurItems).where({ parent_ID: factureId });
       const receptions  = facture.reception_ID
         ? await SELECT.from(ReceptionItems).where({ parent_ID: facture.reception_ID })
         : [];
