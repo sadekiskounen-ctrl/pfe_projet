@@ -17,8 +17,27 @@ module.exports = class SRMService extends cds.ApplicationService {
       FacturesFournisseur, FactureFournisseurItems
     } = this.entities;
 
-    // ── Auto-generate document numbers ──
-    this.before('CREATE', RFQs,         async (req) => { req.data.rfqNumber    = await this._generateNumber('RFQ',  'RFQ'); });
+    // ── Auto-generate document numbers & budget calculation ──
+    this.before('CREATE', RFQs,         async (req) => { 
+      req.data.rfqNumber = await this._generateNumber('RFQ',  'RFQ'); 
+      if (req.data.items) {
+        let total = 0;
+        for (const item of req.data.items) {
+          total += (parseFloat(item.quantity) || 0) * (parseFloat(item.targetPrice) || 0);
+        }
+        req.data.totalBudget = parseFloat(total.toFixed(2));
+      }
+    });
+    
+    this.before('UPDATE', RFQs,         async (req) => {
+      if (req.data.items) {
+        let total = 0;
+        for (const item of req.data.items) {
+          total += (parseFloat(item.quantity) || 0) * (parseFloat(item.targetPrice) || 0);
+        }
+        req.data.totalBudget = parseFloat(total.toFixed(2));
+      }
+    });
     this.before('CREATE', BonsCommande, async (req) => { req.data.poNumber     = await this._generateNumber('PO',   'PO');  });
     this.before('CREATE', Receptions,   async (req) => { req.data.receiptNumber = await this._generateNumber('GR',  'GR');  });
     this.before('CREATE', FacturesFournisseur, async (req) => { req.data.invoiceNumber = await this._generateNumber('SUPINV', 'SINV'); });
@@ -70,6 +89,20 @@ module.exports = class SRMService extends cds.ApplicationService {
         notes           : notes || '',
         items           : responseItems
       });
+
+      try {
+        const { Notification } = cds.entities('sap.pme.admin');
+        const supplier = await SELECT.one.from('sap.pme.srm.Fournisseur').where({ ID: fournisseurId });
+        await INSERT.into(Notification).entries({
+          userId    : 'admin',
+          title     : '📩 Nouvelle offre reçue',
+          message   : `Le fournisseur ${supplier ? supplier.companyName : 'inconnu'} a soumis une offre pour l'appel d'offres : ${rfq.title}`,
+          notifType : 'INFO',
+          isRead    : false
+        });
+      } catch (e) {
+        console.warn('Failed to insert admin notification:', e.message);
+      }
 
       return SELECT.one.from(RFQResponses).where({ ID: response.ID });
     });
@@ -187,7 +220,7 @@ module.exports = class SRMService extends cds.ApplicationService {
         rfq_ID       : rfqId,
         date         : new Date().toISOString().split('T')[0],
         deliveryDate : delivDate.toISOString().split('T')[0],
-        status       : 'CONFIRMED',
+        status       : 'SENT',
         totalHT      : parseFloat(totalHT.toFixed(2)),
         totalTVA     : parseFloat(totalTVA.toFixed(2)),
         totalTTC     : parseFloat(totalTTC.toFixed(2)),
@@ -197,6 +230,37 @@ module.exports = class SRMService extends cds.ApplicationService {
       return SELECT.one.from(BonsCommande).where({ ID: po.ID });
     });
 
+    // ─────────────────────────────────────────
+    // ACTION: Fournisseur accepte le PO
+    // ─────────────────────────────────────────
+    this.on('acceptPO', async (req) => {
+      const { poId } = req.data;
+      const po = await SELECT.one.from(BonsCommande).where({ ID: poId });
+      if (!po) return req.error(404, 'Bon de commande introuvable');
+      if (po.status !== 'SENT') {
+        return req.error(400, `Impossible d'accepter un bon de commande au statut ${po.status}`);
+      }
+
+      await UPDATE(BonsCommande).set({
+        status     : 'CONFIRMED',
+        statusDate : new Date().toISOString()
+      }).where({ ID: poId });
+
+      try {
+        const { Notification } = cds.entities('sap.pme.admin');
+        await INSERT.into(Notification).entries({
+          ID: cds.utils.uuid(),
+          title: `PO ${po.poNumber} accepté`,
+          message: `Le fournisseur a accepté le bon de commande ${po.poNumber}. Vous pouvez valider la réception (GR).`,
+          isRead: false,
+          createdAt: new Date().toISOString()
+        });
+      } catch (e) {
+        console.warn('Failed to insert admin notification:', e.message);
+      }
+
+      return SELECT.one.from(BonsCommande).where({ ID: poId });
+    });
     // ─────────────────────────────────────────
     // ACTION: 3-Way Match — Facture/PO/Réception
     // ─────────────────────────────────────────
@@ -393,6 +457,8 @@ module.exports = class SRMService extends cds.ApplicationService {
         totalHT        : parseFloat(totalHT.toFixed(2)),
         totalTVA       : parseFloat(totalTVA.toFixed(2)),
         totalTTC       : parseFloat(totalTTC.toFixed(2)),
+        paidAmount     : 0,
+        remainingAmount: parseFloat(totalTTC.toFixed(2)),
         notes          : notes || '',
         items          : factItems
       });
@@ -459,6 +525,73 @@ module.exports = class SRMService extends cds.ApplicationService {
       const items = await SELECT.from(FactureFournisseurItems).columns(i => { i('*'), i.product(p => p('*')) }).where({ parent_ID: factureId });
       const pdfBuffer = await generateInvoiceFournisseurPDF({ ...facture, items, fournisseur });
       return pdfBuffer.toString('base64');
+    });
+
+    // ─────────────────────────────────────────
+    // ACTION: Confirmer Paiement Espèces (Fournisseur)
+    // ─────────────────────────────────────────
+    this.on('confirmCashPayment', async (req) => {
+      const { factureId } = req.data;
+      const { FacturesFournisseur, BonsCommande } = this.entities;
+      const { Paiement } = cds.entities('sap.pme.doc');
+      const { NumberRange } = cds.entities('sap.pme.admin');
+
+      const invoice = await SELECT.one.from(FacturesFournisseur).where({ ID: factureId });
+      if (!invoice) return req.error(404, 'Facture introuvable');
+      if (invoice.status !== 'PENDING_CASH') {
+        return req.error(400, "Cette facture n'est pas en attente de confirmation de paiement en espèces");
+      }
+
+      // 1. Update Invoice Status to PAID
+      await UPDATE(FacturesFournisseur).set({
+        status          : 'PAID',
+        paidAmount      : invoice.totalTTC,
+        remainingAmount : 0
+      }).where({ ID: factureId });
+
+      // 2. Generate Payment Number for Supplier Payment
+      let payNum = 'PAY-SUP-00001';
+      let payRange = await SELECT.one.from(NumberRange).where({ objectType: 'PAIEMENT_FOURNISSEUR' });
+      if (!payRange) {
+        await INSERT.into(NumberRange).entries({ objectType: 'PAIEMENT_FOURNISSEUR', prefix: 'PYS', currentNumber: 0, padLength: 5 });
+        payRange = { currentNumber: 0, padLength: 5, prefix: 'PYS' };
+      }
+      const payNext = (payRange.currentNumber || 0) + 1;
+      payNum = `PYS-${String(payNext).padStart(payRange.padLength || 5, '0')}`;
+      await UPDATE(NumberRange).set({ currentNumber: payNext }).where({ objectType: 'PAIEMENT_FOURNISSEUR' });
+
+      // 3. Record Payment in Paiement entity
+      await INSERT.into(Paiement).entries({
+        paymentNumber : payNum,
+        date          : new Date().toISOString().split('T')[0],
+        amount        : invoice.totalTTC,
+        method        : 'ESPECES',
+        reference     : `SUP-PAY-ESPECES-CONFIRMED-${Date.now()}`
+      });
+
+      // 4. Update PO Status to CLOSED
+      if (invoice.bonCommande_ID) {
+        await UPDATE(BonsCommande).set({
+          status: 'CLOSED',
+          statusDate: new Date().toISOString()
+        }).where({ ID: invoice.bonCommande_ID });
+      }
+
+      // 5. Send Notification to Admin
+      try {
+        const { Notification } = cds.entities('sap.pme.admin');
+        await INSERT.into(Notification).entries({
+          ID: cds.utils.uuid(),
+          title: `Facture ${invoice.invoiceNumber} payée`,
+          message: `Le fournisseur a confirmé la réception du paiement en espèces de ${new Intl.NumberFormat('fr-FR').format(invoice.totalTTC)} DA pour la facture ${invoice.invoiceNumber}.`,
+          isRead: false,
+          createdAt: new Date().toISOString()
+        });
+      } catch (e) {
+        console.warn('Failed to insert admin notification:', e.message);
+      }
+
+      return SELECT.one.from(FacturesFournisseur).where({ ID: factureId });
     });
 
     await super.init();

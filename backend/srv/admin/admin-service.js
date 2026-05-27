@@ -324,11 +324,74 @@ module.exports = class AdminService extends cds.ApplicationService {
       await UPDATE(FactureFournisseur).set({
         matchStatus : 'MATCHED',
         status      : 'PAID',
+        paidAmount  : invoice.totalTTC,
+        remainingAmount : 0,
         matchDate   : new Date().toISOString(),
         matchBy     : req.user?.id || 'admin'
       }).where({ ID: invoiceId });
 
       await this._logAudit(req, 'RESOLVE_DISPUTE', 'FactureFournisseur', invoiceId, `Dispute resolved for invoice ${invoice.invoiceNumber}. Status forced to PAID.`);
+
+      return SELECT.one.from(FactureFournisseur).where({ ID: invoiceId });
+    });
+
+    // ── Action: Pay Supplier Invoice ──
+    this.on('paySupplierInvoice', async (req) => {
+      const { invoiceId, paymentMethod } = req.data;
+      const { FactureFournisseur, BonCommandeFournisseur, Paiement } = cds.entities('sap.pme.doc');
+      const { NumberRange } = cds.entities('sap.pme.admin');
+
+      const invoice = await SELECT.one.from(FactureFournisseur).where({ ID: invoiceId });
+      if (!invoice) return req.error(404, 'Facture introuvable');
+      if (invoice.status !== 'APPROVED') return req.error(400, "Seules les factures approuvées (3-Way Match conforme) peuvent être payées");
+
+      if (paymentMethod === 'ESPECES') {
+        // Pour un paiement en espèces, la facture passe au statut 'PENDING_CASH' 
+        // et attend que le fournisseur confirme de son côté sur son portail.
+        await UPDATE(FactureFournisseur).set({
+          status : 'PENDING_CASH'
+        }).where({ ID: invoiceId });
+
+        await this._logAudit(req, 'INITIATE_CASH_PAYMENT', 'FactureFournisseur', invoiceId, `Supplier invoice ${invoice.invoiceNumber} payment initiated in cash. Pending supplier confirmation.`);
+        return SELECT.one.from(FactureFournisseur).where({ ID: invoiceId });
+      }
+
+      // Paiement en ligne (CARTE) : exécuté directement
+      await UPDATE(FactureFournisseur).set({
+        status          : 'PAID',
+        paidAmount      : invoice.totalTTC,
+        remainingAmount : 0
+      }).where({ ID: invoiceId });
+
+      // Generate Payment Number for Supplier Payment
+      let payNum = 'PAY-SUP-00001';
+      let payRange = await SELECT.one.from(NumberRange).where({ objectType: 'PAIEMENT_FOURNISSEUR' });
+      if (!payRange) {
+        await INSERT.into(NumberRange).entries({ objectType: 'PAIEMENT_FOURNISSEUR', prefix: 'PYS', currentNumber: 0, padLength: 5 });
+        payRange = { currentNumber: 0, padLength: 5, prefix: 'PYS' };
+      }
+      const payNext = (payRange.currentNumber || 0) + 1;
+      payNum = `PYS-${String(payNext).padStart(payRange.padLength || 5, '0')}`;
+      await UPDATE(NumberRange).set({ currentNumber: payNext }).where({ objectType: 'PAIEMENT_FOURNISSEUR' });
+
+      // Record Payment in Paiement entity
+      await INSERT.into(Paiement).entries({
+        paymentNumber : payNum,
+        date          : new Date().toISOString().split('T')[0],
+        amount        : invoice.totalTTC,
+        method        : 'CARTE',
+        reference     : `SUP-PAY-CARTE-${Date.now()}`
+      });
+
+      // Update PO Status to CLOSED
+      if (invoice.bonCommande_ID) {
+        await UPDATE(BonCommandeFournisseur).set({
+          status: 'CLOSED',
+          statusDate: new Date().toISOString()
+        }).where({ ID: invoice.bonCommande_ID });
+      }
+
+      await this._logAudit(req, 'PAY_SUPPLIER_INVOICE', 'FactureFournisseur', invoiceId, `Supplier invoice ${invoice.invoiceNumber} paid via CARTE online. Linked PO closed.`);
 
       return SELECT.one.from(FactureFournisseur).where({ ID: invoiceId });
     });

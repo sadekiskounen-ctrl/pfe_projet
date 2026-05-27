@@ -87,4 +87,5 @@ service AdminService {
 
   // ── Admin Dispute Actions ──
   action resolveDispute(invoiceId: UUID) returns AllFacturesFournisseur;
+  action paySupplierInvoice(invoiceId: UUID, paymentMethod: String) returns AllFacturesFournisseur;
 }

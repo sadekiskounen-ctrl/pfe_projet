@@ -16,21 +16,40 @@
 </script>
 <style>
 :root {
-  --bg: #0c1118;
-  --bg-card: #141b24;
-  --bg-card2: #1c2533;
-  --accent: #00c9a7;
-  --accent2: #6c63ff;
+  /* ☀️ SAP Morning Horizon (Light Fiori Theme) */
+  --bg: #f2f5f8;
+  --bg-card: #ffffff;
+  --bg-card2: #f7f9fa;
+  --accent: #0a6ed1; /* Sapphire brand accent */
+  --accent2: #e9730c; /* Warning Orange */
   --accent-gold: #f5a623;
-  --accent-red: #ff6584;
-  --text: #e2e8f0;
-  --text-dim: #718096;
-  --border: rgba(0,201,167,0.12);
-  --border-light: rgba(255,255,255,0.06);
-  --shadow: 0 8px 32px rgba(0,0,0,0.5);
-  --radius: 16px;
+  --accent-red: #bb0000; /* Error Red */
+  --text: #1a1c1e;
+  --text-dim: #6a6d70;
+  --border: #d9d9d9;
+  --border-light: rgba(0,0,0,0.08);
+  --shadow: 0 4px 12px rgba(0,0,0,0.03);
+  --radius: 12px;
   --sidebar-w: 260px;
   --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+  --nav-item-active-bg: rgba(10, 110, 209, 0.12);
+}
+
+body.dark-mode {
+  /* 🌙 SAP Evening Horizon (Dark Fiori Theme) */
+  --bg: #12171c;
+  --bg-card: #1a222c;
+  --bg-card2: #212833;
+  --accent: #3596ff; /* Luminous brand accent */
+  --accent2: #ff9a2e;
+  --accent-gold: #f5a623;
+  --accent-red: #ef4444;
+  --text: #ffffff;
+  --text-dim: #a1a8b0;
+  --border: rgba(255,255,255,0.08);
+  --border-light: rgba(255,255,255,0.06);
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --nav-item-active-bg: rgba(53, 150, 255, 0.18);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow: hidden; }
@@ -50,14 +69,14 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
 .nav-section-label { font-size: 0.64rem; font-weight: 700; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; padding: 12px 20px 6px; }
 .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 20px; color: var(--text-dim); cursor: pointer; border-radius: 10px; margin: 2px 10px; font-size: 0.85rem; font-weight: 500; transition: all var(--transition); }
-.nav-item:hover { background: rgba(0,201,167,0.08); color: var(--text); }
-.nav-item.active { background: rgba(0,201,167,0.15); color: var(--accent); font-weight: 600; }
+.nav-item:hover { background: var(--border-light); color: var(--text); }
+.nav-item.active { background: var(--nav-item-active-bg); color: var(--accent); font-weight: 600; }
 .nav-icon { width: 18px; text-align: center; font-size: 0.9rem; }
-.nav-badge { margin-left: auto; background: var(--accent); color: #0c1118; border-radius: 10px; padding: 1px 7px; font-size: 0.65rem; font-weight: 700; }
+.nav-badge { margin-left: auto; background: var(--accent); color: var(--bg); border-radius: 10px; padding: 1px 7px; font-size: 0.65rem; font-weight: 700; }
 
 .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); }
 .user-info { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; cursor: pointer; transition: background var(--transition); }
-.user-info:hover { background: rgba(255,255,255,0.04); }
+.user-info:hover { background: var(--border-light); }
 .avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: white; flex-shrink: 0; }
 .user-name  { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .user-email { font-size: 0.7rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -66,7 +85,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
 /* MAIN */
 .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow-y: auto; }
-.topbar { position: sticky; top: 0; z-index: 50; background: rgba(12,17,24,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; padding: 14px 32px; gap: 16px; }
+.topbar { position: sticky; top: 0; z-index: 50; background: var(--bg-card); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; padding: 14px 32px; gap: 16px; }
 .page-title { font-size: 1.1rem; font-weight: 700; flex: 1; }
 .content { padding: 28px 32px; flex: 1; }
 
@@ -169,9 +188,55 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
 .empty-state i { font-size: 2.5rem; margin-bottom: 16px; opacity: 0.3; display: block; }
 
-/* PULSING BADGE */
-.noti-badge-pulse { animation: badgePulse 1.5s ease-in-out infinite; }
-@keyframes badgePulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.15);opacity:0.85} }
+/* PULSING BADGE — Enhanced with glow */
+.noti-badge-pulse { animation: badgePulse 1.2s ease-in-out infinite; }
+@keyframes badgePulse {
+  0%,100% { transform:scale(1); opacity:1; box-shadow: 0 0 0 0 rgba(0,201,167,0.4); }
+  50% { transform:scale(1.18); opacity:0.9; box-shadow: 0 0 8px 2px rgba(0,201,167,0.35); }
+}
+
+/* NOTIFICATION DOT — Glowing indicator in front of nav items */
+.noti-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block; margin-right: 6px; flex-shrink: 0;
+  animation: dotBlink 1.4s ease-in-out infinite;
+}
+.noti-dot.dot-green { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.noti-dot.dot-gold  { background: var(--accent-gold); box-shadow: 0 0 6px var(--accent-gold); }
+.noti-dot.dot-red   { background: var(--accent-red); box-shadow: 0 0 6px var(--accent-red); }
+.noti-dot.dot-purple{ background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+@keyframes dotBlink {
+  0%,100% { opacity:1; transform:scale(1); }
+  50% { opacity:0.35; transform:scale(0.7); }
+}
+
+/* NAV ITEM with new notification — subtle highlight */
+.nav-item.has-notif { background: rgba(0,201,167,0.06); }
+.nav-item.has-notif .nav-icon { color: var(--accent); }
+
+/* LIVE INDICATOR in topbar */
+.live-indicator {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.7rem; font-weight: 600; color: var(--accent);
+  padding: 4px 12px; border-radius: 20px;
+  background: rgba(0,201,167,0.1); border: 1px solid rgba(0,201,167,0.2);
+  letter-spacing: 0.3px; text-transform: uppercase;
+}
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); animation: livePulse 2s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(0,201,167,0.5); }
+  50% { opacity:0.6; box-shadow: 0 0 6px 2px rgba(0,201,167,0.3); }
+}
+
+/* STAT CARD notification highlight */
+.stat-card.has-update { border-color: rgba(0,201,167,0.3); animation: statFlash 0.6s ease; }
+@keyframes statFlash {
+  0% { border-color: rgba(0,201,167,0.6); box-shadow: 0 0 12px rgba(0,201,167,0.2); }
+  100% { border-color: rgba(0,201,167,0.3); box-shadow: none; }
+}
 
 /* STARS */
 .stars { display:inline-flex; gap:2px; }
@@ -182,7 +247,49 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 /* PDF VIEWER */
 .pdf-modal-box { max-width:900px; width:95vw; height:85vh; display:flex; flex-direction:column; }
 .pdf-icon-btn { background:none; border:none; cursor:pointer; color:var(--accent); font-size:1rem; padding:4px; transition:all var(--transition); vertical-align:middle; margin-left:4px; }
-.pdf-icon-btn:hover { color:var(--accent2); transform:scale(1.15); }
+/* Premium Switch Toggle CSS */
+.switch-toggle {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 24px;
+}
+.switch-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider-toggle {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--border);
+  transition: .3s ease;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+}
+.slider-toggle:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--text-dim);
+  transition: .3s ease;
+  border-radius: 50%;
+}
+input:checked + .slider-toggle {
+  background-color: rgba(53, 150, 255, 0.2);
+  border-color: var(--accent);
+}
+input:checked + .slider-toggle:before {
+  transform: translateX(24px);
+  background-color: var(--accent);
+}
 </style>
 </head>
 <body>
@@ -205,14 +312,17 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     </div>
     <div class="nav-section-label">Achats</div>
     <div class="nav-item" id="nav-rfqs" onclick="showView('rfqs',this)">
+      <span class="noti-dot dot-green" id="rfqDot" style="display:none"></span>
       <span class="nav-icon"><i class="fas fa-file-contract"></i></span> Appels d'Offres
       <span class="nav-badge noti-badge-pulse" id="rfqBadge" style="display:none">0</span>
     </div>
     <div class="nav-item" id="nav-pos" onclick="showView('pos',this)">
+      <span class="noti-dot dot-purple" id="poDot" style="display:none"></span>
       <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span> Bons de Commande
       <span class="nav-badge noti-badge-pulse" id="poBadge" style="display:none">0</span>
     </div>
     <div class="nav-item" id="nav-match" onclick="showView('match',this)">
+      <span class="noti-dot dot-gold" id="matchDot" style="display:none"></span>
       <span class="nav-icon"><i class="fas fa-layer-group"></i></span> 3-Way Match
       <span class="nav-badge noti-badge-pulse" id="matchBadge" style="display:none;background:var(--accent-gold)">0</span>
     </div>
@@ -237,6 +347,10 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 <main class="main">
   <div class="topbar">
     <h1 class="page-title" id="pageTitle">Tableau de bord</h1>
+    <button class="theme-toggle-btn" onclick="toggleFioriTheme()" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; vertical-align: middle; margin-right: 10px;" title="Changer de thème Fiori">
+        <span id="theme-icon-srm">☀️</span> <span id="theme-text-srm">Morning Horizon</span>
+    </button>
+    <div class="live-indicator" id="liveIndicator"><span class="live-dot"></span> Live · 5s</div>
   </div>
   <div class="content">
 
@@ -315,9 +429,9 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
             <th><i class="fas fa-clipboard-list"></i> Bon de Commande</th>
             <th><i class="fas fa-truck"></i> Bon de Réception</th>
             <th><i class="fas fa-file-invoice"></i> Facture</th>
-            <th>Statut Match</th><th>Montant</th>
+            <th>Statut Match</th><th>Montant</th><th>Actions</th>
           </tr></thead>
-          <tbody id="matchTableBody"><tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr></tbody>
+          <tbody id="matchTableBody"><tr class="empty-row"><td colspan="7"><i class="fas fa-spinner fa-spin"></i></td></tr></tbody>
         </table>
       </div>
     </div>
@@ -335,18 +449,23 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
           <div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div>
         </div>
       </div>
-
-      <div class="profile-section">
-        <h3><i class="fas fa-university" style="color:var(--accent2)"></i> Informations Bancaires</h3>
-        <div class="profile-grid" id="profileBanque">
-          <div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div>
-        </div>
-      </div>
-
       <div class="profile-section">
         <h3><i class="fas fa-certificate" style="color:var(--accent-gold)"></i> Statut KYC</h3>
         <div id="kycStatus" style="padding:16px;border-radius:10px;">
           <div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+      </div>
+      <div class="profile-section">
+        <h3><i class="fas fa-palette" style="color:var(--accent)"></i> Thème & Personnalisation</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+          <div>
+            <span style="font-weight: 600; display: block; color: var(--text);">Mode Sombre (Dark Mode)</span>
+            <span style="font-size: 0.85rem; color: var(--text-dim);">Activer le thème sombre pour votre portail fournisseur.</span>
+          </div>
+          <label class="switch-toggle">
+            <input type="checkbox" id="darkmode-toggle-srm" onchange="toggleFioriTheme()">
+            <span class="slider-toggle"></span>
+          </label>
         </div>
       </div>
     </div>
@@ -366,7 +485,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
       </div>
       <div class="form-group">
         <label>Offre valide jusqu'au</label>
-        <input type="date" class="form-input" id="resp-validUntil">
+        <input type="date" class="form-input" id="resp-validUntil" disabled>
       </div>
     </div>
     <div class="form-group" style="margin-bottom:20px">
@@ -399,13 +518,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
       <div class="form-group"><label>Adresse</label><input type="text" class="form-input" id="edit-street" placeholder="Rue, N°..."></div>
       <div class="form-group"><label>Ville</label><input type="text" class="form-input" id="edit-city" placeholder="Alger..."></div>
       <div class="form-group"><label>Article d'Imposition</label><input type="text" class="form-input" id="edit-ai" placeholder="AI N°..."></div>
-    </div>
-    <div style="padding-bottom:12px;margin-bottom:16px;border-bottom:1px solid var(--border-light);font-size:0.8rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Informations Bancaires</div>
-    <div class="form-grid-2">
-      <div class="form-group"><label>Nom de la banque</label><input type="text" class="form-input" id="edit-bankName" placeholder="BNA, CPA..."></div>
       <div class="form-group"><label>RIB</label><input type="text" class="form-input" id="edit-rib" placeholder="00000 00000 00000000000 00"></div>
-      <div class="form-group"><label>Délais de paiement</label><input type="text" class="form-input" id="edit-paymentTerms" placeholder="Ex: 30 jours net"></div>
-      <div class="form-group"><label>Délais de livraison</label><input type="text" class="form-input" id="edit-deliveryTerms" placeholder="Ex: FOB Alger"></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeProfileModal()">Annuler</button>
@@ -522,11 +635,38 @@ function showView(id, navEl) {
 // ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
+function initTheme() {
+  const isDark = localStorage.getItem('theme-dark') === 'true';
+  const headerIcon = document.getElementById('theme-icon-srm');
+  const headerText = document.getElementById('theme-text-srm');
+  const toggleEl = document.getElementById('darkmode-toggle-srm');
+  if (toggleEl) {
+    toggleEl.checked = isDark;
+  }
+  if (isDark) {
+    document.body.classList.add('dark-mode');
+    if (headerIcon) headerIcon.textContent = '🌙';
+    if (headerText) headerText.textContent = 'Evening Horizon';
+  } else {
+    document.body.classList.remove('dark-mode');
+    if (headerIcon) headerIcon.textContent = '☀️';
+    if (headerText) headerText.textContent = 'Morning Horizon';
+  }
+}
+
+function toggleFioriTheme() {
+  const isDark = !document.body.classList.contains('dark-mode');
+  localStorage.setItem('theme-dark', isDark ? 'true' : 'false');
+  initTheme();
+}
+
 async function init() {
+  initTheme();
   showLoader(true);
   try {
     await loadProfile();
     await loadDashboard();
+    await refreshNotifications(true);
   } catch(e) { toast('error', 'Erreur : ' + e.message); }
   finally { showLoader(false); }
 }
@@ -551,7 +691,7 @@ async function loadDashboard() {
 
   // Open RFQs (all, since supplier can see open ones)
   const [rfqRes, poRes, matchRes] = await Promise.all([
-    fetch(`/odata/v4/srm/RFQs?$filter=status eq 'OPEN'&$orderby=deadline asc`),
+    fetch(`/odata/v4/srm/RFQs?$filter=status eq 'OPEN'&$expand=items&$orderby=deadline asc`),
     fetch(`/odata/v4/srm/BonsCommande?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID}`)}&$orderby=createdAt desc&$top=10`),
     fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID} and matchStatus eq 'PENDING'`)}&$select=ID`)
   ]);
@@ -570,38 +710,39 @@ async function loadDashboard() {
   document.getElementById('kpi-pos').textContent          = posList.length;
   document.getElementById('kpi-pending-match').textContent = pendingMatch;
 
-  if (openRFQs > 0) {
-    document.getElementById('rfqBadge').textContent = openRFQs;
-    document.getElementById('rfqBadge').style.display = '';
-  }
-
   // Recent RFQs on dashboard
   const container = document.getElementById('recentRFQs');
   if (!rfqsList.length) {
     container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>Aucun appel d\'offres ouvert.</p></div>';
   } else {
-    container.innerHTML = rfqsList.slice(0, 5).map(r => `
+    container.innerHTML = rfqsList.slice(0, 5).map(r => {
+      const computedBudget = (r.items && r.items.length > 0)
+        ? r.items.reduce((s, item) => s + ((parseFloat(item.quantity) || 0) * (parseFloat(item.targetPrice) || 0)), 0)
+        : (parseFloat(r.totalBudget) || 0);
+      return `
       <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border-light)">
         <div style="flex:1">
           <div style="font-weight:700;font-size:0.88rem">${r.title || 'Sans titre'}</div>
-          <div style="font-size:0.75rem;color:var(--text-dim);margin-top:3px">Limite : ${fmtDate(r.deadline)} · Budget : ${fmt(r.totalBudget)} DA</div>
+          <div style="font-size:0.75rem;color:var(--text-dim);margin-top:3px">Limite : ${fmtDate(r.deadline)} · Budget : ${fmt(computedBudget)} DA</div>
         </div>
         <span class="badge badge-open">OUVERT</span>
         <button class="btn btn-primary btn-sm" onclick="openRFQModal('${r.ID}')"><i class="fas fa-reply"></i> Répondre</button>
       </div>
-    `).join('');
+    `; }).join('');
   }
 }
 
 // ═══════════════════════════════════════════════════════
 // RFQS
 // ═══════════════════════════════════════════════════════
-async function loadRFQs() {
+async function loadRFQs(isSilent = false) {
   const tbody  = document.getElementById('rfqTableBody');
   const filter = document.getElementById('rfqStatusFilter').value;
-  tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+  if (!isSilent) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+  }
   try {
-    const url = filter ? `/odata/v4/srm/RFQs?$filter=status eq '${filter}'&$orderby=deadline asc` : `/odata/v4/srm/RFQs?$orderby=deadline asc`;
+    const url = filter ? `/odata/v4/srm/RFQs?$filter=status eq '${filter}'&$expand=items&$orderby=deadline asc` : `/odata/v4/srm/RFQs?$expand=items&$orderby=deadline asc`;
     const res  = await fetch(url);
     const data = await res.json();
     rfqsList = data.value || [];
@@ -609,8 +750,13 @@ async function loadRFQs() {
     tbody.innerHTML = rfqsList.map(r => {
       const isOpen = r.status === 'OPEN' || !r.status;
       const action = isOpen ? `<button class="btn btn-primary btn-sm" onclick="openRFQModal('${r.ID}')"><i class="fas fa-reply"></i> Répondre</button>` : '<span style="color:var(--text-dim);font-size:0.8rem">Clôturé</span>';
-      // Budget : affiche totalBudget si disponible, sinon 0.00
-      const budgetDisplay = (r.totalBudget > 0) ? `${fmt(r.totalBudget)} DA` : '<span style="color:var(--text-dim)">Non défini</span>';
+      
+      // Calculate total budget dynamically from item target prices and quantities for maximum compatibility
+      const computedBudget = (r.items && r.items.length > 0)
+        ? r.items.reduce((s, item) => s + ((parseFloat(item.quantity) || 0) * (parseFloat(item.targetPrice) || 0)), 0)
+        : (parseFloat(r.totalBudget) || 0);
+      const budgetDisplay = (computedBudget > 0) ? `${fmt(computedBudget)} DA` : '<span style="color:var(--text-dim)">Non défini</span>';
+      
       return `<tr>
         <td style="font-family:monospace;font-weight:600">${r.rfqNumber||'—'}</td>
         <td style="font-weight:700">${r.title||'—'}</td>
@@ -644,7 +790,7 @@ async function openRFQModal(rfqId) {
     const tbody = document.getElementById('offerItemsBody');
     const items = currentRFQ.items || [];
     if (!items.length) { toast('error', 'Cet appel d\'offres n\'a pas d\'articles.'); return; }
-    // Prix unitaire fourni par l'admin (targetPrice) — read-only, total auto
+    // Prix unitaire proposé — saisie éditable par le fournisseur
     tbody.innerHTML = items.map((item, i) => `
       <tr>
         <td>${i+1}</td>
@@ -654,8 +800,8 @@ async function openRFQModal(rfqId) {
           <input type="number" class="price-input" id="price-${item.ID}"
             value="${item.targetPrice > 0 ? parseFloat(item.targetPrice).toFixed(2) : ''}" 
             data-qty="${item.quantity}" data-targetprice="${item.targetPrice || 0}"
-            placeholder="${item.targetPrice > 0 ? parseFloat(item.targetPrice).toFixed(2) : '0.00'}"
-            min="0" step="0.01" ${item.targetPrice > 0 ? 'readonly style="background:rgba(0,201,167,0.07);border-color:rgba(0,201,167,0.3);cursor:not-allowed"' : 'oninput="recalcOffer()"'}>
+            placeholder="0.00"
+            min="0" step="0.01" oninput="recalcOffer()">
         </td>
         <td style="font-family:monospace;font-weight:600;color:var(--accent)" id="line-total-${item.ID}">${item.targetPrice > 0 ? fmt(item.targetPrice * item.quantity) : '0.00'} DA</td>
       </tr>
@@ -687,8 +833,8 @@ async function submitOffer() {
   if (!profile) { toast('error', 'Profil non chargé'); return; }
   const items = (currentRFQ?.items || []).map(item => {
     const priceEl = document.getElementById(`price-${item.ID}`);
-    // Si prix admin (targetPrice) disponible, on l'utilise directement
-    const price = item.targetPrice > 0 ? parseFloat(item.targetPrice) : parseFloat(priceEl?.value || 0);
+    // Utiliser le prix proposé saisi par le fournisseur
+    const price = parseFloat(priceEl?.value || 0);
     return { rfqItemId: item.ID, unitPrice: price, notes: '' };
   });
   if (items.some(i => i.unitPrice <= 0)) { toast('error', 'Veuillez vérifier les prix — certains sont à 0.'); return; }
@@ -724,21 +870,23 @@ async function submitOffer() {
 // ═══════════════════════════════════════════════════════
 // PURCHASE ORDERS
 // ═══════════════════════════════════════════════════════
-async function loadPOs() {
+async function loadPOs(isSilent = false) {
   if (!profile) return;
   const tbody = document.getElementById('poTableBody');
-  tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+  if (!isSilent) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+  }
   try {
     const enc = encodeURIComponent(`fournisseur_ID eq ${profile.ID}`);
     const res  = await fetch(`/odata/v4/srm/BonsCommande?$filter=${enc}&$orderby=createdAt desc`);
     const data = await res.json();
     posList = data.value || [];
     if (!posList.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>Aucun bon de commande.</td></tr>'; return; }
-    const statusMap = { CONFIRMED:'badge-confirmed', DELIVERED:'badge-matched', CANCELLED:'badge-closed' };
+    const statusMap = { SENT:'badge-pending', CONFIRMED:'badge-confirmed', DELIVERED:'badge-matched', CANCELLED:'badge-closed' };
     tbody.innerHTML = posList.map(po => {
       let actionBtns = `<button class="btn btn-ghost btn-sm" onclick="viewPO('${po.ID}')"><i class="fas fa-eye"></i> Voir</button>`;
-      if (po.status === 'CONFIRMED') {
-        actionBtns += ` <button class="btn btn-primary btn-sm" onclick="openGRModal('${po.ID}', '${po.poNumber}')"><i class="fas fa-truck"></i> GR</button>`;
+      if (po.status === 'SENT') {
+        actionBtns += ` <button class="btn btn-accent2 btn-sm accept-btn-${po.ID}" onclick="acceptPurchaseOrder('${po.ID}')"><i class="fas fa-check"></i> Accepter</button>`;
       }
       if (po.status === 'DELIVERED') {
         actionBtns += ` <button class="btn btn-primary btn-sm" onclick="openCreateInvoiceModal('${po.ID}', '${po.poNumber}')"><i class="fas fa-file-invoice"></i> Facture</button>`;
@@ -792,6 +940,40 @@ async function viewPO(poId) {
   finally { showLoader(false); }
 }
 function closePOModal() { document.getElementById('poModal').classList.remove('open'); }
+
+async function acceptPurchaseOrder(poId) {
+  const btn = document.querySelector(`.accept-btn-${poId}`);
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+  }
+  try {
+    const res = await fetch('/odata/v4/srm/acceptPO', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ poId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || "Erreur lors de l'acceptation");
+    
+    // Visually transition the button instantly
+    if (btn) {
+      btn.className = 'badge badge-confirmed';
+      btn.innerHTML = '✓ Accepté';
+      btn.onclick = null;
+    }
+    toast('success', 'Bon de commande accepté avec succès !');
+    setTimeout(() => {
+      loadPOs();
+    }, 1200);
+  } catch(e) {
+    toast('error', e.message);
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-check"></i> Accepter';
+    }
+  }
+}
 
 // ═══════════════════════════════════════════════════════
 // CRÉER GR (RÉCEPTION MARCHANDISE)
@@ -930,10 +1112,10 @@ async function submitSupplierInvoice() {
     }));
     const body = {
       poId        : invPoId,
-      receptionId : invReceptionId,
+      receptionId : invReceptionId || null,
       items,
-      dueDate     : document.getElementById('inv-dueDate').value,
-      notes       : document.getElementById('inv-notes').value
+      dueDate     : document.getElementById('inv-dueDate').value || null,
+      notes       : document.getElementById('inv-notes').value || null
     };
     const res = await fetch('/odata/v4/srm/createSupplierInvoice', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -955,37 +1137,67 @@ async function submitSupplierInvoice() {
 // ═══════════════════════════════════════════════════════
 // 3-WAY MATCH
 // ═══════════════════════════════════════════════════════
-async function loadMatch() {
+async function loadMatch(isSilent = false) {
   if (!profile) return;
   const tbody = document.getElementById('matchTableBody');
-  tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+  if (!isSilent) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+  }
   try {
     const enc  = encodeURIComponent(`fournisseur_ID eq ${profile.ID}`);
     const res  = await fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${enc}&$expand=bonCommande,reception&$orderby=createdAt desc`);
     const data = await res.json();
     matchList = data.value || [];
-    if (!matchList.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-layer-group" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>Aucune facture à apparier.</td></tr>'; return; }
+    if (!matchList.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="fas fa-layer-group" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>Aucune facture à apparier.</td></tr>'; return; }
     const matchBadge = { PENDING:'badge-pending', MATCHED:'badge-matched', DISCREPANCY:'badge-discrepancy' };
     const matchLabel = { PENDING:'En attente', MATCHED:'Apparié ✓', DISCREPANCY:'Écart détecté' };
     tbody.innerHTML = matchList.map(f => {
       const po  = f.bonCommande;
       const gr  = f.reception;
       const poPdf  = po ? ` <button class="pdf-icon-btn" onclick="viewPOPDF('${po.ID}','${po.poNumber}')" title="PDF Bon de Commande"><i class="fas fa-file-pdf"></i></button>` : '';
-      const grPdf  = gr ? ` <button class="pdf-icon-btn" onclick="viewGRPDF('${gr.ID}','${gr.receiptNumber}')" title="PDF Bon de R\u00e9ception"><i class="fas fa-file-pdf"></i></button>` : '';
+      const grPdf  = gr ? ` <button class="pdf-icon-btn" onclick="viewGRPDF('${gr.ID}','${gr.receiptNumber}')" title="PDF Bon de Réception"><i class="fas fa-file-pdf"></i></button>` : '';
       const invPdf = ` <button class="pdf-icon-btn" onclick="viewInvoicePDF('${f.ID}','${f.invoiceNumber}')" title="PDF Facture"><i class="fas fa-file-pdf"></i></button>`;
       const poIcon  = po ? `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${po.poNumber}${poPdf}` : `<span class="match-status-err"><i class="fas fa-times-circle"></i></span> Aucun PO`;
       const grIcon  = gr ? `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${gr.receiptNumber}${grPdf}` : `<span class="match-status-warn"><i class="fas fa-clock"></i></span> En attente`;
       const invIcon = `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${f.invoiceNumber}${invPdf}`;
+      const remAmt = f.remainingAmount !== undefined ? f.remainingAmount : (f.status === 'PAID' ? 0 : f.totalTTC);
+      const remHtml = `<div style="font-size:0.72rem; color:var(--text-dim); margin-top:2px;">Reste : ${fmt(remAmt)} DA</div>`;
+
+      let actionHtml = '-';
+      if (f.status === 'PENDING_CASH') {
+        actionHtml = `<button class="btn btn-accent2 btn-sm" style="padding:4px 8px; font-size:0.75rem;" onclick="supplierConfirmCashReceipt('${f.ID}', '${f.invoiceNumber}')"><i class="fas fa-check"></i> Confirmer encaissement</button>`;
+      } else if (f.status === 'PAID') {
+        actionHtml = `<span style="color:#22c55e; font-weight:600; font-size:0.8rem;"><i class="fas fa-check-double"></i> Encaissé</span>`;
+      }
+
       return `<tr>
         <td style="font-family:monospace;font-weight:600">${f.invoiceNumber||'—'}</td>
         <td style="font-size:0.82rem">${poIcon}</td>
         <td style="font-size:0.82rem">${grIcon}</td>
         <td style="font-size:0.82rem">${invIcon}</td>
         <td><span class="badge ${matchBadge[f.matchStatus]||'badge-pending'}">${matchLabel[f.matchStatus]||f.matchStatus}</span></td>
-        <td style="font-weight:700;color:var(--accent-gold)">${fmt(f.totalTTC)} DA</td>
+        <td style="font-weight:700;color:var(--accent-gold)">${fmt(f.totalTTC)} DA${remHtml}</td>
+        <td style="white-space:nowrap;">${actionHtml}</td>
       </tr>`;
     }).join('');
-  } catch(e) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6" style="color:var(--accent-red)">${e.message}</td></tr>`; }
+  } catch(e) { tbody.innerHTML = `<tr class="empty-row"><td colspan="7" style="color:var(--accent-red)">${e.message}</td></tr>`; }
+}
+
+async function supplierConfirmCashReceipt(factureId, invoiceNumber) {
+  if (!confirm(`Confirmer la réception du paiement en espèces pour la facture ${invoiceNumber} ?\nCela clôturera officiellement la transaction.`)) return;
+  showLoader(true);
+  try {
+    const res = await fetch('/odata/v4/srm/confirmCashPayment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ factureId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Erreur lors de la confirmation');
+    toast('success', `Paiement en espèces pour la facture ${invoiceNumber} confirmé avec succès !`);
+    loadMatch();
+  } catch(e) { toast('error', e.message); }
+  finally { showLoader(false); }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -994,7 +1206,6 @@ async function loadMatch() {
 function renderProfileView() {
   if (!profile) { toast('error', 'Profil non disponible'); return; }
   const g1 = document.getElementById('profileGeneral');
-  const g2 = document.getElementById('profileBanque');
   g1.innerHTML = `
     <div class="profile-field"><label>Raison Sociale</label><p>${profile.companyName||'—'}</p></div>
     <div class="profile-field"><label>Secteur</label><p>${profile.sector||'—'}</p></div>
@@ -1008,12 +1219,6 @@ function renderProfileView() {
     <div class="profile-field"><label>Ville</label><p>${profile.city||'—'}</p></div>
     <div class="profile-field"><label>Wilaya</label><p>${profile.wilaya||'—'}</p></div>
     <div class="profile-field"><label>Note Fournisseur</label><p>${(profile.bp?.rating > 0) ? renderStars(profile.bp.rating) : '—'}</p></div>
-  `;
-  g2.innerHTML = `
-    <div class="profile-field"><label>Banque</label><p>${profile.bankName||'—'}</p></div>
-    <div class="profile-field"><label>RIB</label><p style="font-family:monospace">${profile.rib||'—'}</p></div>
-    <div class="profile-field"><label>Conditions paiement</label><p>${profile.paymentTerms||'—'}</p></div>
-    <div class="profile-field"><label>Conditions livraison</label><p>${profile.deliveryTerms||'—'}</p></div>
   `;
   const kycCont = document.getElementById('kycStatus');
   const kycOK = profile.kycStatus === 'VALIDATED';
@@ -1032,6 +1237,7 @@ function renderProfileView() {
       </div>
     </div>
   `;
+  initTheme();
 }
 
 function openEditProfile() {
@@ -1041,10 +1247,7 @@ function openEditProfile() {
   document.getElementById('edit-street').value        = profile.street || '';
   document.getElementById('edit-city').value          = profile.city || '';
   document.getElementById('edit-ai').value            = profile.ai || '';
-  document.getElementById('edit-bankName').value      = profile.bankName || '';
   document.getElementById('edit-rib').value           = profile.rib || '';
-  document.getElementById('edit-paymentTerms').value  = profile.paymentTerms || '';
-  document.getElementById('edit-deliveryTerms').value = profile.deliveryTerms || '';
   document.getElementById('profileModal').classList.add('open');
 }
 function closeProfileModal() { document.getElementById('profileModal').classList.remove('open'); }
@@ -1060,10 +1263,7 @@ async function saveProfile() {
       street        : document.getElementById('edit-street').value,
       city          : document.getElementById('edit-city').value,
       ai            : document.getElementById('edit-ai').value,
-      bankName      : document.getElementById('edit-bankName').value,
       rib           : document.getElementById('edit-rib').value,
-      paymentTerms  : document.getElementById('edit-paymentTerms').value,
-      deliveryTerms : document.getElementById('edit-deliveryTerms').value,
     };
     const res = await fetch('/odata/v4/srm/updateProfile', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1078,6 +1278,7 @@ async function saveProfile() {
   } catch(e) { toast('error', e.message); }
   finally { showLoader(false); }
 }
+
 
 // ═══════════════════════════════════════════════════════
 // UTILS
@@ -1146,29 +1347,114 @@ async function viewInvoicePDF(factureId, invoiceNumber) {
 }
 
 // ═══════════════════════════════════════════════════════
-// POLLING (5s) — Auto-refresh badges & KPIs
+// POLLING (5s) — Auto-refresh badges, KPIs & active view
 // ═══════════════════════════════════════════════════════
-setInterval(async () => {
+let prevCounts = { rfq: -1, po: -1, po_new: -1, match: -1, match_actionable: -1 };
+
+function updateNavIndicator(dotEl, navEl, badgeEl, count, prevCount) {
+  // Update badge
+  badgeEl.textContent = count;
+  badgeEl.style.display = count > 0 ? '' : 'none';
+  // Update notification dot
+  dotEl.style.display = count > 0 ? '' : 'none';
+  // Highlight nav item
+  if (count > 0) {
+    navEl.classList.add('has-notif');
+  } else {
+    navEl.classList.remove('has-notif');
+  }
+  // Flash stat card if count changed
+  if (prevCount >= 0 && count !== prevCount) {
+    badgeEl.classList.remove('noti-badge-pulse');
+    void badgeEl.offsetWidth; // force reflow
+    badgeEl.classList.add('noti-badge-pulse');
+  }
+}
+
+function getActiveViewId() {
+  const active = document.querySelector('.view.active');
+  return active ? active.id.replace('view-', '') : 'dashboard';
+}
+
+async function refreshNotifications(isInitial = false) {
   if (!profile) return;
   try {
-    const [rfqRes, poRes, matchRes] = await Promise.all([
+    const [rfqRes, poRes, matchRes, actionableMatchRes] = await Promise.all([
       fetch(`/odata/v4/srm/RFQs?$filter=status eq 'OPEN'&$select=ID`),
-      fetch(`/odata/v4/srm/BonsCommande?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID}`)}&$select=ID`),
-      fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID} and matchStatus eq 'PENDING'`)}&$select=ID`)
+      fetch(`/odata/v4/srm/BonsCommande?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID}`)}&$select=ID,status`),
+      fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID} and matchStatus eq 'PENDING'`)}&$select=ID`),
+      fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID} and (status eq 'PENDING_CASH' or matchStatus eq 'DISCREPANCY')`)}&$select=ID`)
     ]);
     const rfqCount   = ((await rfqRes.json()).value || []).length;
-    const poCount    = ((await poRes.json()).value || []).length;
+    const poData     = (await poRes.json()).value || [];
+    const poCount    = poData.length;
+    const poNewCount = poData.filter(p => p.status === 'SENT').length;
     const matchCount = ((await matchRes.json()).value || []).length;
-    document.getElementById('kpi-rfqs').textContent          = rfqCount;
-    document.getElementById('kpi-pos').textContent           = poCount;
-    document.getElementById('kpi-pending-match').textContent = matchCount;
-    const rfqB = document.getElementById('rfqBadge');
-    rfqB.textContent = rfqCount; rfqB.style.display = rfqCount > 0 ? '' : 'none';
-    const poB = document.getElementById('poBadge');
-    poB.textContent = poCount; poB.style.display = poCount > 0 ? '' : 'none';
-    const matchB = document.getElementById('matchBadge');
-    matchB.textContent = matchCount; matchB.style.display = matchCount > 0 ? '' : 'none';
+    const actionableMatchCount = ((await actionableMatchRes.json()).value || []).length;
+
+    // Update KPI values
+    const rfqKpi = document.getElementById('kpi-rfqs');
+    const poKpi  = document.getElementById('kpi-pos');
+    const matchKpi = document.getElementById('kpi-pending-match');
+
+    // Flash stat cards on change
+    if (!isInitial && prevCounts.rfq >= 0 && rfqCount !== prevCounts.rfq) {
+      rfqKpi.closest('.stat-card')?.classList.add('has-update');
+      setTimeout(() => rfqKpi.closest('.stat-card')?.classList.remove('has-update'), 1500);
+    }
+    if (!isInitial && prevCounts.po >= 0 && poCount !== prevCounts.po) {
+      poKpi.closest('.stat-card')?.classList.add('has-update');
+      setTimeout(() => poKpi.closest('.stat-card')?.classList.remove('has-update'), 1500);
+    }
+    if (!isInitial && prevCounts.match >= 0 && matchCount !== prevCounts.match) {
+      matchKpi.closest('.stat-card')?.classList.add('has-update');
+      setTimeout(() => matchKpi.closest('.stat-card')?.classList.remove('has-update'), 1500);
+    }
+
+    if (rfqKpi) rfqKpi.textContent = rfqCount;
+    if (poKpi) poKpi.textContent = poCount;
+    if (matchKpi) matchKpi.textContent = matchCount;
+
+    // Update nav badges + dots + highlight
+    updateNavIndicator(
+      document.getElementById('rfqDot'),
+      document.getElementById('nav-rfqs'),
+      document.getElementById('rfqBadge'),
+      rfqCount, isInitial ? -1 : prevCounts.rfq
+    );
+    updateNavIndicator(
+      document.getElementById('poDot'),
+      document.getElementById('nav-pos'),
+      document.getElementById('poBadge'),
+      poNewCount, isInitial ? -1 : prevCounts.po_new
+    );
+    updateNavIndicator(
+      document.getElementById('matchDot'),
+      document.getElementById('nav-match'),
+      document.getElementById('matchBadge'),
+      actionableMatchCount, isInitial ? -1 : prevCounts.match_actionable
+    );
+
+    prevCounts = { 
+      rfq: rfqCount, 
+      po: poCount, 
+      po_new: poNewCount, 
+      match: matchCount, 
+      match_actionable: actionableMatchCount 
+    };
+
+    // Auto-refresh the currently active view silently in the background
+    const activeView = getActiveViewId();
+    if (activeView === 'rfqs')   loadRFQs(true);
+    if (activeView === 'pos')    loadPOs(true);
+    if (activeView === 'match')  loadMatch(true);
+    if (activeView === 'dashboard') loadDashboard();
+
   } catch(e) { /* silent polling error */ }
+}
+
+setInterval(async () => {
+  await refreshNotifications(false);
 }, 5000);
 
 init();

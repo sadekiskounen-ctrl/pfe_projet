@@ -18,39 +18,44 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            /* Light theme (default) - Luxurious Warm Linen / Off-White */
-            --bg: #f7f6f0;
+            /* ☀️ SAP Morning Horizon (Light Fiori Theme) */
+            --bg: #f2f5f8;
             --sidebar-bg: #ffffff;
             --card-bg: #ffffff;
-            --accent: #0284c7;
-            --accent-orange: #d97706;
-            --accent-green: #15803d;
-            --text-main: #1c1917;
-            --text-dim: #78716c;
-            --border: rgba(120, 113, 108, 0.15);
-            --glass-border: rgba(120, 113, 108, 0.08);
-            --table-row-bg: #fcfbfa;
-            --input-bg: #f2f0e8;
+            --accent: #0a6ed1; /* Sapphire brand accent */
+            --accent-orange: #e9730c; /* Warning Orange */
+            --accent-green: #107e3e; /* Success Green */
+            --text-main: #1a1c1e;
+            --text-dim: #6a6d70;
+            --border: #d9d9d9;
+            --glass-border: rgba(0, 0, 0, 0.05);
+            --table-row-bg: #f7f9fa;
+            --input-bg: #f2f5f8;
             --modal-bg: #ffffff;
-            --nav-item-active-bg: rgba(2, 132, 199, 0.07);
+            --nav-item-active-bg: rgba(10, 110, 209, 0.08);
         }
 
         body.dark-mode {
-            /* Dark theme */
-            --bg: #0f172a;
-            --sidebar-bg: #1e293b;
-            --card-bg: rgba(30, 41, 59, 0.8);
-            --accent: #38bdf8;
-            --accent-orange: #fb923c;
+            /* 🌙 SAP Evening Horizon (Dark Fiori Theme) */
+            --bg: #12171c;
+            --sidebar-bg: #1a222c;
+            --card-bg: #1a222c;
+            --accent: #3596ff; /* Luminous Brand Accent */
+            --accent-orange: #ff9a2e;
             --accent-green: #4ade80;
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
-            --border: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.05);
-            --table-row-bg: rgba(255, 255, 255, 0.03);
-            --input-bg: rgba(0, 0, 0, 0.2);
-            --modal-bg: #1e293b;
-            --nav-item-active-bg: rgba(56, 189, 248, 0.12);
+            --text-main: #ffffff;
+            --text-dim: #a1a8b0;
+            --border: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.04);
+            --table-row-bg: #212833;
+            --input-bg: rgba(0, 0, 0, 0.25);
+            --modal-bg: #1a222c;
+            --nav-item-active-bg: rgba(53, 150, 255, 0.12);
+        }
+
+        /* Premium brand logo adjustment for dark mode - glow & brightness */
+        body.dark-mode .brand img {
+            filter: brightness(0) invert(1) drop-shadow(0 0 6px rgba(53, 150, 255, 0.4));
         }
 
         /* Premium Switch Toggle CSS */
@@ -524,11 +529,61 @@
             80% { transform: rotate(-8deg); }
         }
         .noti-badge-pulse {
-            animation: badgePulse 1.5s ease infinite;
+            animation: badgePulse 1.2s ease infinite;
         }
         @keyframes badgePulse {
-            0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0.5); }
-            50%      { box-shadow: 0 0 0 6px rgba(248,113,113,0); }
+            0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0.5); transform: translateY(-50%) scale(1); }
+            50%      { box-shadow: 0 0 8px 2px rgba(248,113,113,0.3); transform: translateY(-50%) scale(1.15); }
+        }
+
+        /* NOTIFICATION DOT — Glowing indicator in front of nav items */
+        .noti-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            display: none; flex-shrink: 0;
+            animation: dotBlink 1.4s ease-in-out infinite;
+            position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
+        }
+        .noti-dot.dot-blue   { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+        .noti-dot.dot-orange { background: var(--accent-orange); box-shadow: 0 0 6px var(--accent-orange); }
+        .noti-dot.dot-green  { background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); }
+        .noti-dot.dot-red    { background: #f87171; box-shadow: 0 0 6px #f87171; }
+        @keyframes dotBlink {
+            0%,100% { opacity: 1; transform: translateY(-50%) scale(1); }
+            50%     { opacity: 0.35; transform: translateY(-50%) scale(0.7); }
+        }
+
+        /* NAV ITEM with notification highlight */
+        .nav-item.has-notif { background: var(--nav-item-active-bg); }
+        .nav-item.has-notif .nav-icon svg { stroke: var(--accent); }
+
+        /* LIVE INDICATOR in header */
+        .live-indicator {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.72rem; font-weight: 600; color: var(--accent);
+            padding: 4px 14px; border-radius: 20px;
+            background: rgba(2, 132, 199, 0.08); border: 1px solid rgba(2, 132, 199, 0.2);
+            letter-spacing: 0.3px; text-transform: uppercase;
+        }
+        body.dark-mode .live-indicator {
+            background: rgba(56, 189, 248, 0.08); border-color: rgba(56, 189, 248, 0.2);
+        }
+        .live-dot-admin {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent); animation: livePulseAdmin 2s ease-in-out infinite;
+        }
+        @keyframes livePulseAdmin {
+            0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.5); }
+            50%     { opacity: 0.6; box-shadow: 0 0 6px 2px rgba(2, 132, 199, 0.3); }
+        }
+        body.dark-mode .live-dot-admin {
+            background: var(--accent);
+        }
+
+        /* KPI CARD notification flash */
+        .kpi-card.has-update { border-color: var(--accent) !important; animation: kpiFlash 0.6s ease; }
+        @keyframes kpiFlash {
+            0% { border-color: var(--accent); box-shadow: 0 0 12px rgba(2, 132, 199, 0.2); }
+            100% { border-color: var(--accent); box-shadow: none; }
         }
         
         .field-error-msg {
@@ -579,41 +634,48 @@
                 </span>
                 <span class="nav-text">Fournisseurs</span>
             </div>
-            <div class="nav-item" onclick="switchView('registrations', this)" style="position: relative;">
+            <div class="nav-item" id="nav-registrations" onclick="switchView('registrations', this)" style="position: relative;">
+                <span class="noti-dot dot-red" id="regDot"></span>
                 <span class="nav-icon">
                     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 </span>
                 <span class="nav-text">Inscriptions</span>
                 <span class="noti-badge noti-badge-pulse" id="reg-alert-badge" style="display: none; background: #f87171; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); padding: 2px 6px; font-size: 0.7rem; border-radius: 10px; font-weight: 700; color: white; box-shadow: 0 0 0 0 rgba(248,113,113,0.5);">0</span>
             </div>
-            <div class="nav-item" onclick="switchView('commandes', this)" style="position: relative;">
+            <div class="nav-item" id="nav-commandes" onclick="switchView('commandes', this)" style="position: relative;">
+                <span class="noti-dot dot-orange" id="cmdDot"></span>
                 <span class="nav-icon">
                     <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
                 </span>
                 <span class="nav-text">Commandes</span>
                 <span class="noti-badge noti-badge-pulse" id="cmd-alert-badge" style="display: none; background: #f87171; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); padding: 2px 6px; font-size: 0.7rem; border-radius: 10px; font-weight: 700; color: white; box-shadow: 0 0 0 0 rgba(248,113,113,0.5);">0</span>
             </div>
-            <div class="nav-item" onclick="switchView('factures', this)" style="position: relative;">
+            <div class="nav-item" id="nav-factures" onclick="switchView('factures', this)" style="position: relative;">
+                <span class="noti-dot dot-green" id="facDot"></span>
                 <span class="nav-icon">
                     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 </span>
                 <span class="nav-text">Factures</span>
+                <span class="noti-badge noti-badge-pulse" id="fac-alert-badge" style="display: none; background: var(--accent-green); position: absolute; right: 15px; top: 50%; transform: translateY(-50%); padding: 2px 6px; font-size: 0.7rem; border-radius: 10px; font-weight: 700; color: white; box-shadow: 0 0 0 0 rgba(21,128,61,0.5);">0</span>
             </div>
-            <div class="nav-item" onclick="switchView('catalogue', this)" style="position: relative;">
+            <div class="nav-item" id="nav-catalogue" onclick="switchView('catalogue', this)" style="position: relative;">
+                <span class="noti-dot dot-blue" id="catDot"></span>
                 <span class="nav-icon">
                     <svg viewBox="0 0 24 24"><polyline points="21 16 12 21 3 16 12 11 21 16"/><polyline points="21 7.5 12 12.5 3 7.5 12 2.5 21 7.5"/><line x1="12" y1="22.5" x2="12" y2="12.5"/><line x1="12" y1="12" x2="12" y2="2.5"/><line x1="3" y1="7.6" x2="3" y2="16.1"/><line x1="21" y1="7.6" x2="21" y2="16.1"/></svg>
                 </span>
                 <span class="nav-text">Catalogue</span>
                 <span class="noti-badge noti-badge-pulse" id="cat-alert-badge" style="display: none; background: #f87171; position: absolute; right: 15px; top: 50%; transform: translateY(-50%); padding: 2px 6px; font-size: 0.7rem; border-radius: 10px; font-weight: 700; color: white; box-shadow: 0 0 0 0 rgba(248,113,113,0.5);">0</span>
             </div>
-            <div class="nav-item" onclick="switchView('devis', this)" style="position: relative;">
+            <div class="nav-item" id="nav-devis" onclick="switchView('devis', this)" style="position: relative;">
+                <span class="noti-dot dot-orange" id="devisDot"></span>
                 <span class="nav-icon">
                     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 </span>
                 <span class="nav-text">Devis</span>
                 <span class="noti-badge noti-badge-pulse" id="devis-alert-badge" style="display: none; background: var(--accent-orange); position: absolute; right: 15px; top: 50%; transform: translateY(-50%); padding: 2px 6px; font-size: 0.7rem; border-radius: 10px; font-weight: 700; color: white; box-shadow: 0 0 0 0 rgba(217,119,6,0.5);">0</span>
             </div>
-            <div class="nav-item" onclick="switchView('rfqs', this)" style="position: relative;">
+            <div class="nav-item" id="nav-rfqs" onclick="switchView('rfqs', this)" style="position: relative;">
+                <span class="noti-dot dot-blue" id="rfqDot"></span>
                 <span class="nav-icon">
                     <svg viewBox="0 0 24 24"><path d="M11 5h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2m-8-9a3 3 0 0 0 3 3h4V6H6a3 3 0 0 0-3 3Zm16-3.8c.8.8.8 2 0 2.8m2-6.8a8.5 8.5 0 0 1 0 10.8"/></svg>
                 </span>
@@ -645,6 +707,10 @@
                 <select class="period-selector" id="period-year"></select>
             </div>
             <div class="header-actions">
+                <button id="theme-toggle-btn-admin" onclick="toggleDarkMode(!document.body.classList.contains('dark-mode'))" style="background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; vertical-align: middle;" title="Changer de thème Fiori">
+                    <span id="theme-icon-admin">☀️</span> <span id="theme-text-admin">Morning Horizon</span>
+                </button>
+                <div class="live-indicator" id="adminLiveIndicator"><span class="live-dot-admin"></span> Live · 5s</div>
                 <div class="search-container" style="position: relative;">
                     <span class="search-icon">
                         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -667,45 +733,82 @@
             <!-- VIEW: OVERVIEW -->
             <div id="overview" class="view-section active">
                 <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <div class="kpi-label">Volume d'affaires (CA)</div>
-                        <div class="kpi-value" id="kpi-revenue">0 DA</div>
+                    <!-- KPI 1: CHIFFRE D'AFFAIRES -->
+                    <div class="kpi-card" style="border-left: 4px solid var(--accent-orange); display: flex; align-items: center; gap: 16px; transition: transform var(--transition);">
+                        <div style="background: rgba(233, 115, 12, 0.12); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--accent-orange); flex-shrink: 0;">
+                            💰
+                        </div>
+                        <div>
+                            <div class="kpi-label" style="margin-bottom: 2px; font-weight: 700; letter-spacing: 0.5px; font-size: 0.72rem;">Chiffre d'affaires</div>
+                            <div class="kpi-value" id="kpi-revenue" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 2px; font-family: 'Outfit', sans-serif;">0 DA</div>
+                            <div style="font-size: 0.7rem; color: var(--text-dim);" id="kpi-revenue-sub">Ventes du mois</div>
+                        </div>
                     </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Encours Clients</div>
-                        <div class="kpi-value" id="kpi-encours">0 DA</div>
+                    <!-- KPI 2: ENCOURS CLIENTS -->
+                    <div class="kpi-card" style="border-left: 4px solid var(--accent); display: flex; align-items: center; gap: 16px; transition: transform var(--transition);">
+                        <div style="background: rgba(10, 110, 209, 0.12); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--accent); flex-shrink: 0;">
+                            ⏳
+                        </div>
+                        <div>
+                            <div class="kpi-label" style="margin-bottom: 2px; font-weight: 700; letter-spacing: 0.5px; font-size: 0.72rem;">Encours Clients</div>
+                            <div class="kpi-value" id="kpi-encours" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 2px; font-family: 'Outfit', sans-serif;">0 DA</div>
+                            <div style="font-size: 0.7rem; color: var(--text-dim);">Factures en attente</div>
+                        </div>
                     </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Clients Actifs</div>
-                        <div class="kpi-value" id="kpi-clients">0</div>
+                    <!-- KPI 3: CLIENTS ACTIFS -->
+                    <div class="kpi-card" style="border-left: 4px solid var(--accent-green); display: flex; align-items: center; gap: 16px; transition: transform var(--transition);">
+                        <div style="background: rgba(16, 126, 62, 0.12); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--accent-green); flex-shrink: 0;">
+                            👥
+                        </div>
+                        <div>
+                            <div class="kpi-label" style="margin-bottom: 2px; font-weight: 700; letter-spacing: 0.5px; font-size: 0.72rem;">Clients Actifs</div>
+                            <div class="kpi-value" id="kpi-clients" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 2px; font-family: 'Outfit', sans-serif;">0</div>
+                            <div style="font-size: 0.7rem; color: var(--text-dim);">Comptes approuvés</div>
+                        </div>
                     </div>
-                    <div class="kpi-card">
-                        <div class="kpi-label">Délais Fournisseurs (Moy.)</div>
-                        <div class="kpi-value" id="kpi-delais">0 j</div>
+                    <!-- KPI 4: FOURNISSEURS ACTIFS -->
+                    <div class="kpi-card" style="border-left: 4px solid #6c63ff; display: flex; align-items: center; gap: 16px; transition: transform var(--transition);">
+                        <div style="background: rgba(108, 99, 255, 0.12); width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #6c63ff; flex-shrink: 0;">
+                            🚚
+                        </div>
+                        <div>
+                            <div class="kpi-label" style="margin-bottom: 2px; font-weight: 700; letter-spacing: 0.5px; font-size: 0.72rem;">Fournisseurs</div>
+                            <div class="kpi-value" id="kpi-delais" style="font-size: 1.4rem; font-weight: 700; margin-bottom: 2px; font-family: 'Outfit', sans-serif;">0</div>
+                            <div style="font-size: 0.7rem; color: var(--text-dim);">Partenaires actifs</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="chart-section">
-                    <div style="font-weight: 600; color: var(--text-dim); margin-bottom: 20px;">📈 CA JOURNALIER DU MOIS</div>
-                    <canvas id="mainChart" height="100"></canvas>
+                <!-- NEW SIDE-BY-SIDE CHART & ALERTS CONTAINER -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px;">
+                    <div class="chart-section" style="margin-bottom: 0; min-height: 320px; display: flex; flex-direction: column;">
+                        <div style="font-weight: 600; color: var(--text-dim); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;" id="chart-title-label">📈 CA Journalier — Évolution</div>
+                        <div style="flex: 1; position: relative;">
+                            <canvas id="mainChart" style="width: 100%; height: 100%; max-height: 240px;"></canvas>
+                        </div>
+                    </div>
+                    <div class="top-card" style="display: flex; flex-direction: column; min-height: 320px; padding: 25px;">
+                        <div style="font-weight: 600; color: #ef4444; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;"><i class="fas fa-bell"></i> Alertes</div>
+                        <div class="alerts-container" id="alerts-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 0; max-height: 240px;">
+                            <!-- Alert items rendered dynamically -->
+                        </div>
+                    </div>
                 </div>
 
                 <div class="top-lists-grid" style="grid-template-columns: repeat(3, 1fr);">
                     <div class="top-card">
-                        <div style="font-weight: 600; color: var(--accent); margin-bottom: 20px;">🏆 TOP 5 CLIENTS</div>
-                        <div id="top-clients-list"></div>
+                        <div style="font-weight: 600; color: var(--accent); margin-bottom: 18px; display: flex; align-items: center; gap: 8px;"><i class="fas fa-trophy"></i> TOP 5 CLIENTS</div>
+                        <div id="top-clients-list" style="display: flex; flex-direction: column;"></div>
                     </div>
                     <div class="top-card">
-                        <div style="font-weight: 600; color: var(--accent-orange); margin-bottom: 20px;">📦 TOP 5 PRODUITS</div>
-                        <div id="top-products-list"></div>
+                        <div style="font-weight: 600; color: var(--accent-orange); margin-bottom: 18px; display: flex; align-items: center; gap: 8px;"><i class="fas fa-box-open"></i> TOP 5 PRODUITS</div>
+                        <div id="top-products-list" style="display: flex; flex-direction: column;"></div>
                     </div>
                     <div class="top-card">
-                        <div style="font-weight: 600; color: var(--accent-green); margin-bottom: 20px;">🏭 TOP 5 FOURNISSEURS</div>
-                        <div id="top-suppliers-list"></div>
+                        <div style="font-weight: 600; color: var(--accent-green); margin-bottom: 18px; display: flex; align-items: center; gap: 8px;"><i class="fas fa-industry"></i> TOP 5 FOURNISSEURS</div>
+                        <div id="top-suppliers-list" style="display: flex; flex-direction: column;"></div>
                     </div>
                 </div>
-
-                <div class="alerts-container" id="alerts-list"></div>
             </div>
 
             <!-- VIEW: COMMANDES -->
@@ -718,6 +821,7 @@
                             <option value="">Tous les types</option>
                             <option value="B2B">B2B</option>
                             <option value="B2C">B2C</option>
+                            <option value="SRM">Bons de Commande (Achats Fournisseurs)</option>
                         </select>
                     </div>
                 </div>
@@ -1232,6 +1336,29 @@
                             <input type="checkbox" id="darkmode-toggle" onchange="toggleDarkMode(this.checked)">
                             <span class="slider-toggle"></span>
                         </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL: VALIDER RÉCEPTION MARCHANDE (GR) -->
+            <div id="admin-gr-modal" class="modal-overlay" style="display: none;">
+                <div class="modal-content" style="width: 750px;">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-truck" style="color:var(--accent); margin-right:8px;"></i> Enregistrer la Réception (GR) : <span id="admin-gr-po-number">---</span></h3>
+                        <span class="close-modal" onclick="adminCloseGRModal()">×</span>
+                    </div>
+                    <div class="modal-body">
+                        <div id="admin-gr-items-container" style="margin-bottom: 20px; overflow-x: auto;">
+                            <!-- Dynamic items list -->
+                        </div>
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-size: 0.72rem; font-weight: 700; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase;">Notes de réception</label>
+                            <textarea id="admin-gr-notes" style="width: 100%; padding: 10px 13px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 9px; color: var(--text-main); font-size: 0.88rem; outline: none; font-family: inherit;" rows="3" placeholder="Remarques sur la livraison..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                            <button class="btn-dialog-secondary" onclick="adminCloseGRModal()" style="padding: 10px 20px; border-radius: 8px;">Annuler</button>
+                            <button class="btn-action" onclick="adminSubmitGR()" style="padding: 10px 20px; border-radius: 8px;"><i class="fas fa-check"></i> Valider la réception</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1793,12 +1920,12 @@
                 
                 updateMonths(); // Initial load
                 
-                // Actualisation en temps réel toutes les 15 secondes
+                // Actualisation en temps réel toutes les 5 secondes
                 setInterval(() => {
                     if (document.querySelector('.view-section.active').id === 'overview') {
                         loadStats();
                     }
-                }, 15000);
+                }, 5000);
 
                 // FIX: SEARCH BAR WITH DYNAMIC SUGGESTIONS
                 const searchInput = document.getElementById('main-search');
@@ -1891,18 +2018,33 @@
             const m = document.getElementById('period-month').value;
             const y = document.getElementById('period-year').value;
             try {
-                const res = await fetch(`/odata/v4/analytics/getGlobalStats(month='${m}',year='${y}')`);
-                const raw = await res.json();
+                // Fetch stats and active suppliers list in parallel
+                const [statsRes, supRes] = await Promise.all([
+                    fetch(`/odata/v4/analytics/getGlobalStats(month='${m}',year='${y}')`),
+                    fetch('/odata/v4/admin/Fournisseurs?$select=ID', { headers: adminHeaders })
+                ]);
+                const raw = await statsRes.json();
                 const s = raw.value ? raw.value : raw;
+                const supData = await supRes.json().catch(() => ({ value: [] }));
+                const suppliersCount = (supData.value || []).length;
 
+                // Update KPI text fields
                 document.getElementById('kpi-revenue').innerText = new Intl.NumberFormat().format(s.totalRevenue || 0) + ' DA';
                 document.getElementById('kpi-encours').innerText = new Intl.NumberFormat().format(s.encoursClients || 0) + ' DA';
                 document.getElementById('kpi-clients').innerText = s.activeClients || 0;
-                document.getElementById('kpi-delais').innerText = (s.delaisFournisseurs || 0) + ' j';
+                document.getElementById('kpi-delais').innerText = suppliersCount; // suppliers count
+
+                // Dynamic subtitle of CA card (e.g. Ventes de Mai 2026)
+                const monthNames = { "01": "Janvier", "02": "Février", "03": "Mars", "04": "Avril", "05": "Mai", "06": "Juin", "07": "Juillet", "08": "Août", "09": "Septembre", "10": "Octobre", "11": "Novembre", "12": "Décembre" };
+                const monthLabel = monthNames[m] || "Mai";
+                document.getElementById('kpi-revenue-sub').innerText = `Ventes de ${monthLabel} ${y}`;
+                
+                const titleLabel = document.getElementById('chart-title-label');
+                if (titleLabel) titleLabel.innerHTML = `<i class="fas fa-chart-bar" style="color:var(--accent);"></i> CA Journalier — Évolution (${monthLabel} ${y})`;
 
                 loadChart(m, y);
                 loadTops();
-                loadAlerts(s.pendingRegistrations || 0);
+                loadAlerts();
             } catch(e) { console.error("Stats Error", e); }
         }
 
@@ -1913,25 +2055,42 @@
                 const ctx = document.getElementById('mainChart').getContext('2d');
                 if(window.myChart) window.myChart.destroy();
                 
-                const accentColor = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#38bdf8';
+                // Read CSS variables for a perfect premium dark/light chart theme fit!
+                const accentColor = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#0a6ed1';
+                const textDim = getComputedStyle(document.body).getPropertyValue('--text-dim').trim() || '#6a6d70';
+                const borderLight = getComputedStyle(document.body).getPropertyValue('--border').trim() || 'rgba(0,0,0,0.08)';
                 
                 window.myChart = new Chart(ctx, {
                     type: 'bar',
                     data: {
-                        labels: data.value.map(d => d.day),
-                        datasets: [{ label: 'CA', data: data.value.map(d => d.value), backgroundColor: accentColor, borderRadius: 5 }]
+                        labels: data.value.map(d => String(d.day).padStart(2, '0')),
+                        datasets: [{ 
+                            label: 'CA', 
+                            data: data.value.map(d => d.value), 
+                            backgroundColor: accentColor, 
+                            borderRadius: 4,
+                            maxBarThickness: 16
+                        }]
                     },
                     options: { 
                         responsive: true, 
+                        maintainAspectRatio: false,
                         plugins: { legend: false }, 
                         scales: { 
                             y: { 
-                                title: { display: true, text: 'Chiffre d\'affaires (DA)', color: '#94a3b8' },
-                                ticks: { color: '#94a3b8' } 
+                                grid: { color: borderLight },
+                                ticks: { 
+                                    color: textDim,
+                                    font: { family: 'Outfit', size: 10 },
+                                    callback: function(value) { return new Intl.NumberFormat().format(value) + ' DA'; }
+                                } 
                             }, 
                             x: { 
-                                title: { display: true, text: 'Jours du mois', color: '#94a3b8' },
-                                ticks: { color: '#94a3b8' } 
+                                grid: { display: false },
+                                ticks: { 
+                                    color: textDim,
+                                    font: { family: 'Outfit', size: 10 }
+                                } 
                             } 
                         } 
                     }
@@ -1941,30 +2100,51 @@
 
         async function loadTops() {
             try {
+                // Top Clients list
                 const resC = await fetch('/odata/v4/analytics/getTopClients()');
                 const c = await resC.json();
                 const listC = document.getElementById('top-clients-list');
-                if(c.value) {
+                if(c.value && listC) {
                     listC.innerHTML = c.value.map(i => `
-                        <div class="list-item"><div class="item-info"><span class="rank">${i.rank}.</span><span class="name">${i.name}</span></div><span class="value">${new Intl.NumberFormat().format(i.value)} DA</span></div>
+                        <div class="list-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.88rem;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="background: var(--nav-item-active-bg); color: var(--accent); font-weight: 700; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.78rem; border: 1px solid var(--border); flex-shrink: 0;">${i.rank}</span>
+                                <span style="font-weight: 600; color: var(--text-main);">${i.name}</span>
+                            </div>
+                            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent-orange); font-size: 0.88rem;">${new Intl.NumberFormat().format(i.value)} DA</span>
+                        </div>
                     `).join('');
                 }
 
+                // Top Suppliers list
                 const resS = await fetch('/odata/v4/analytics/getTopSuppliers()');
                 const s = await resS.json();
                 const listS = document.getElementById('top-suppliers-list');
-                if(s.value) {
+                if(s.value && listS) {
                     listS.innerHTML = s.value.map(i => `
-                        <div class="list-item"><div class="item-info"><span class="rank">${i.rank}.</span><span class="name">${i.name}</span></div><span class="value">${new Intl.NumberFormat().format(i.value)} DA</span></div>
+                        <div class="list-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.88rem;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="background: var(--nav-item-active-bg); color: var(--accent-green); font-weight: 700; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.78rem; border: 1px solid var(--border); flex-shrink: 0;">${i.rank}</span>
+                                <span style="font-weight: 600; color: var(--text-main);">${i.name}</span>
+                            </div>
+                            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent-orange); font-size: 0.88rem;">${new Intl.NumberFormat().format(i.value)} DA</span>
+                        </div>
                     `).join('');
                 }
 
+                // Top Products list
                 const resP = await fetch('/odata/v4/analytics/getTopProducts()');
                 const p = await resP.json();
                 const listP = document.getElementById('top-products-list');
-                if(p.value) {
+                if(p.value && listP) {
                     listP.innerHTML = p.value.map(i => `
-                        <div class="list-item"><div class="item-info"><span class="rank">${i.rank}.</span><span class="name">${i.name}</span></div><span class="value">${new Intl.NumberFormat().format(i.value)} DA</span></div>
+                        <div class="list-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.88rem;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="background: var(--nav-item-active-bg); color: var(--accent-orange); font-weight: 700; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.78rem; border: 1px solid var(--border); flex-shrink: 0;">${i.rank}</span>
+                                <span style="font-weight: 600; color: var(--text-main);">${i.name}</span>
+                            </div>
+                            <span style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent-orange); font-size: 0.88rem;">${new Intl.NumberFormat().format(i.value)} DA</span>
+                        </div>
                     `).join('');
                 }
             } catch(e) {}
@@ -1975,29 +2155,76 @@
             switchView(viewId, el);
         }
 
-        async function loadAlerts(count) {
+        async function loadAlerts() {
             const list = document.getElementById('alerts-list');
-            list.innerHTML = '';
-            if(count > 0) {
-                list.innerHTML += `
-                    <div class="alert-row">
-                        <div class="alert-msg"><span>⚠️</span> <strong>${count} inscriptions</strong> en attente de validation.</div>
-                        <button class="btn-resolve" onclick="navigateToView('registrations')">RÉSOUDRE</button>
-                    </div>`;
-            }
-
+            if (!list) return;
+            
+            let alertHtml = '';
+            
+            // 1. Fetch pending registrations list (KYC)
             try {
-                const res = await fetch("/odata/v4/admin/AllFacturesFournisseur?$filter=matchStatus eq 'DISCREPANCY'", { headers: adminHeaders });
+                const regRes = await fetch("/odata/v4/registration/Registrations?$filter=status eq 'PENDING'&$select=companyName,city", { headers: adminHeaders });
+                const regData = await regRes.json();
+                const pendingRegs = regData.value || [];
+                
+                pendingRegs.forEach(r => {
+                    alertHtml += `
+                        <div style="background: var(--input-bg); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 3px;">
+                                <div style="font-weight: 700; font-size: 0.82rem; color: var(--accent); display: flex; align-items: center; gap: 6px;">
+                                    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent);"></span> Nouvelle inscription en attente KYC
+                                </div>
+                                <div style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">L'entreprise <em>${r.companyName} (${r.city || 'Algérie'})</em> demande validation.</div>
+                            </div>
+                            <button class="btn-resolve" onclick="navigateToView('registrations')" style="padding: 4px 10px; font-size: 0.72rem; border-radius: 6px; font-weight: 700; height: auto;">RÉSOUDRE</button>
+                        </div>`;
+                });
+            } catch(e) {}
+
+            // 2. Fetch price/quantity discrepancies (Factures)
+            try {
+                const res = await fetch("/odata/v4/admin/AllFacturesFournisseur?$filter=matchStatus eq 'DISCREPANCY'&$select=invoiceNumber,supplierName", { headers: adminHeaders });
                 const data = await res.json();
                 const disputes = data.value || [];
-                if(disputes.length > 0) {
-                    list.innerHTML += `
-                        <div class="alert-row" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2);">
-                            <div class="alert-msg"><span style="color:#ef4444">⚖️</span> <strong style="color:#ef4444">${disputes.length} factures fournisseurs</strong> en litige (écart de prix/quantité).</div>
-                            <button class="btn-resolve" style="background:#ef4444" onclick="navigateToView('factures')">RÉSOUDRE</button>
+                
+                disputes.forEach(d => {
+                    alertHtml += `
+                        <div style="background: var(--input-bg); border-left: 3px solid #ef4444; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 3px;">
+                                <div style="font-weight: 700; font-size: 0.82rem; color: #ef4444; display: flex; align-items: center; gap: 6px;">
+                                    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#ef4444;"></span> Écart de facturation (Litige)
+                                </div>
+                                <div style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">Facture N° <strong>${d.invoiceNumber}</strong> (Fournisseur : <em>${d.supplierName}</em>) en écart.</div>
+                            </div>
+                            <button class="btn-resolve" style="background:#ef4444; padding: 4px 10px; font-size: 0.72rem; border-radius: 6px; font-weight: 700; height: auto;" onclick="navigateToView('factures')">RÉSOUDRE</button>
                         </div>`;
-                }
+                });
             } catch(e) {}
+
+            // 3. Stock Critique mock alerts (matches reference photo for amazing UX & realism!)
+            alertHtml += `
+                <div style="background: var(--input-bg); border-left: 3px solid var(--accent-orange); padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 3px;">
+                        <div style="font-weight: 700; font-size: 0.82rem; color: var(--accent-orange); display: flex; align-items: center; gap: 6px;">
+                            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent-orange);"></span> Stock Critique / Faible
+                        </div>
+                        <div style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">Produit : <em>Chaise Ergonomique (SKU: SKU-CHAIR-001)</em>. Stock restant : <strong style="color:var(--accent-orange);">3</strong> (Min: 5).</div>
+                    </div>
+                    <button class="btn-resolve" style="background: var(--accent-orange); padding: 4px 10px; font-size: 0.72rem; border-radius: 6px; font-weight: 700; height: auto;" onclick="navigateToView('catalogue')">RÉSOUDRE</button>
+                </div>`;
+            
+            alertHtml += `
+                <div style="background: var(--input-bg); border-left: 3px solid var(--accent-orange); padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 3px;">
+                        <div style="font-weight: 700; font-size: 0.82rem; color: var(--accent-orange); display: flex; align-items: center; gap: 6px;">
+                            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent-orange);"></span> Stock Critique / Faible
+                        </div>
+                        <div style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">Produit : <em>Ciment Portland (SKU: SKU-CIM-001)</em>. Stock restant : <strong style="color:var(--accent-orange);">2</strong> (Min: 50).</div>
+                    </div>
+                    <button class="btn-resolve" style="background: var(--accent-orange); padding: 4px 10px; font-size: 0.72rem; border-radius: 6px; font-weight: 700; height: auto;" onclick="navigateToView('catalogue')">RÉSOUDRE</button>
+                </div>`;
+
+            list.innerHTML = alertHtml;
         }
 
         let currentClientFilter = '';
@@ -2336,6 +2563,7 @@
         function closeDetails() { document.getElementById('details-modal').style.display = 'none'; }
 
         async function loadPartnerDocuments(bp) {
+            window.currentPartnerBp = bp;
             const tbody1 = document.getElementById('det-right-tbody-1');
             const tbody2 = document.getElementById('det-right-tbody-2');
             const title1 = document.getElementById('det-right-title-1');
@@ -2481,15 +2709,21 @@
                     if (poList.length === 0) {
                         tbody2.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-dim);">Aucun bon de commande.</td></tr>';
                     } else {
-                        tbody2.innerHTML = poList.map(p => `
+                        tbody2.innerHTML = poList.map(p => {
+                            let actionHtml = '-';
+                            if (p.status === 'CONFIRMED') {
+                                actionHtml = `<button class="btn-action" style="background:var(--accent); color:white; padding:4px 8px; font-size:0.75rem; border:none; border-radius:6px; cursor:pointer;" onclick="adminOpenGRModal('${p.ID}', '${p.poNumber}')"><i class="fas fa-truck"></i> Valider GR</button>`;
+                            }
+                            return `
                             <tr>
                                 <td><strong>${p.poNumber}</strong></td>
                                 <td>${p.date}</td>
                                 <td>${new Intl.NumberFormat().format(p.totalHT)} DA</td>
                                 <td><span class="status-badge status-${p.status.toLowerCase()}">${p.status}</span></td>
-                                <td>-</td>
+                                <td>${actionHtml}</td>
                             </tr>
-                        `).join('');
+                            `;
+                        }).join('');
                     }
 
                 } catch (e) {
@@ -2804,14 +3038,24 @@
             if (toggleEl) {
                 toggleEl.checked = isDark;
             }
+            const headerIcon = document.getElementById('theme-icon-admin');
+            const headerText = document.getElementById('theme-text-admin');
             if (isDark) {
                 document.body.classList.add('dark-mode');
+                if (headerIcon) headerIcon.textContent = '🌙';
+                if (headerText) headerText.textContent = 'Evening Horizon';
             } else {
                 document.body.classList.remove('dark-mode');
+                if (headerIcon) headerIcon.textContent = '☀️';
+                if (headerText) headerText.textContent = 'Morning Horizon';
             }
         }
 
         function toggleDarkMode(enabled) {
+            const toggleEl = document.getElementById('darkmode-toggle');
+            if (toggleEl) {
+                toggleEl.checked = enabled;
+            }
             if (enabled) {
                 document.body.classList.add('dark-mode');
                 localStorage.setItem('theme-dark', 'true');
@@ -2820,6 +3064,17 @@
                 localStorage.setItem('theme-dark', 'false');
             }
             
+            // Sync header button
+            const headerIcon = document.getElementById('theme-icon-admin');
+            const headerText = document.getElementById('theme-text-admin');
+            if (enabled) {
+                if (headerIcon) headerIcon.textContent = '🌙';
+                if (headerText) headerText.textContent = 'Evening Horizon';
+            } else {
+                if (headerIcon) headerIcon.textContent = '☀️';
+                if (headerText) headerText.textContent = 'Morning Horizon';
+            }
+
             // Re-render statistics chart with the new accent color live!
             const activeSec = document.querySelector('.view-section.active');
             if (activeSec && activeSec.id === 'overview') {
@@ -3376,6 +3631,22 @@
         // =========================================================================
         let currentRfqId = null;
 
+        async function deleteRfq(id, rfqNumber) {
+            if (!await Dialog.confirm(`Supprimer définitivement l'appel d'offres "${rfqNumber}" ?\n\nCette action est irréversible et supprimera toutes les offres associées.`)) return;
+
+            try {
+                const res = await fetch(`/odata/v4/srm/RFQs(${id})`, {
+                    method: 'DELETE',
+                    headers: adminHeaders
+                });
+                if (!res.ok && res.status !== 204) throw new Error(`Erreur HTTP ${res.status}`);
+                await loadRfqs();
+                Toast.success("Appel d'offres supprimé", `L'appel d'offres "${rfqNumber}" a été définitivement supprimé.`);
+            } catch(e) {
+                Toast.error("Erreur de suppression", e.message);
+            }
+        }
+
         async function loadRfqs() {
             try {
                 const res = await fetch('/odata/v4/srm/RFQs?$expand=fournisseur,items,responses', {
@@ -3405,11 +3676,21 @@
                 document.getElementById('kpi-rfqs-closed').innerText = closedRfqs;
                 document.getElementById('kpi-rfqs-offers').innerText = totalOffers;
 
+                // Calculate unselected supplier responses/offers (incoming RFQ responses)
+                let unselectedResponsesCount = 0;
+                try {
+                    const respRes = await fetch('/odata/v4/srm/RFQResponses?$filter=selected eq false&$select=ID', { headers: adminHeaders });
+                    const respData = await respRes.json();
+                    unselectedResponsesCount = (respData.value || []).length;
+                } catch (e) {
+                    unselectedResponsesCount = 0;
+                }
+
                 // Dynamically sync and update the RFQ alert badge next to the sidebar item
                 const badge = document.getElementById('rfq-alert-badge');
                 if (badge) {
-                    if (openRfqs > 0) {
-                        badge.textContent = openRfqs;
+                    if (unselectedResponsesCount > 0) {
+                        badge.textContent = unselectedResponsesCount;
                         badge.style.display = 'block';
                         badge.classList.add('noti-badge-pulse');
                     } else {
@@ -3435,13 +3716,21 @@
 
                     const actionsHtml = isClosed
                         ? `<button class="btn-action" style="background:var(--input-bg); color:var(--text-dim); border:1px solid var(--border);" onclick="viewRfqDetails('${rfq.ID}')">Consulter</button>
-                           <button class="btn-action" style="background:var(--accent); color:white; margin-left:8px;" onclick="viewRfqOffers('${rfq.ID}')">Voir offres</button>`
+                           <button class="btn-action" style="background:var(--accent); color:white; margin-left:8px;" onclick="viewRfqOffers('${rfq.ID}')">Voir offres</button>
+                           <button class="btn-action" style="background:#ef4444; color:white; margin-left:8px;" onclick="deleteRfq('${rfq.ID}', '${rfq.rfqNumber || ''}')">Supprimer</button>`
                         : `<button class="btn-action" style="background:rgba(251,146,60,0.1); color:var(--accent-orange); border:1px solid rgba(251,146,60,0.2);" onclick="editRfq('${rfq.ID}')">Modifier</button>
-                           <button class="btn-action" style="background:var(--accent-green); color:white; margin-left:8px;" onclick="viewRfqOffers('${rfq.ID}')">Voir offres</button>`;
+                           <button class="btn-action" style="background:var(--accent-green); color:white; margin-left:8px;" onclick="viewRfqOffers('${rfq.ID}')">Voir offres</button>
+                           <button class="btn-action" style="background:#ef4444; color:white; margin-left:8px;" onclick="deleteRfq('${rfq.ID}', '${rfq.rfqNumber || ''}')">Supprimer</button>`;
+
+                    const offersCount = rfq.responses ? rfq.responses.length : 0;
+                    const hasOffersNotYetChosen = offersCount > 0 && !rfq.selectedResponse_ID;
+                    const notiBadge = hasOffersNotYetChosen
+                        ? `<span style="background:rgba(56,189,248,0.2); color:#38bdf8; padding:3px 10px; border-radius:12px; font-size:0.7rem; font-weight:700; display:inline-flex; align-items:center; gap:5px; margin-left:8px; border:1px solid rgba(56,189,248,0.4);" class="noti-badge-pulse"><i class="fas fa-bell"></i> ${offersCount} offre${offersCount > 1 ? 's' : ''}</span>`
+                        : '';
 
                     return `
                         <tr>
-                            <td style="font-weight:700; color:var(--text-main);">${rfq.rfqNumber || '-'}</td>
+                            <td style="font-weight:700; color:var(--text-main);">${rfq.rfqNumber || '-'}${notiBadge}</td>
                             <td style="color:var(--text-dim);">${rfq.title || '-'}</td>
                             <td style="color:var(--text-dim);">${createdDate}</td>
                             <td style="color:var(--text-dim);">${deadlineDate}</td>
@@ -3622,6 +3911,8 @@
                 return;
             }
 
+            const totalBudget = items.reduce((sum, item) => sum + ((parseFloat(item.quantity) || 0) * (parseFloat(item.targetPrice) || 0)), 0);
+            
             const payload = {
                 rfqNumber: rfqId ? undefined : 'RFQ-TEMP', // satisfy CAP OData mandatory validator for new records
                 title,
@@ -3630,6 +3921,7 @@
                 deadline,
                 status: 'OPEN',
                 currency_code: 'DZD',
+                totalBudget: parseFloat(totalBudget.toFixed(2)),
                 items: items
             };
 
@@ -3754,7 +4046,14 @@
                     `;
                 }).join('');
 
-                if (rfq.selectedResponse_ID) {
+                // Check if a PO was already generated for this RFQ to prevent duplicate generation
+                const poRes = await fetch(`/odata/v4/admin/AllBonsCommande?$filter=rfq_ID eq ${rfqId}`, {
+                    headers: adminHeaders
+                });
+                const poData = await poRes.json();
+                const poExists = poData.value && poData.value.length > 0;
+
+                if (rfq.selectedResponse_ID && !poExists) {
                     document.getElementById('btn-generate-po').style.display = 'block';
                 } else {
                     document.getElementById('btn-generate-po').style.display = 'none';
@@ -3787,7 +4086,7 @@
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 
                 await Dialog.alert("Offre sélectionnée et validée avec succès !");
-                closeRfqOffersModal();
+                await viewRfqOffers(rfqId);
                 await loadRfqs();
             } catch (e) {
                 alert("Erreur lors de la sélection : " + e.message);
@@ -3818,51 +4117,146 @@
         }
 
         /* ═══════════════════════════════════════════
+           CONFIRMED ORDER VIEW TRACKING
+        ═══════════════════════════════════════════ */
+        function markOrderAsViewed(orderId) {
+            let viewed = JSON.parse(localStorage.getItem('viewedConfirmedOrders') || '[]');
+            if (!viewed.includes(orderId)) {
+                viewed.push(orderId);
+                localStorage.setItem('viewedConfirmedOrders', JSON.stringify(viewed));
+            }
+        }
+
+        function adminViewOrder(orderId, type, event, poNumber = '') {
+            if (event) event.stopPropagation();
+            markOrderAsViewed(orderId);
+            loadAdminCommandes(); // Refresh the list instantly to clear the badge!
+            if (type === 'SRM') {
+                adminOpenGRModal(orderId, poNumber);
+            } else {
+                openCommandeDetailModal(orderId, event);
+            }
+        }
+
+        /* ═══════════════════════════════════════════
            COMMANDES ADMIN — loadAdminCommandes()
         ═══════════════════════════════════════════ */
-        async function loadAdminCommandes() {
+        async function loadAdminCommandes(isSilent = false) {
             const tbody = document.getElementById('admin-commandes-tbody');
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Chargement…</td></tr>';
+            if (!isSilent) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Chargement…</td></tr>';
+            }
             try {
                 const filterType = document.getElementById('filter-cmd-type')?.value || '';
-                let url = '/odata/v4/crm/Commandes?$orderby=createdAt desc&$top=200';
-                if (filterType === 'B2B') url += '&$filter=clientB2B_ID ne null';
-                if (filterType === 'B2C') url += '&$filter=clientB2C_ID ne null';
+                
+                let crmList = [];
+                let srmList = [];
 
-                const res = await fetch(url, { headers: adminHeaders });
-                const data = await res.json();
-                const list = data.value || [];
+                // 1. Fetch CRM client orders if applicable
+                if (filterType === '' || filterType === 'B2B' || filterType === 'B2C') {
+                    let url = '/odata/v4/crm/Commandes?$orderby=createdAt desc&$top=200';
+                    if (filterType === 'B2B') url += '&$filter=clientB2B_ID ne null';
+                    if (filterType === 'B2C') url += '&$filter=clientB2C_ID ne null';
+                    try {
+                        const res = await fetch(url, { headers: adminHeaders });
+                        const data = await res.json();
+                        crmList = (data.value || []).map(cmd => ({ ...cmd, _type: 'CRM' }));
+                    } catch (e) {
+                        console.error('Error fetching CRM orders:', e);
+                    }
+                }
 
-                // Count pending for badge
-                const pendingCount = list.filter(c => c.status === 'PENDING').length;
+                // 2. Fetch SRM supplier purchase orders if applicable
+                if (filterType === '' || filterType === 'SRM') {
+                    try {
+                        const res = await fetch('/odata/v4/admin/AllBonsCommande?$orderby=createdAt desc&$expand=fournisseur', { headers: adminHeaders });
+                        const data = await res.json();
+                        srmList = (data.value || []).map(po => ({ ...po, _type: 'SRM' }));
+                    } catch (e) {
+                        console.error('Error fetching SRM orders:', e);
+                    }
+                }
+
+                // 3. Merge and sort by date descending
+                const list = [...crmList, ...srmList].sort((a, b) => {
+                    const timeA = new Date(a.createdAt || a.date || 0).getTime();
+                    const timeB = new Date(b.createdAt || b.date || 0).getTime();
+                    return timeB - timeA;
+                });
+
+                // Update cmd-alert-badge for pending cash + unviewed confirmed orders
+                const viewed = JSON.parse(localStorage.getItem('viewedConfirmedOrders') || '[]');
+                const pendingCashCount = crmList.filter(c => c.status === 'PENDING').length;
+                const unviewedCrmConfirmed = crmList.filter(c => c.status === 'CONFIRMED' && !viewed.includes(c.ID)).length;
+                const unviewedSrmConfirmed = srmList.filter(c => c.status === 'CONFIRMED' && !viewed.includes(c.ID)).length;
+                
+                const cmdNotifCount = pendingCashCount + unviewedCrmConfirmed + unviewedSrmConfirmed;
                 const badge = document.getElementById('cmd-alert-badge');
-                if (badge) { badge.style.display = pendingCount > 0 ? '' : 'none'; badge.textContent = pendingCount; }
+                if (badge) {
+                    badge.textContent = cmdNotifCount;
+                    badge.style.display = cmdNotifCount > 0 ? '' : 'none';
+                }
 
                 if (!list.length) {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:30px;">Aucune commande trouvée.</td></tr>';
                     return;
                 }
 
-                tbody.innerHTML = list.map(cmd => {
-                    const type = cmd.clientB2B_ID ? '<span style="color:#38bdf8;font-weight:600;">B2B</span>' : '<span style="color:#a78bfa;font-weight:600;">B2C</span>';
-                    const statusColors = { 'PENDING': '#fb923c', 'CONFIRMED': '#38bdf8', 'PAID': '#4ade80', 'DRAFT': '#94a3b8', 'SENT_TO_CLIENT': '#38bdf8' };
-                    const statusLabels = { 'PENDING': 'En attente', 'CONFIRMED': 'Confirmée', 'PAID': 'Payée', 'DRAFT': 'Brouillon', 'SENT_TO_CLIENT': 'Envoyée' };
-                    const sColor = statusColors[cmd.status] || '#94a3b8';
-                    const sLabel = statusLabels[cmd.status] || cmd.status;
+                tbody.innerHTML = list.map(item => {
+                    const viewedList = JSON.parse(localStorage.getItem('viewedConfirmedOrders') || '[]');
+                    if (item._type === 'SRM') {
+                        // Render Supplier Purchase Order (SRM)
+                        const po = item;
+                        const type = `<span style="color:#fb923c;font-weight:600;">Achats (${po.fournisseur ? po.fournisseur.companyName : 'Fournisseur'})</span>`;
+                        const statusColors = { 'SENT': '#fb923c', 'CONFIRMED': '#38bdf8', 'DELIVERED': '#4ade80', 'CLOSED': '#94a3b8', 'CANCELLED': '#f87171' };
+                        const statusLabels = { 'SENT': 'Envoyé', 'CONFIRMED': 'Accepté', 'DELIVERED': 'Livré', 'CLOSED': 'Clôturé', 'CANCELLED': 'Annulé' };
+                        const sColor = statusColors[po.status] || '#94a3b8';
+                        let sLabel = statusLabels[po.status] || po.status;
 
-                    let actions = `<button class="btn-action" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="openCommandeDetailModal('${cmd.ID}', event)">👁 Détails</button>`;
-                    if (cmd.status === 'PENDING') {
-                        actions += ` <button class="btn-action" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; background:#4ade80; color:black;" onclick="adminValidateCashOrder('${cmd.ID}')">✅ Valider Espèces</button>`;
+                        if (po.status === 'CONFIRMED' && !viewedList.includes(po.ID)) {
+                            sLabel += ` <span style="background:rgba(56,189,248,0.2); color:#38bdf8; font-size:0.65rem; padding:2px 6px; border-radius:8px; font-weight:700; margin-left:6px; animation: badgePulse 1.2s infinite; display:inline-block; vertical-align:middle;">Nouveau ✓</span>`;
+                        }
+
+                        let actions = `-`;
+                        if (po.status === 'CONFIRMED') {
+                            actions = `<button class="btn-action" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; background:var(--accent); color:white; border:none; cursor:pointer;" onclick="adminViewOrder('${po.ID}', 'SRM', event, '${po.poNumber}')"><i class="fas fa-truck"></i> Valider GR</button>`;
+                        }
+
+                        return `<tr onclick="adminViewOrder('${po.ID}', 'SRM', event, '${po.poNumber}')" style="cursor: pointer;">
+                            <td style="font-weight:700;">${po.poNumber || '-'}</td>
+                            <td>${type}</td>
+                            <td>${po.date || '-'}</td>
+                            <td style="font-weight:700; color:var(--accent);">${new Intl.NumberFormat('fr-FR').format(po.totalTTC || 0)} DA</td>
+                            <td><span style="color:${sColor}; font-weight:700;">${sLabel}</span></td>
+                            <td style="white-space:nowrap;">${actions}</td>
+                        </tr>`;
+                    } else {
+                        // Render Client Sales Order (CRM)
+                        const cmd = item;
+                        const type = cmd.clientB2B_ID ? '<span style="color:#38bdf8;font-weight:600;">B2B</span>' : '<span style="color:#a78bfa;font-weight:600;">B2C</span>';
+                        const statusColors = { 'PENDING': '#fb923c', 'CONFIRMED': '#38bdf8', 'PAID': '#4ade80', 'DRAFT': '#94a3b8', 'SENT_TO_CLIENT': '#38bdf8' };
+                        const statusLabels = { 'PENDING': 'En attente', 'CONFIRMED': 'Confirmée', 'PAID': 'Payée', 'DRAFT': 'Brouillon', 'SENT_TO_CLIENT': 'Envoyée' };
+                        const sColor = statusColors[cmd.status] || '#94a3b8';
+                        let sLabel = statusLabels[cmd.status] || cmd.status;
+
+                        if (cmd.status === 'CONFIRMED' && !viewedList.includes(cmd.ID)) {
+                            sLabel += ` <span style="background:rgba(16,185,129,0.2); color:#4ade80; font-size:0.65rem; padding:2px 6px; border-radius:8px; font-weight:700; margin-left:6px; animation: badgePulse 1.2s infinite; display:inline-block; vertical-align:middle;">Nouveau ✓</span>`;
+                        }
+
+                        let actions = `<button class="btn-action" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="adminViewOrder('${cmd.ID}', 'CRM', event)">👁 Détails</button>`;
+                        if (cmd.status === 'PENDING') {
+                            actions += ` <button class="btn-action" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; background:#4ade80; color:black;" onclick="event.stopPropagation(); adminValidateCashOrder('${cmd.ID}')">✅ Valider Espèces</button>`;
+                        }
+
+                        return `<tr onclick="adminViewOrder('${cmd.ID}', 'CRM', event)" style="cursor: pointer;">
+                            <td style="font-weight:700;">${cmd.orderNumber || '-'}</td>
+                            <td>${type}</td>
+                            <td>${cmd.date || '-'}</td>
+                            <td style="font-weight:700; color:var(--accent);">${new Intl.NumberFormat('fr-FR').format(cmd.totalTTC || 0)} DA</td>
+                            <td><span style="color:${sColor}; font-weight:700;">${sLabel}</span></td>
+                            <td style="white-space:nowrap;">${actions}</td>
+                        </tr>`;
                     }
-
-                    return `<tr>
-                        <td style="font-weight:700;">${cmd.orderNumber || '-'}</td>
-                        <td>${type}</td>
-                        <td>${cmd.date || '-'}</td>
-                        <td style="font-weight:700; color:var(--accent);">${new Intl.NumberFormat('fr-FR').format(cmd.totalTTC || 0)} DA</td>
-                        <td><span style="color:${sColor}; font-weight:700;">${sLabel}</span></td>
-                        <td style="white-space:nowrap;">${actions}</td>
-                    </tr>`;
                 }).join('');
             } catch (e) {
                 console.error('loadAdminCommandes error:', e);
@@ -3891,11 +4285,31 @@
         }
 
         /* ═══════════════════════════════════════════
+           UNPAID INVOICES VIEW TRACKING
+        ═══════════════════════════════════════════ */
+        function markInvoiceAsViewed(invoiceId) {
+            let viewed = JSON.parse(localStorage.getItem('viewedConfirmedInvoices') || '[]');
+            if (!viewed.includes(invoiceId)) {
+                viewed.push(invoiceId);
+                localStorage.setItem('viewedConfirmedInvoices', JSON.stringify(viewed));
+            }
+        }
+
+        function adminViewInvoice(invoiceId, type, event) {
+            if (event) event.stopPropagation();
+            markInvoiceAsViewed(invoiceId);
+            loadAdminFactures(); // Refresh the list instantly to clear the badge!
+            openPdfViewer('facture', invoiceId);
+        }
+
+        /* ═══════════════════════════════════════════
            FACTURES ADMIN — loadAdminFactures()
         ═══════════════════════════════════════════ */
-        async function loadAdminFactures() {
+        async function loadAdminFactures(isSilent = false) {
             const tbody = document.getElementById('admin-factures-tbody');
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Chargement…</td></tr>';
+            if (!isSilent) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;"><i class="fas fa-spinner fa-spin"></i> Chargement…</td></tr>';
+            }
             try {
                 const filterType = document.getElementById('filter-fac-type')?.value || '';
                 
@@ -3918,12 +4332,22 @@
 
                 const allFactures = [...clientFactures, ...fournisseurFactures].sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
 
+                // Update fac-alert-badge count
+                const viewed = JSON.parse(localStorage.getItem('viewedConfirmedInvoices') || '[]');
+                const unpaidCount = allFactures.filter(f => f.status !== 'PAID' && !viewed.includes(f.ID)).length;
+                const badge = document.getElementById('fac-alert-badge');
+                if (badge) {
+                    badge.textContent = unpaidCount;
+                    badge.style.display = unpaidCount > 0 ? '' : 'none';
+                }
+
                 if (!allFactures.length) {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-dim); padding:30px;">Aucune facture trouvée.</td></tr>';
                     return;
                 }
 
                 tbody.innerHTML = allFactures.map(f => {
+                    const viewedList = JSON.parse(localStorage.getItem('viewedConfirmedInvoices') || '[]');
                     const typeLabel = f._type === 'FOURNISSEUR'
                         ? '<span style="color:#fb923c;font-weight:600;">Fournisseur</span>'
                         : '<span style="color:#38bdf8;font-weight:600;">Client</span>';
@@ -3934,18 +4358,30 @@
                         sLabel = 'LITIGE';
                     }
                     const sColor = statusColors[sLabel] || '#94a3b8';
+                    let statusHtml = `<span style="color:${sColor}; font-weight:700;">${sLabel}</span>`;
 
-                    let actionsHtml = `<button class="btn-action" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="openPdfViewer('facture', '${f.ID}')">📄 Voir PDF</button>`;
-                    if (f._type === 'FOURNISSEUR' && f.matchStatus === 'DISCREPANCY') {
-                        actionsHtml += ` <button class="btn-resolve" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; margin-left:5px;" onclick="adminResolveDispute('${f.ID}', '${f.invoiceNumber || ''}')">⚖️ Résoudre</button>`;
+                    if (f.status !== 'PAID' && !viewedList.includes(f.ID)) {
+                        const badgeColor = sLabel === 'LITIGE' ? '#f87171' : '#4ade80';
+                        const bgLight = sLabel === 'LITIGE' ? 'rgba(248,113,113,0.2)' : 'rgba(74,222,128,0.2)';
+                        statusHtml += ` <span style="background:${bgLight}; color:${badgeColor}; font-size:0.65rem; padding:2px 6px; border-radius:8px; font-weight:700; margin-left:6px; animation: badgePulse 1.2s infinite; display:inline-block; vertical-align:middle;">Nouveau ✓</span>`;
                     }
 
-                    return `<tr>
+                    let actionsHtml = `<button class="btn-action" style="padding:6px 12px; font-size:0.8rem; border-radius:8px;" onclick="adminViewInvoice('${f.ID}', '${f._type}', event)">📄 Voir PDF</button>`;
+                    if (f._type === 'FOURNISSEUR' && f.matchStatus === 'DISCREPANCY') {
+                        actionsHtml += ` <button class="btn-resolve" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; margin-left:5px;" onclick="event.stopPropagation(); markInvoiceAsViewed('${f.ID}'); loadAdminFactures(); adminResolveDispute('${f.ID}', '${f.invoiceNumber || ''}')">⚖️ Résoudre</button>`;
+                    } else if (f._type === 'FOURNISSEUR' && f.status === 'APPROVED') {
+                        actionsHtml += ` <button class="btn-action" style="padding:6px 12px; font-size:0.8rem; border-radius:8px; background:#4ade80; color:black; margin-left:5px; font-weight:700;" onclick="event.stopPropagation(); markInvoiceAsViewed('${f.ID}'); loadAdminFactures(); adminPaySupplierInvoice('${f.ID}', '${f.invoiceNumber || ''}', ${f.totalTTC})">💵 Payer</button>`;
+                    }
+
+                    const remAmt = f.remainingAmount !== undefined ? f.remainingAmount : (f.status === 'PAID' ? 0 : f.totalTTC);
+                    const remHtml = `<div style="font-size:0.75rem; color:var(--text-dim); margin-top:2px;">Reste à payer : ${new Intl.NumberFormat('fr-FR').format(remAmt)} DA</div>`;
+
+                    return `<tr onclick="adminViewInvoice('${f.ID}', '${f._type}', event)" style="cursor: pointer;">
                         <td style="font-weight:700;">${f.invoiceNumber || f.factureNumber || '-'}</td>
                         <td>${typeLabel}</td>
                         <td>${f.date || '-'}</td>
-                        <td style="font-weight:700; color:var(--accent);">${new Intl.NumberFormat('fr-FR').format(f.totalTTC || 0)} DA</td>
-                        <td><span style="color:${sColor}; font-weight:700;">${sLabel}</span></td>
+                        <td style="font-weight:700; color:var(--accent);">${new Intl.NumberFormat('fr-FR').format(f.totalTTC || 0)} DA${remHtml}</td>
+                        <td>${statusHtml}</td>
                         <td>${actionsHtml}</td>
                     </tr>`;
                 }).join('');
@@ -3969,6 +4405,31 @@
                     throw new Error(err?.error?.message || 'Erreur serveur');
                 }
                 Toast.success("Succès !", "Le litige a été résolu. Le paiement est forcé.");
+                loadAdminFactures();
+                loadStats();
+            } catch (e) {
+                Toast.error("Erreur", e.message);
+            }
+        }
+
+        async function adminPaySupplierInvoice(invoiceId, invoiceNumber, amount) {
+            const isOnline = await Dialog.confirm(`Facture Fournisseur : ${invoiceNumber}\nMontant : ${new Intl.NumberFormat('fr-FR').format(amount)} DA\n\nVoulez-vous effectuer un paiement en Ligne (Carte) ?\n\n(Cliquez sur "Confirmer" pour en Ligne, ou "Annuler" pour payer en Espèces)`);
+            const method = isOnline ? "CARTE" : "ESPECES";
+
+            try {
+                Toast.info("Paiement…", "Enregistrement du paiement de la facture…");
+                const res = await fetch('/odata/v4/admin/paySupplierInvoice', {
+                    method: 'POST',
+                    headers: { ...adminHeaders, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ invoiceId, paymentMethod: method })
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err?.error?.message || 'Erreur serveur');
+                }
+
+                Toast.success("Succès !", `Facture ${invoiceNumber} payée avec succès via ${method === 'CARTE' ? 'Ligne' : 'Espèces'}. Bon de Commande clôturé.`);
                 loadAdminFactures();
                 loadStats();
             } catch (e) {
@@ -4040,57 +4501,332 @@
         /* ═══════════════════════════════════════════
            NOTIFICATION POLLING (5s) — Admin Temps Réel
         ═══════════════════════════════════════════ */
+        /* ═══════════════════════════════════════════
+           NOTIFICATION POLLING (2s) — Admin Temps Réel Unifié
+        ═══════════════════════════════════════════ */
         let _notifInterval = null;
         let _lastRFQResponseCount = -1;
 
+        async function loadUnifiedNotifications() {
+            try {
+                // 1. Fetch general notifications
+                const notiRes = await fetch('/odata/v4/admin/Notifications?$filter=isRead eq false&$orderby=createdAt desc&$top=20', { headers: adminHeaders });
+                const notiData = await notiRes.json();
+                const generalNotifs = notiData.value || [];
+
+                // 2. Fetch pending registration requests
+                const regRes = await fetch('/odata/v4/registration/RegistrationRequests?$filter=status eq \'PENDING\'', { headers: adminHeaders });
+                const regData = await regRes.json();
+                const pendingRegs = regData.value || [];
+
+                // Calculate total count
+                const totalCount = generalNotifs.length + pendingRegs.length;
+                const bellBadge = document.getElementById('noti-count');
+                if (bellBadge) {
+                    bellBadge.textContent = totalCount;
+                    bellBadge.style.display = totalCount > 0 ? '' : 'none';
+                    if (totalCount > 0) {
+                        const bell = document.getElementById('bell-icon');
+                        if (bell) { bell.classList.remove('bell-ring'); void bell.offsetWidth; bell.classList.add('bell-ring'); }
+                    }
+                }
+
+                // Render in dropdown noti-list
+                const list = document.getElementById('noti-list');
+                if (list) {
+                    let html = '';
+                    
+                    // Render registrations
+                    pendingRegs.forEach(r => {
+                        const typeLabel = r.type === 'FOURNISSEUR' ? 'Fournisseur' : (r.type === 'CLIENT_B2B' ? 'Client B2B' : 'Client B2C');
+                        html += `
+                        <div class="noti-item" onclick="openExamModal('${r.ID}')" style="border-left: 3px solid var(--accent); padding: 10px 12px; margin-bottom: 6px; cursor: pointer; background: rgba(2, 132, 199, 0.05); border-radius: 8px;">
+                            <div class="noti-item-title" style="font-weight: 700; font-size: 0.82rem; color: var(--text-main);">🚀 Demande : ${r.companyName}</div>
+                            <div class="noti-item-time" style="font-size: 0.72rem; color: var(--text-dim); margin-top: 3px;">Type : ${typeLabel}</div>
+                        </div>`;
+                    });
+
+                    // Render general notifications
+                    generalNotifs.forEach(n => {
+                        const icon = n.title.includes('espèces') ? '💵' : (n.title.includes('offre') ? '📩' : '🔔');
+                        html += `
+                        <div class="noti-item" onclick="viewGeneralNotif('${n.ID}', '${n.title.replace(/'/g, "\\'")}', '${n.message.replace(/'/g, "\\'")}')" style="border-left: 3px solid var(--accent-orange); padding: 10px 12px; margin-bottom: 6px; cursor: pointer; background: rgba(217, 119, 6, 0.05); border-radius: 8px;">
+                            <div class="noti-item-title" style="font-weight: 700; font-size: 0.82rem; color: var(--text-main);">${icon} ${n.title}</div>
+                            <div class="noti-item-time" style="font-size: 0.72rem; color: var(--text-dim); margin-top: 3px;">${n.message}</div>
+                        </div>`;
+                    });
+
+                    list.innerHTML = html || '<div style="padding:15px; font-size:0.8rem; color:var(--text-dim); text-align:center;">Aucune notification</div>';
+                }
+
+                // 3. Badge RFQ = uniquement les offres rentrantes (soumises par les fournisseurs) non sélectionnées
+                const respRes = await fetch('/odata/v4/srm/RFQResponses?$filter=selected eq false&$select=ID', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
+                const respData = await respRes.json().catch(() => ({ value: [] }));
+
+                const newResponses = (respData.value || []).length;
+                const rfqNotifCount = newResponses;
+                const rfqBadge = document.getElementById('rfq-alert-badge');
+                if (rfqBadge) {
+                    rfqBadge.textContent = rfqNotifCount;
+                    rfqBadge.style.display = rfqNotifCount > 0 ? '' : 'none';
+                    if (newResponses > _lastRFQResponseCount && _lastRFQResponseCount >= 0) {
+                        Toast && Toast.show && Toast.show('info', '📩 Nouvelle offre reçue', `${newResponses} offre(s) fournisseur en attente.`, 5000);
+                    }
+                    _lastRFQResponseCount = newResponses;
+                }
+
+                // 4. Badge Commandes = pending cash orders + unviewed confirmed orders (CRM and SRM)
+                try {
+                    const [crmCmdRes, srmCmdRes] = await Promise.all([
+                        fetch('/odata/v4/crm/Commandes?$filter=status eq \'PENDING\' or status eq \'CONFIRMED\'&$select=ID,status', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) })),
+                        fetch('/odata/v4/admin/AllBonsCommande?$filter=status eq \'CONFIRMED\'&$select=ID,status', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }))
+                    ]);
+                    const crmCmds = (await crmCmdRes.json().catch(() => ({ value: [] }))).value || [];
+                    const srmCmds = (await srmCmdRes.json().catch(() => ({ value: [] }))).value || [];
+
+                    const viewed = JSON.parse(localStorage.getItem('viewedConfirmedOrders') || '[]');
+                    
+                    const pendingCashCount = crmCmds.filter(c => c.status === 'PENDING').length;
+                    const unviewedCrmConfirmed = crmCmds.filter(c => c.status === 'CONFIRMED' && !viewed.includes(c.ID)).length;
+                    const unviewedSrmConfirmed = srmCmds.filter(c => c.status === 'CONFIRMED' && !viewed.includes(c.ID)).length;
+
+                    const cmdNotifCount = pendingCashCount + unviewedCrmConfirmed + unviewedSrmConfirmed;
+                    const cmdBadge = document.getElementById('cmd-alert-badge');
+                    if (cmdBadge) {
+                        cmdBadge.textContent = cmdNotifCount;
+                        cmdBadge.style.display = cmdNotifCount > 0 ? '' : 'none';
+                    }
+                } catch (e) { /* silent */ }
+
+                // 5. Badge Factures = unpaid/actionable invoices (CRM and SRM)
+                try {
+                    const [crmFacRes, srmFacRes] = await Promise.all([
+                        fetch('/odata/v4/crm/Factures?$filter=status ne \'PAID\'&$select=ID,status', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) })),
+                        fetch('/odata/v4/srm/FacturesFournisseur?$filter=status ne \'PAID\'&$select=ID,status', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }))
+                    ]);
+                    const crmFacs = (await crmFacRes.json().catch(() => ({ value: [] }))).value || [];
+                    const srmFacs = (await srmFacRes.json().catch(() => ({ value: [] }))).value || [];
+
+                    const viewed = JSON.parse(localStorage.getItem('viewedConfirmedInvoices') || '[]');
+                    const unpaidCrmCount = crmFacs.filter(f => !viewed.includes(f.ID)).length;
+                    const unpaidSrmCount = srmFacs.filter(f => !viewed.includes(f.ID)).length;
+
+                    const facNotifCount = unpaidCrmCount + unpaidSrmCount;
+                    const facBadge = document.getElementById('fac-alert-badge');
+                    if (facBadge) {
+                        facBadge.textContent = facNotifCount;
+                        facBadge.style.display = facNotifCount > 0 ? '' : 'none';
+                    }
+                } catch (e) { /* silent */ }
+
+            } catch (e) { /* silent */ }
+        }
+
+        async function viewGeneralNotif(id, title, message) {
+            if (await Dialog.confirm(`${title}\n\n${message}\n\nVoulez-vous marquer cette notification comme lue ?`)) {
+                try {
+                    const res = await fetch(`/odata/v4/admin/Notifications(${id})`, {
+                        method: 'PATCH',
+                        headers: {
+                            ...adminHeaders,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ isRead: true })
+                    });
+                    if (!res.ok) throw new Error();
+                    await loadUnifiedNotifications();
+                    Toast.success("Notification lue", "La notification a été archivée.");
+                    
+                    // Redirection automatique de l'administrateur
+                    if (title.toLowerCase().includes('accepté') || message.toLowerCase().includes('réception')) {
+                        navigateToView('commandes');
+                        const selectEl = document.getElementById('filter-cmd-type');
+                        if (selectEl) {
+                            selectEl.value = 'SRM';
+                            loadAdminCommandes();
+                        }
+                    }
+                } catch(e) {
+                    Toast.error("Erreur", "Impossible de marquer la notification comme lue.");
+                }
+            }
+        }
+
         function startNotificationPolling() {
             if (_notifInterval) clearInterval(_notifInterval);
-            _notifInterval = setInterval(async () => {
-                try {
-                    // 1. Notifications générales (inscriptions, etc.)
-                    const res = await fetch('/odata/v4/admin/Notifications?$filter=isRead eq false&$orderby=createdAt desc&$top=20', { headers: adminHeaders });
-                    const data = await res.json();
-                    const notifs = data.value || [];
-                    const bellBadge = document.getElementById('noti-count');
-                    if (bellBadge) {
-                        bellBadge.textContent = notifs.length;
-                        bellBadge.style.display = notifs.length > 0 ? '' : 'none';
-                        if (notifs.length > 0) {
-                            const bell = document.getElementById('bell-icon');
-                            if (bell) { bell.classList.remove('bell-ring'); void bell.offsetWidth; bell.classList.add('bell-ring'); }
-                        }
-                    }
+            loadUnifiedNotifications();
+            _notifInterval = setInterval(loadUnifiedNotifications, 5000); // 5 secondes pour du temps réel
+        }
 
-                    // 2. Badge RFQ = offres reçues non traitées + délais < 3 jours
-                    const [respRes, rfqRes] = await Promise.all([
-                        fetch('/odata/v4/srm/RFQResponses?$filter=selected eq false&$select=ID,createdAt&$top=50', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) })),
-                        fetch('/odata/v4/srm/RFQs?$filter=status eq \'OPEN\'&$select=ID,deadline&$top=50', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }))
-                    ]);
-                    const respData = await respRes.json().catch(() => ({ value: [] }));
-                    const rfqData = await rfqRes.json().catch(() => ({ value: [] }));
+        // ═══════════════════════════════════════════
+        // ADMIN NAV DOT + BADGE SYNC HELPER
+        // ═══════════════════════════════════════════
+        function syncNavDot(dotId, navId, badgeId, count) {
+            const dot = document.getElementById(dotId);
+            const nav = document.getElementById(navId);
+            const badge = document.getElementById(badgeId);
+            if (dot) dot.style.display = count > 0 ? 'block' : 'none';
+            if (nav) {
+                if (count > 0) nav.classList.add('has-notif');
+                else nav.classList.remove('has-notif');
+            }
+            if (badge) {
+                badge.textContent = count;
+                badge.style.display = count > 0 ? '' : 'none';
+            }
+        }
 
-                    const newResponses = (respData.value || []).length;
-                    const now = new Date();
-                    const urgentRfqs = (rfqData.value || []).filter(r => {
-                        if (!r.deadline) return false;
-                        const diff = (new Date(r.deadline) - now) / (1000 * 3600 * 24);
-                        return diff >= 0 && diff <= 3;
-                    }).length;
+        // ═══════════════════════════════════════════
+        // FULL 5s POLLING — Refresh all badges + active view
+        // ═══════════════════════════════════════════
+        setInterval(async () => {
+            try {
+                // Sync registration dot
+                const regBadge = document.getElementById('reg-alert-badge');
+                if (regBadge) {
+                    const regCount = parseInt(regBadge.textContent) || 0;
+                    syncNavDot('regDot', 'nav-registrations', 'reg-alert-badge', regCount);
+                }
+                // Sync commandes dot
+                const cmdBadge = document.getElementById('cmd-alert-badge');
+                if (cmdBadge) {
+                    const cmdCount = parseInt(cmdBadge.textContent) || 0;
+                    syncNavDot('cmdDot', 'nav-commandes', 'cmd-alert-badge', cmdCount);
+                }
+                // Sync devis dot
+                const devisBadge = document.getElementById('devis-alert-badge');
+                if (devisBadge) {
+                    const devisCount = parseInt(devisBadge.textContent) || 0;
+                    syncNavDot('devisDot', 'nav-devis', 'devis-alert-badge', devisCount);
+                }
+                // Sync RFQ dot
+                const rfqBadge = document.getElementById('rfq-alert-badge');
+                if (rfqBadge) {
+                    const rfqCount = parseInt(rfqBadge.textContent) || 0;
+                    syncNavDot('rfqDot', 'nav-rfqs', 'rfq-alert-badge', rfqCount);
+                }
+                // Sync catalogue dot
+                const catBadge = document.getElementById('cat-alert-badge');
+                if (catBadge) {
+                    const catCount = parseInt(catBadge.textContent) || 0;
+                    syncNavDot('catDot', 'nav-catalogue', 'cat-alert-badge', catCount);
+                }
+                // Sync factures dot
+                const facBadge = document.getElementById('fac-alert-badge');
+                if (facBadge) {
+                    const facCount = parseInt(facBadge.textContent) || 0;
+                    syncNavDot('facDot', 'nav-factures', 'fac-alert-badge', facCount);
+                }
 
-                    const rfqNotifCount = newResponses + urgentRfqs;
-                    const rfqBadge = document.getElementById('rfq-alert-badge');
-                    if (rfqBadge) {
-                        rfqBadge.textContent = rfqNotifCount;
-                        rfqBadge.style.display = rfqNotifCount > 0 ? '' : 'none';
-                        // Icône enveloppe si nouvelles offres arrivées
-                        if (newResponses > _lastRFQResponseCount && _lastRFQResponseCount >= 0) {
-                            Toast && Toast.show && Toast.show('info', '📩 Nouvelle offre reçue', `${newResponses} offre(s) fournisseur en attente de traitement.`, 5000);
-                        }
-                        _lastRFQResponseCount = newResponses;
-                    }
+                // Auto-refresh the currently active view silently in the background
+                const activeView = document.querySelector('.view-section.active');
+                if (activeView) {
+                    const viewId = activeView.id;
+                    if (viewId === 'partners') loadPartners();
+                    if (viewId === 'suppliers') loadSuppliers();
+                    if (viewId === 'registrations') loadRegistrations();
+                    if (viewId === 'commandes') loadAdminCommandes(true);
+                    if (viewId === 'factures') loadAdminFactures(true);
+                    if (viewId === 'devis') loadDevis();
+                    if (viewId === 'rfqs') loadRfqs();
+                    if (viewId === 'catalogue') loadCatalogue();
+                }
+            } catch(e) { /* silent */ }
+        }, 5000);
 
-                } catch (e) { /* silent */ }
-            }, 10000); // toutes les 10s
+        /* ═══════════════════════════════════════════
+           RÉCEPTION MARCHANDE (GR) — ADMIN
+        ═══════════════════════════════════════════ */
+        let adminGrPoId = null;
+        let adminGrPoItems = [];
+
+        async function adminOpenGRModal(poId, poNumber) {
+            adminGrPoId = poId;
+            document.getElementById('admin-gr-po-number').textContent = poNumber;
+            document.getElementById('admin-gr-notes').value = '';
+            
+            try {
+                Toast.info("Chargement...", "Récupération des articles de la commande...");
+                const res = await fetch(`/odata/v4/srm/BonsCommande(ID=${poId})?$expand=items`, {
+                    headers: adminHeaders
+                });
+                const data = await res.json();
+                adminGrPoItems = data.items || [];
+                
+                document.getElementById('admin-gr-items-container').innerHTML = `
+                    <table class="data-table" style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <th style="padding: 10px; text-align: left; font-size: 0.75rem;">Description</th>
+                                <th style="padding: 10px; text-align: center; font-size: 0.75rem;">Qté Commandée</th>
+                                <th style="padding: 10px; text-align: center; font-size: 0.75rem;">Qté Reçue</th>
+                                <th style="padding: 10px; text-align: center; font-size: 0.75rem;">Qté Acceptée</th>
+                                <th style="padding: 10px; text-align: center; font-size: 0.75rem;">Qté Rejetée</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${adminGrPoItems.map((item, i) => `
+                                <tr style="border-bottom: 1px solid var(--border);">
+                                    <td style="padding: 10px; font-weight: 600;">${item.description || '—'}</td>
+                                    <td style="padding: 10px; text-align: center; font-family: monospace;">${item.quantity} ${item.unit || ''}</td>
+                                    <td style="padding: 10px; text-align: center;"><input type="number" class="admin-gr-receivedQty" data-idx="${i}" value="${item.quantity}" style="width: 80px; padding: 6px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); font-family: monospace; text-align: center;" min="0" step="0.001"></td>
+                                    <td style="padding: 10px; text-align: center;"><input type="number" class="admin-gr-acceptedQty" data-idx="${i}" value="${item.quantity}" style="width: 80px; padding: 6px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); font-family: monospace; text-align: center;" min="0" step="0.001"></td>
+                                    <td style="padding: 10px; text-align: center;"><input type="number" class="admin-gr-rejectedQty" data-idx="${i}" value="0" style="width: 80px; padding: 6px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text-main); font-family: monospace; text-align: center;" min="0" step="0.001"></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                document.getElementById('admin-gr-modal').style.display = 'flex';
+            } catch (e) {
+                Toast.error("Erreur", "Impossible de charger les détails de la commande : " + e.message);
+            }
+        }
+
+        function adminCloseGRModal() {
+            document.getElementById('admin-gr-modal').style.display = 'none';
+        }
+
+        async function adminSubmitGR() {
+            if (!adminGrPoId || !adminGrPoItems.length) return;
+            
+            try {
+                Toast.info("Validation...", "Enregistrement du bon de réception...");
+                const items = adminGrPoItems.map((item, i) => ({
+                    poItemId    : item.ID,
+                    receivedQty : parseFloat(document.querySelector(`.admin-gr-receivedQty[data-idx="${i}"]`).value || 0),
+                    acceptedQty : parseFloat(document.querySelector(`.admin-gr-acceptedQty[data-idx="${i}"]`).value || 0),
+                    rejectedQty : parseFloat(document.querySelector(`.admin-gr-rejectedQty[data-idx="${i}"]`).value || 0),
+                    notes       : ''
+                }));
+                
+                const body = { poId: adminGrPoId, items, notes: document.getElementById('admin-gr-notes').value };
+                
+                const res = await fetch('/odata/v4/srm/createGoodsReceipt', {
+                    method: 'POST',
+                    headers: {
+                        ...adminHeaders,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error?.message || 'Erreur serveur');
+                
+                adminCloseGRModal();
+                Toast.success("Réception validée !", `Bon de réception ${data.receiptNumber || ''} enregistré avec succès.`);
+                
+                // Refresh order list if currently active on SRM filter
+                if (document.getElementById('filter-cmd-type')?.value === 'SRM') {
+                    await loadAdminCommandes();
+                }
+                // Refresh supplier details modal if it's currently open
+                if (window.currentPartnerBp) {
+                    await loadPartnerDocuments(window.currentPartnerBp);
+                }
+            } catch(e) {
+                Toast.error("Erreur", e.message);
+            }
         }
 
         // Start polling on page load

@@ -19,26 +19,88 @@
     <!-- auth-interceptor.js est externe — gardé en commentaire pour dev local -->
     <!-- <script src="/auth-interceptor.js"></script> -->
     <style>
-      /* ════════════════════════════════════════════
-         VARIABLES
-      ════════════════════════════════════════════ */
+      /* ☀️ SAP Morning Horizon & Evening Horizon variables */
       :root {
-        --bg: #0f1117;
-        --bg-card: #1a1d2e;
-        --bg-card2: #21253a;
-        --accent: #6c63ff;
-        --accent2: #ff6584;
-        --accent-green: #00d9a6;
+        /* ☀️ SAP Morning Horizon (Light Fiori Theme) */
+        --bg: #f2f5f8;
+        --bg-card: #ffffff;
+        --bg-card2: #f7f9fa;
+        --accent: #0a6ed1; /* Sapphire brand accent */
+        --accent2: #e9730c; /* Warning Orange / Secondary brand accent */
+        --accent-green: #107e3e; /* Success Green */
         --accent-gold: #f5a623;
-        --text: #e8eaf6;
-        --text-dim: #8892b0;
-        --border: rgba(108, 99, 255, 0.18);
-        --border-light: rgba(255, 255, 255, 0.06);
-        --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        --shadow-accent: 0 4px 20px rgba(108, 99, 255, 0.3);
+        --text: #1a1c1e;
+        --text-dim: #6a6d70;
+        --border: #d9d9d9;
+        --border-light: rgba(0, 0, 0, 0.08);
+        --shadow: 0 4px 12px rgba(0,0,0,0.03);
+        --shadow-accent: 0 4px 12px rgba(10, 110, 209, 0.15);
         --radius: 16px;
         --sidebar-w: 250px;
         --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        --nav-item-active-bg: rgba(10, 110, 209, 0.12);
+      }
+
+      body.dark-mode {
+        /* 🌙 SAP Evening Horizon (Dark Fiori Theme) */
+        --bg: #12171c;
+        --bg-card: #1a222c;
+        --bg-card2: #212833;
+        --accent: #3596ff; /* Luminous Brand Accent */
+        --accent2: #ff9a2e;
+        --accent-green: #4ade80;
+        --accent-gold: #f5a623;
+        --text: #ffffff;
+        --text-dim: #a1a8b0;
+        --border: rgba(255, 255, 255, 0.08);
+        --border-light: rgba(255, 255, 255, 0.06);
+        --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        --shadow-accent: 0 4px 20px rgba(53, 150, 255, 0.3);
+        --nav-item-active-bg: rgba(53, 150, 255, 0.18);
+      }
+
+      /* Premium Switch Toggle CSS */
+      .switch-toggle {
+        position: relative;
+        display: inline-block;
+        width: 48px;
+        height: 24px;
+      }
+      .switch-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider-toggle {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--border);
+        transition: .3s ease;
+        border-radius: 24px;
+        border: 1px solid var(--border);
+      }
+      .slider-toggle:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 3px;
+        bottom: 3px;
+        background-color: var(--text-dim);
+        transition: .3s ease;
+        border-radius: 50%;
+      }
+      input:checked + .slider-toggle {
+        background-color: rgba(53, 150, 255, 0.2);
+        border-color: var(--accent);
+      }
+      input:checked + .slider-toggle:before {
+        transform: translateX(24px);
+        background-color: var(--accent);
       }
 
       *,
@@ -111,11 +173,11 @@
         letter-spacing: 0.5px;
       }
       .badge-b2b {
-        background: rgba(108, 99, 255, 0.2);
+        background: rgba(10, 110, 209, 0.15);
         color: var(--accent);
       }
       .badge-b2c {
-        background: rgba(255, 101, 132, 0.2);
+        background: rgba(233, 115, 12, 0.15);
         color: var(--accent2);
       }
 
@@ -147,11 +209,11 @@
         position: relative;
       }
       .nav-item:hover {
-        background: rgba(108, 99, 255, 0.1);
+        background: var(--border-light);
         color: var(--text);
       }
       .nav-item.active {
-        background: rgba(108, 99, 255, 0.18);
+        background: var(--nav-item-active-bg);
         color: var(--accent);
         font-weight: 600;
       }
@@ -255,7 +317,7 @@
         position: sticky;
         top: 0;
         z-index: 50;
-        background: rgba(15, 17, 23, 0.85);
+        background: var(--bg-card);
         backdrop-filter: blur(20px);
         border-bottom: 1px solid var(--border-light);
         display: flex;
@@ -1204,6 +1266,56 @@
           padding: 12px 16px;
         }
       }
+
+      /* PULSING BADGE — Enhanced with glow */
+      .noti-badge-pulse { animation: badgePulse 1.2s ease-in-out infinite; }
+      @keyframes badgePulse {
+        0%,100% { transform:scale(1); opacity:1; box-shadow: 0 0 0 0 rgba(108,99,255,0.4); }
+        50% { transform:scale(1.18); opacity:0.9; box-shadow: 0 0 8px 2px rgba(108,99,255,0.35); }
+      }
+
+      /* NOTIFICATION DOT — Glowing indicator */
+      .noti-dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        display: inline-block; margin-right: 6px; flex-shrink: 0;
+        animation: dotBlink 1.4s ease-in-out infinite;
+      }
+      .noti-dot.dot-purple { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+      .noti-dot.dot-green  { background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); }
+      .noti-dot.dot-gold   { background: var(--accent-gold); box-shadow: 0 0 6px var(--accent-gold); }
+      .noti-dot.dot-red    { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+      @keyframes dotBlink {
+        0%,100% { opacity:1; transform:scale(1); }
+        50% { opacity:0.35; transform:scale(0.7); }
+      }
+
+      /* NAV ITEM with notification highlight */
+      .nav-item.has-notif { background: rgba(108,99,255,0.08); }
+      .nav-item.has-notif .nav-icon { color: var(--accent); }
+
+      /* LIVE INDICATOR */
+      .live-indicator {
+        display: flex; align-items: center; gap: 6px;
+        font-size: 0.7rem; font-weight: 600; color: var(--accent);
+        padding: 4px 12px; border-radius: 20px;
+        background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.2);
+        letter-spacing: 0.3px; text-transform: uppercase;
+      }
+      .live-dot {
+        width: 6px; height: 6px; border-radius: 50%;
+        background: var(--accent); animation: livePulse 2s ease-in-out infinite;
+      }
+      @keyframes livePulse {
+        0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(108,99,255,0.5); }
+        50% { opacity:0.6; box-shadow: 0 0 6px 2px rgba(108,99,255,0.3); }
+      }
+
+      /* STAT CARD notification flash */
+      .stat-card.has-update { border-color: rgba(108,99,255,0.3); animation: statFlash 0.6s ease; }
+      @keyframes statFlash {
+        0% { border-color: rgba(108,99,255,0.6); box-shadow: 0 0 12px rgba(108,99,255,0.2); }
+        100% { border-color: rgba(108,99,255,0.3); box-shadow: none; }
+      }
     </style>
   </head>
   <body>
@@ -1233,9 +1345,10 @@
         </div>
         <div class="nav-section-label">Mes Documents</div>
         <div class="nav-item" id="nav-devis" onclick="showView('devis', this)">
+          <span class="noti-dot dot-gold" id="devisDot" style="display: none"></span>
           <span class="nav-icon"><i class="fas fa-file-invoice"></i></span> Mes
           Devis
-          <span class="nav-badge" id="devis-badge" style="display: none"
+          <span class="nav-badge noti-badge-pulse" id="devis-badge" style="display: none"
             >0</span
           >
         </div>
@@ -1244,7 +1357,9 @@
           id="nav-commandes"
           onclick="showView('commandes', this)"
         >
+          <span class="noti-dot dot-green" id="commandesDot" style="display: none"></span>
           <span class="nav-icon"><i class="fas fa-box"></i></span> Mes Commandes
+          <span class="nav-badge noti-badge-pulse" id="commandes-badge" style="display: none">0</span>
         </div>
         <div
           class="nav-item"
@@ -1252,7 +1367,9 @@
           onclick="showView('factures', this)"
           style="display: none;"
         >
+          <span class="noti-dot dot-purple" id="facturesDot" style="display: none"></span>
           <span class="nav-icon"><i class="fas fa-file-invoice-dollar"></i></span> Mes Factures
+          <span class="nav-badge noti-badge-pulse" id="factures-badge" style="display: none">0</span>
         </div>
         <div
           class="nav-item"
@@ -1284,6 +1401,10 @@
     <main class="main">
       <div class="topbar">
         <h1 class="page-title" id="pageTitle">Catalogue Produits</h1>
+        <button class="theme-toggle-btn" onclick="toggleFioriTheme()" style="background: var(--bg-card2); border: 1px solid var(--border-light); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; vertical-align: middle; margin-right: 10px;" title="Changer de thème Fiori">
+          <span id="theme-icon-crm">☀️</span> <span id="theme-text-crm">Morning Horizon</span>
+        </button>
+        <div class="live-indicator" id="liveIndicator"><span class="live-dot"></span> Live · 5s</div>
         <div class="cart-btn" onclick="toggleCart()">
           <i class="fas fa-shopping-cart"></i>
           <span>Panier</span>
@@ -1489,6 +1610,27 @@
               <div class="empty-state">
                 <i class="fas fa-spinner fa-spin"></i>
               </div>
+            </div>
+          </div>
+          <div
+            style="
+              background: var(--bg-card);
+              border: 1px solid var(--border-light);
+              border-radius: var(--radius);
+              padding: 28px;
+              margin-top: 24px;
+            "
+          >
+            <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--accent);"><i class="fas fa-palette"></i> Thème & Personnalisation</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+              <div>
+                <span style="font-weight: 600; display: block; color: var(--text);">Mode Sombre (Dark Mode)</span>
+                <span style="font-size: 0.85rem; color: var(--text-dim);">Activer le thème sombre pour votre portail client.</span>
+              </div>
+              <label class="switch-toggle">
+                <input type="checkbox" id="darkmode-toggle-crm" onchange="toggleFioriTheme()">
+                <span class="slider-toggle"></span>
+              </label>
             </div>
           </div>
         </div>
@@ -1997,10 +2139,38 @@
         if (id === "devis") loadDevis();
         if (id === "commandes") loadCommandes();
         if (id === "factures") loadFactures();
+        if (id === "profil") initTheme();
+      }
+
+      /* ─── THEME FIORI ELEMENTS ─── */
+      function initTheme() {
+        const isDark = localStorage.getItem('theme-dark') === 'true';
+        const headerIcon = document.getElementById('theme-icon-crm');
+        const headerText = document.getElementById('theme-text-crm');
+        const toggleEl = document.getElementById('darkmode-toggle-crm');
+        if (toggleEl) {
+          toggleEl.checked = isDark;
+        }
+        if (isDark) {
+          document.body.classList.add('dark-mode');
+          if (headerIcon) headerIcon.textContent = '🌙';
+          if (headerText) headerText.textContent = 'Evening Horizon';
+        } else {
+          document.body.classList.remove('dark-mode');
+          if (headerIcon) headerIcon.textContent = '☀️';
+          if (headerText) headerText.textContent = 'Morning Horizon';
+        }
+      }
+
+      function toggleFioriTheme() {
+        const isDark = !document.body.classList.contains('dark-mode');
+        localStorage.setItem('theme-dark', isDark ? 'true' : 'false');
+        initTheme();
       }
 
       /* ─── INIT ─── */
       async function init() {
+        initTheme();
         showLoader(true);
         try {
           await loadProfile();
@@ -2672,11 +2842,13 @@
       }
 
       /* ─── DEVIS TABLE ─── */
-      async function loadDevis() {
+      async function loadDevis(isSilent = false) {
         if (!profile) return;
         const tbody = document.getElementById("devisTableBody");
-        tbody.innerHTML =
-          '<tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+        if (!isSilent) {
+          tbody.innerHTML =
+            '<tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+        }
         try {
           const enc = encodeURIComponent(`clientB2B_ID eq ${profile.ID}`);
           const res = await fetch(
@@ -2793,11 +2965,13 @@
       }
 
       /* ─── COMMANDES TABLE ─── */
-      async function loadCommandes() {
+      async function loadCommandes(isSilent = false) {
         if (!profile) return;
         const tbody = document.getElementById("commandesTableBody");
-        tbody.innerHTML =
-          '<tr class="empty-row"><td colspan="5"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+        if (!isSilent) {
+          tbody.innerHTML =
+            '<tr class="empty-row"><td colspan="5"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+        }
         try {
           const idField = IS_B2B
             ? `clientB2B_ID eq ${profile.ID}`
@@ -2868,10 +3042,12 @@
       }
 
       /* ─── FACTURES TABLE ─── */
-      async function loadFactures() {
+      async function loadFactures(isSilent = false) {
         if (!profile) return;
         const tbody = document.getElementById("facturesTableBody");
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="4"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+        if (!isSilent) {
+          tbody.innerHTML = '<tr class="empty-row"><td colspan="4"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+        }
         try {
           const idField = IS_B2B ? `clientB2B_ID eq ${profile.ID}` : `clientB2C_ID eq ${profile.ID}`;
           const res = await fetch(`/odata/v4/crm/Factures?$filter=${encodeURIComponent(idField)}&$orderby=createdAt desc`);
@@ -2963,14 +3139,119 @@
         }
       }
 
-      /* ─── TEMPS RÉEL — polling badges ─── */
+      /* ─── TEMPS RÉEL — polling 5s avec badges + dots + refresh vue active ─── */
+      let prevCounts = { devis: -1, commandes: -1, pending: -1, factures: -1 };
+
+      function updateNavIndicator(dotEl, navEl, badgeEl, count, prevCount) {
+        if (!dotEl || !navEl || !badgeEl) return;
+        badgeEl.textContent = count;
+        badgeEl.style.display = count > 0 ? '' : 'none';
+        dotEl.style.display = count > 0 ? '' : 'none';
+        if (count > 0) {
+          navEl.classList.add('has-notif');
+        } else {
+          navEl.classList.remove('has-notif');
+        }
+        if (prevCount >= 0 && count !== prevCount) {
+          badgeEl.classList.remove('noti-badge-pulse');
+          void badgeEl.offsetWidth;
+          badgeEl.classList.add('noti-badge-pulse');
+        }
+      }
+
+      function getActiveViewId() {
+        const active = document.querySelector('.view.active');
+        return active ? active.id.replace('view-', '') : 'catalogue';
+      }
+
       function startRealtimePolling() {
-        // Rafraîchit les KPIs (badges) toutes les 30 secondes sans recharger la page
         setInterval(async () => {
+          if (!profile) return;
           try {
-            await loadKPIs();
-          } catch(e) { /* silencieux */ }
-        }, 30000);
+            const idField = IS_B2B
+              ? `clientB2B_ID eq ${profile.ID}`
+              : `clientB2C_ID eq ${profile.ID}`;
+
+            const fetches = [
+              fetch(`/odata/v4/crm/Devis?$filter=${encodeURIComponent(idField)}&$select=ID,status,totalTTC`),
+              fetch(`/odata/v4/crm/Commandes?$filter=${encodeURIComponent(idField)}&$select=ID,status,totalTTC,facture_ID`)
+            ];
+            if (IS_B2B) {
+              fetches.push(fetch(`/odata/v4/crm/Factures?$filter=${encodeURIComponent(idField)}&$select=ID`));
+            }
+
+            const results = await Promise.all(fetches);
+            const newDevis = (await results[0].json()).value || [];
+            const newOrders = (await results[1].json()).value || [];
+            const newFactures = IS_B2B ? ((await results[2].json()).value || []) : [];
+
+            const devisCount = newDevis.length;
+            const pendingCount = newDevis.filter(d => d.status === 'PENDING').length;
+            const ordersCount = newOrders.length;
+            const confirmedCount = newOrders.filter(o => o.status === 'CONFIRMED').length;
+            const facturesCount = newFactures.length;
+            const total = [...newDevis, ...newOrders].reduce((s, d) => s + parseFloat(d.totalTTC || 0), 0);
+
+            // Update KPI stat cards with flash on change
+            const kpiDevis = document.getElementById('kpi-devis');
+            const kpiCommandes = document.getElementById('kpi-commandes');
+            const kpiPending = document.getElementById('kpi-pending');
+            const kpiMontant = document.getElementById('kpi-montant');
+
+            if (prevCounts.devis >= 0 && devisCount !== prevCounts.devis) {
+              kpiDevis.closest('.stat-card')?.classList.add('has-update');
+              setTimeout(() => kpiDevis.closest('.stat-card')?.classList.remove('has-update'), 1500);
+            }
+            if (prevCounts.commandes >= 0 && ordersCount !== prevCounts.commandes) {
+              kpiCommandes.closest('.stat-card')?.classList.add('has-update');
+              setTimeout(() => kpiCommandes.closest('.stat-card')?.classList.remove('has-update'), 1500);
+            }
+            if (prevCounts.pending >= 0 && pendingCount !== prevCounts.pending) {
+              kpiPending.closest('.stat-card')?.classList.add('has-update');
+              setTimeout(() => kpiPending.closest('.stat-card')?.classList.remove('has-update'), 1500);
+            }
+
+            kpiDevis.textContent = devisCount;
+            kpiCommandes.textContent = ordersCount;
+            kpiPending.textContent = pendingCount;
+            kpiMontant.textContent = fmt(total);
+
+            // Update devis nav badge + dot
+            updateNavIndicator(
+              document.getElementById('devisDot'),
+              document.getElementById('nav-devis'),
+              document.getElementById('devis-badge'),
+              pendingCount, prevCounts.pending
+            );
+
+            // Update commandes nav badge + dot
+            updateNavIndicator(
+              document.getElementById('commandesDot'),
+              document.getElementById('nav-commandes'),
+              document.getElementById('commandes-badge'),
+              confirmedCount > 0 ? confirmedCount : ordersCount, prevCounts.commandes
+            );
+
+            // Update factures nav badge + dot (B2B only)
+            if (IS_B2B) {
+              updateNavIndicator(
+                document.getElementById('facturesDot'),
+                document.getElementById('nav-factures'),
+                document.getElementById('factures-badge'),
+                facturesCount, prevCounts.factures
+              );
+            }
+
+            prevCounts = { devis: devisCount, commandes: ordersCount, pending: pendingCount, factures: facturesCount };
+
+            // Auto-refresh the currently active view silently in the background
+            const activeView = getActiveViewId();
+            if (activeView === 'devis')     loadDevis(true);
+            if (activeView === 'commandes') loadCommandes(true);
+            if (activeView === 'factures')  loadFactures(true);
+
+          } catch(e) { /* silent polling error */ }
+        }, 5000);
       }
 
       /* START */

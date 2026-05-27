@@ -127,6 +127,7 @@ service SRMService {
   // Workflow Admin
   action selectRFQResponse(rfqId: UUID, responseId: UUID) returns RFQs;
   action convertRFQToPO(rfqId: UUID) returns BonsCommande;
+  action acceptPO(poId: UUID) returns BonsCommande;
 
   // 3-Way Match
   action performThreeWayMatch(factureId: UUID) returns FacturesFournisseur;
@@ -170,6 +171,10 @@ service SRMService {
     items       : array of SupplierInvoiceItem_Input,
     dueDate     : Date,
     notes       : String(2000)
+  ) returns FacturesFournisseur;
+
+  action confirmCashPayment(
+    factureId: UUID
   ) returns FacturesFournisseur;
 
   function downloadPOPDF(poId: UUID) returns String;

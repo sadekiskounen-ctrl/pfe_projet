@@ -260,6 +260,8 @@ entity FactureFournisseur : cuid, managed, pme.StatusTracking, pme.Annotatable {
   totalHT       : pme.Amount default 0;
   totalTVA      : pme.Amount default 0;
   totalTTC      : pme.Amount default 0;
+  paidAmount    : pme.Amount default 0;
+  remainingAmount : pme.Amount default 0;
   currency      : Currency;
   // 3-Way Match
   matchStatus   : String(20) default 'PENDING'; // PENDING, MATCHED, DISCREPANCY
