@@ -53,11 +53,6 @@
             --nav-item-active-bg: rgba(53, 150, 255, 0.12);
         }
 
-        /* Premium brand logo adjustment for dark mode - glow & brightness */
-        body.dark-mode .brand img {
-            filter: brightness(0) invert(1) drop-shadow(0 0 6px rgba(53, 150, 255, 0.4));
-        }
-
         /* Premium Switch Toggle CSS */
         .switch-toggle {
             position: relative;
@@ -4616,6 +4611,18 @@
                     if (facBadge) {
                         facBadge.textContent = facNotifCount;
                         facBadge.style.display = facNotifCount > 0 ? '' : 'none';
+                    }
+                } catch (e) { /* silent */ }
+
+                // 6. Badge Devis = pending devis
+                try {
+                    const devisRes = await fetch('/odata/v4/admin/AllDevis?$filter=status eq \'PENDING\'&$select=ID', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
+                    const devisData = await devisRes.json().catch(() => ({ value: [] }));
+                    const devisNotifCount = (devisData.value || []).length;
+                    const devisBadge = document.getElementById('devis-alert-badge');
+                    if (devisBadge) {
+                        devisBadge.textContent = devisNotifCount;
+                        devisBadge.style.display = devisNotifCount > 0 ? '' : 'none';
                     }
                 } catch (e) { /* silent */ }
 

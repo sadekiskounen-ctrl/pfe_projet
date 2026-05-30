@@ -376,7 +376,7 @@ module.exports = cds.service.impl(async function () {
       
     if (bp) {
       console.log(`[StatusCheck] Trouvé dans BusinessPartner: ${bp.status}`);
-      return { status: bp.status, blockReason: bp.bpType };
+      return { status: bp.status, blockReason: bp.blockReason };
     }
 
     // 2. Chercher dans les demandes d'inscription

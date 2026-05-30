@@ -1193,11 +1193,12 @@
         padding: 14px 18px;
         border-radius: 12px;
         font-size: 0.85rem;
-        font-weight: 500;
-        box-shadow: var(--shadow);
+        font-weight: 600;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         min-width: 280px;
         max-width: 360px;
         animation: slideIn 0.3s ease;
+        transition: all 0.25s ease;
       }
       @keyframes slideIn {
         from {
@@ -1209,20 +1210,38 @@
           transform: translateX(0);
         }
       }
+      /* Morning Horizon (Light Theme Toast) */
       .toast.success {
-        background: #0a2e23;
-        border: 1px solid rgba(0, 217, 166, 0.3);
-        color: var(--accent-green);
+        background: #e6f6f0;
+        border: 1px solid #a3e2cb;
+        color: #15573f;
       }
       .toast.error {
-        background: #2e0a12;
-        border: 1px solid rgba(255, 101, 132, 0.3);
-        color: var(--accent2);
+        background: #fdf2f2;
+        border: 1px solid #f8b4b4;
+        color: #9b1c1c;
       }
       .toast.info {
-        background: #1a1d2e;
-        border: 1px solid var(--border);
-        color: var(--text);
+        background: #eef2f6;
+        border: 1px solid #cbd5e1;
+        color: #0f172a;
+      }
+
+      /* Evening Horizon (Dark Theme Toast) Overrides */
+      body.dark-mode .toast.success {
+        background: #0f2e22;
+        border: 1px solid rgba(74, 222, 128, 0.3);
+        color: #4ade80;
+      }
+      body.dark-mode .toast.error {
+        background: #2e0d13;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #ef4444;
+      }
+      body.dark-mode .toast.info {
+        background: #1a222c;
+        border: 1px solid rgba(53, 150, 255, 0.3);
+        color: #3596ff;
       }
 
       .empty-state {
@@ -1296,18 +1315,18 @@
       /* LIVE INDICATOR */
       .live-indicator {
         display: flex; align-items: center; gap: 6px;
-        font-size: 0.7rem; font-weight: 600; color: var(--accent);
+        font-size: 0.7rem; font-weight: 600; color: #00c9a7;
         padding: 4px 12px; border-radius: 20px;
-        background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.2);
+        background: rgba(0, 201, 167, 0.1); border: 1px solid rgba(0, 201, 167, 0.2);
         letter-spacing: 0.3px; text-transform: uppercase;
       }
       .live-dot {
         width: 6px; height: 6px; border-radius: 50%;
-        background: var(--accent); animation: livePulse 2s ease-in-out infinite;
+        background: #00c9a7; animation: livePulse 2s ease-in-out infinite;
       }
       @keyframes livePulse {
-        0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(108,99,255,0.5); }
-        50% { opacity:0.6; box-shadow: 0 0 6px 2px rgba(108,99,255,0.3); }
+        0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(0, 201, 167, 0.5); }
+        50% { opacity:0.6; box-shadow: 0 0 6px 2px rgba(0, 201, 167, 0.3); }
       }
 
       /* STAT CARD notification flash */
@@ -1316,6 +1335,23 @@
         0% { border-color: rgba(108,99,255,0.6); box-shadow: 0 0 12px rgba(108,99,255,0.2); }
         100% { border-color: rgba(108,99,255,0.3); box-shadow: none; }
       }
+
+      /* CUSTOM DIALOG SYSTEM */
+      .dialog-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);
+        z-index: 9999; display: none; align-items: center; justify-content: center;
+      }
+      .dialog-box {
+        background: var(--bg-card); border: 1px solid var(--border-light);
+        border-radius: 20px; padding: 2rem; width: 100%; max-width: 400px;
+        box-shadow: var(--shadow);
+      }
+      .dialog-box h3 { margin-top: 0; font-size: 1.25rem; color: var(--text); margin-bottom: 1rem; }
+      .dialog-box p { color: var(--text-dim); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+      .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
+      .btn-dialog-primary { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-family: inherit; }
+      .btn-dialog-secondary { background: var(--border-light); color: var(--text-dim); border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-family: inherit; }
     </style>
   </head>
   <body>
@@ -1326,10 +1362,22 @@
     <!-- Cart overlay -->
     <div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
 
+    <!-- CUSTOM DIALOG HTML -->
+    <div id="custom-dialog-overlay" class="dialog-overlay">
+        <div class="dialog-box">
+            <h3 id="dialog-title">Notification</h3>
+            <p id="dialog-message"></p>
+            <div class="dialog-actions">
+                <button id="dialog-cancel" class="btn-dialog-secondary">Annuler</button>
+                <button id="dialog-confirm" class="btn-dialog-primary">Continuer</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ══════ SIDEBAR ══════ -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
-        <div class="logo-mark">P</div>
+        <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" class="brand-logo-img" style="width: 50px; margin-bottom: 10px; transition: all 0.25s ease;">
         <h2>PME Connect</h2>
         <p>Portail Client</p>
         <span class="client-badge" id="clientBadge">B2B</span>
@@ -2103,6 +2151,33 @@
       function showLoader(v) {
         document.getElementById("loader").classList.toggle("active", v);
       }
+
+      // --- DIALOG SYSTEM ---
+      const Dialog = {
+        overlay: document.getElementById('custom-dialog-overlay'),
+        title: document.getElementById('dialog-title'),
+        message: document.getElementById('dialog-message'),
+        btnCancel: document.getElementById('dialog-cancel'),
+        btnConfirm: document.getElementById('dialog-confirm'),
+        
+        confirm: function(msg, title = 'Confirmation') {
+          return new Promise((resolve) => {
+            this.title.innerText = title;
+            this.message.innerText = msg;
+            this.overlay.style.display = 'flex';
+
+            this.btnConfirm.onclick = () => {
+              this.overlay.style.display = 'none';
+              resolve(true);
+            };
+            this.btnCancel.onclick = () => {
+              this.overlay.style.display = 'none';
+              resolve(false);
+            };
+          });
+        }
+      };
+
       function toast(type, msg, duration = 4000) {
         const icons = {
           success: "fas fa-check-circle",
@@ -2222,6 +2297,7 @@
           <div class="profile-field"><label>RC</label><p style="font-family:monospace">${profile.rc || "—"}</p></div>
           <div class="profile-field"><label>NIF</label><p style="font-family:monospace">${profile.nif || "—"}</p></div>
           <div class="profile-field"><label>AI</label><p style="font-family:monospace">${profile.ai || "—"}</p></div>
+          <div class="profile-field"><label>RIB</label><p style="font-family:monospace">${profile.bp?.ribNumber || "—"}</p></div>
           <div class="profile-field"><label>Wilaya</label><p>${profile.wilaya || "—"}</p></div>
           <div class="profile-field"><label>Statut</label><p><span class="badge ${profile.status === "ACTIVE" ? "badge-approved" : "badge-pending"}">${profile.status}</span></p></div>
         `
@@ -3132,8 +3208,8 @@
           return d;
         }
       }
-      function logout() {
-        if (confirm("Déconnexion ?")) {
+      async function logout() {
+        if (await Dialog.confirm("Déconnexion ?")) {
           sessionStorage.clear();
           window.location.href = "/auth.html";
         }

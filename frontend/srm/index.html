@@ -179,11 +179,55 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
 /* TOAST */
 .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-.toast { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 12px; font-size: 0.85rem; font-weight: 500; box-shadow: var(--shadow); min-width: 280px; animation: slideIn 0.3s ease; }
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  min-width: 280px;
+  max-width: 360px;
+  animation: slideIn 0.3s ease;
+  transition: all 0.25s ease;
+}
 @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-.toast.success { background: #071e18; border: 1px solid rgba(0,201,167,0.3); color: var(--accent); }
-.toast.error   { background: #200a12; border: 1px solid rgba(255,101,132,0.3); color: var(--accent-red); }
-.toast.info    { background: var(--bg-card); border: 1px solid var(--border-light); color: var(--text); }
+
+/* Morning Horizon (Light Theme Toast) */
+.toast.success {
+  background: #e6f6f0;
+  border: 1px solid #a3e2cb;
+  color: #15573f;
+}
+.toast.error {
+  background: #fdf2f2;
+  border: 1px solid #f8b4b4;
+  color: #9b1c1c;
+}
+.toast.info {
+  background: #eef2f6;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+}
+
+/* Evening Horizon (Dark Theme Toast) Overrides */
+body.dark-mode .toast.success {
+  background: #0f2e22;
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  color: #4ade80;
+}
+body.dark-mode .toast.error {
+  background: #2e0d13;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+body.dark-mode .toast.info {
+  background: #1a222c;
+  border: 1px solid rgba(53, 150, 255, 0.3);
+  color: #3596ff;
+}
 
 .empty-state { text-align: center; padding: 60px 20px; color: var(--text-dim); }
 .empty-state i { font-size: 2.5rem; margin-bottom: 16px; opacity: 0.3; display: block; }
@@ -217,14 +261,14 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 /* LIVE INDICATOR in topbar */
 .live-indicator {
   display: flex; align-items: center; gap: 6px;
-  font-size: 0.7rem; font-weight: 600; color: var(--accent);
+  font-size: 0.7rem; font-weight: 600; color: #00c9a7;
   padding: 4px 12px; border-radius: 20px;
   background: rgba(0,201,167,0.1); border: 1px solid rgba(0,201,167,0.2);
   letter-spacing: 0.3px; text-transform: uppercase;
 }
 .live-dot {
   width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent); animation: livePulse 2s ease-in-out infinite;
+  background: #00c9a7; animation: livePulse 2s ease-in-out infinite;
 }
 @keyframes livePulse {
   0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(0,201,167,0.5); }
@@ -290,6 +334,23 @@ input:checked + .slider-toggle:before {
   transform: translateX(24px);
   background-color: var(--accent);
 }
+
+/* CUSTOM DIALOG SYSTEM */
+.dialog-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);
+  z-index: 9999; display: none; align-items: center; justify-content: center;
+}
+.dialog-box {
+  background: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: 20px; padding: 2rem; width: 100%; max-width: 400px;
+  box-shadow: var(--shadow);
+}
+.dialog-box h3 { margin-top: 0; font-size: 1.25rem; color: var(--text); margin-bottom: 1rem; }
+.dialog-box p { color: var(--text-dim); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
+.dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.btn-dialog-primary { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-family: inherit; }
+.btn-dialog-secondary { background: var(--border-light); color: var(--text-dim); border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-family: inherit; }
 </style>
 </head>
 <body>
@@ -297,10 +358,22 @@ input:checked + .slider-toggle:before {
 <div class="loader-overlay" id="loader"><div class="spinner"></div></div>
 <div class="toast-container" id="toastContainer"></div>
 
+<!-- CUSTOM DIALOG HTML -->
+<div id="custom-dialog-overlay" class="dialog-overlay">
+    <div class="dialog-box">
+        <h3 id="dialog-title">Notification</h3>
+        <p id="dialog-message"></p>
+        <div class="dialog-actions">
+            <button id="dialog-cancel" class="btn-dialog-secondary">Annuler</button>
+            <button id="dialog-confirm" class="btn-dialog-primary">Continuer</button>
+        </div>
+    </div>
+</div>
+
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-mark">S</div>
+    <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" class="brand-logo-img" style="width: 50px; margin-bottom: 10px; transition: all 0.25s ease;">
     <h2>PME Connect</h2>
     <p>Portail Fournisseur</p>
     <span class="supplier-badge">FOURNISSEUR</span>
@@ -607,6 +680,33 @@ let currentRFQ = null;
 // LOADER & TOAST
 // ═══════════════════════════════════════════════════════
 function showLoader(v) { document.getElementById('loader').classList.toggle('active', v); }
+
+// --- DIALOG SYSTEM ---
+const Dialog = {
+  overlay: document.getElementById('custom-dialog-overlay'),
+  title: document.getElementById('dialog-title'),
+  message: document.getElementById('dialog-message'),
+  btnCancel: document.getElementById('dialog-cancel'),
+  btnConfirm: document.getElementById('dialog-confirm'),
+  
+  confirm: function(msg, title = 'Confirmation') {
+    return new Promise((resolve) => {
+      this.title.innerText = title;
+      this.message.innerText = msg;
+      this.overlay.style.display = 'flex';
+
+      this.btnConfirm.onclick = () => {
+        this.overlay.style.display = 'none';
+        resolve(true);
+      };
+      this.btnCancel.onclick = () => {
+        this.overlay.style.display = 'none';
+        resolve(false);
+      };
+    });
+  }
+};
+
 function toast(type, msg, dur = 4000) {
   const c = document.getElementById('toastContainer'), t = document.createElement('div');
   const icons = { success: 'fas fa-check-circle', error: 'fas fa-exclamation-circle', info: 'fas fa-info-circle' };
@@ -1184,7 +1284,7 @@ async function loadMatch(isSilent = false) {
 }
 
 async function supplierConfirmCashReceipt(factureId, invoiceNumber) {
-  if (!confirm(`Confirmer la réception du paiement en espèces pour la facture ${invoiceNumber} ?\nCela clôturera officiellement la transaction.`)) return;
+  if (!await Dialog.confirm(`Confirmer la réception du paiement en espèces pour la facture ${invoiceNumber} ?\nCela clôturera officiellement la transaction.`)) return;
   showLoader(true);
   try {
     const res = await fetch('/odata/v4/srm/confirmCashPayment', {
@@ -1285,7 +1385,7 @@ async function saveProfile() {
 // ═══════════════════════════════════════════════════════
 function fmt(v) { return parseFloat(v||0).toLocaleString('fr-FR', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
 function fmtDate(d) { if (!d) return '—'; try { return new Date(d).toLocaleDateString('fr-FR'); } catch { return d; } }
-function logout() { if (confirm('Déconnexion ?')) { sessionStorage.clear(); window.location.href = '/auth.html'; } }
+async function logout() { if (await Dialog.confirm('Déconnexion ?')) { sessionStorage.clear(); window.location.href = '/auth.html'; } }
 
 // ═══════════════════════════════════════════════════════
 // RENDER STARS (1-5)
@@ -1385,12 +1485,50 @@ async function refreshNotifications(isInitial = false) {
       fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID} and matchStatus eq 'PENDING'`)}&$select=ID`),
       fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID} and (status eq 'PENDING_CASH' or matchStatus eq 'DISCREPANCY')`)}&$select=ID`)
     ]);
+
+    if (!rfqRes.ok || !poRes.ok || !matchRes.ok || !actionableMatchRes.ok) {
+      console.warn("Polling requests failed:", rfqRes.status, poRes.status, matchRes.status, actionableMatchRes.status);
+      return;
+    }
+
     const rfqCount   = ((await rfqRes.json()).value || []).length;
     const poData     = (await poRes.json()).value || [];
     const poCount    = poData.length;
     const poNewCount = poData.filter(p => p.status === 'SENT').length;
     const matchCount = ((await matchRes.json()).value || []).length;
     const actionableMatchCount = ((await actionableMatchRes.json()).value || []).length;
+
+    // Fetch latest supplier rating & KYC status in the background
+    const ratingRes = await fetch(`/odata/v4/srm/Fournisseurs(ID=${profile.ID})?$select=kycStatus,kycDate,kycBy&$expand=bp($select=rating)`);
+    if (ratingRes.ok) {
+      const latestData = await ratingRes.json();
+      if (latestData) {
+        profile.kycStatus = latestData.kycStatus;
+        profile.kycDate = latestData.kycDate;
+        profile.kycBy = latestData.kycBy;
+        if (latestData.bp) {
+          if (!profile.bp) profile.bp = {};
+          profile.bp.rating = latestData.bp.rating;
+        }
+
+        // Live update the rating displayed on the sidebar/dashboard header KPI
+        const kpiRating = document.getElementById('kpi-rating');
+        if (kpiRating) {
+          const bpRating = profile.bp?.rating || 0;
+          const starsHtml = bpRating > 0 ? renderStars(bpRating) : '—';
+          if (kpiRating.innerHTML !== starsHtml) {
+            kpiRating.innerHTML = starsHtml;
+            kpiRating.closest('.stat-card')?.classList.add('has-update');
+            setTimeout(() => kpiRating.closest('.stat-card')?.classList.remove('has-update'), 1500);
+          }
+        }
+
+        // Live update profile page if it's active
+        if (getActiveViewId() === 'profil') {
+          renderProfileView();
+        }
+      }
+    }
 
     // Update KPI values
     const rfqKpi = document.getElementById('kpi-rfqs');
@@ -1453,11 +1591,13 @@ async function refreshNotifications(isInitial = false) {
   } catch(e) { /* silent polling error */ }
 }
 
-setInterval(async () => {
-  await refreshNotifications(false);
-}, 5000);
+function startRealtimePolling() {
+  setInterval(async () => {
+    await refreshNotifications(false);
+  }, 5000);
+}
 
-init();
+init().then(() => startRealtimePolling());
 </script>
 </body>
 </html>
