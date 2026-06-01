@@ -8,6 +8,7 @@ namespace sap.pme.doc;
 using { sap.pme as pme }         from './common';
 using { sap.pme.crm as crm }     from './crm';
 using { sap.pme.srm as srm }     from './srm';
+using from './products';
 using { cuid, managed, Currency } from '@sap/cds/common';
 
 // ────────────────────────────────────────────
@@ -105,6 +106,7 @@ entity FactureClient : cuid, managed, pme.StatusTracking, pme.Annotatable {
   remainingAmount : pme.Amount default 0;
   currency      : Currency;
   timbreFiscal  : pme.Amount default 0;  // Timbre fiscal algérien
+  discount      : pme.Percent default 0;
   // Paiements
   paiements     : Composition of many Paiement on paiements.facture = $self;
 }
@@ -117,6 +119,7 @@ entity FactureClientItem : cuid {
   quantity     : Decimal(13, 3);
   unit         : String(20);
   unitPrice    : pme.Amount;
+  discount     : pme.Percent default 0;
   tvaRate      : pme.Percent default 19;
   totalHT      : pme.Amount;
   totalTVA     : pme.Amount;
@@ -263,6 +266,7 @@ entity FactureFournisseur : cuid, managed, pme.StatusTracking, pme.Annotatable {
   paidAmount    : pme.Amount default 0;
   remainingAmount : pme.Amount default 0;
   currency      : Currency;
+  discount      : pme.Percent default 0;
   // 3-Way Match
   matchStatus   : String(20) default 'PENDING'; // PENDING, MATCHED, DISCREPANCY
   matchDate     : Timestamp;
@@ -277,6 +281,7 @@ entity FactureFournisseurItem : cuid {
   description  : String(512);
   quantity     : Decimal(13, 3);
   unitPrice    : pme.Amount;
+  discount     : pme.Percent default 0;
   tvaRate      : pme.Percent default 19;
   totalHT      : pme.Amount;
   totalTVA     : pme.Amount;

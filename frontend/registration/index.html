@@ -340,10 +340,10 @@
           <div class="row">
                 <div class="col-md-4 mb-4">
                     <label class="form-label">Numéro RC *</label>
-                    <input type="text" class="form-control" id="rc" placeholder="Ex: 16/B-0123456 ou 16B0123456" 
-                           pattern="(?:\d{2}\/[A-C]-\d{6,7}|\d{2}[A-C]\d{6,7})" required
+                    <input type="text" class="form-control" id="rc" placeholder="Ex: 16/00-1234567B16 ou 16/B-0123456" 
+                           pattern="(?:\d{2}\/\d{2}-\d{7}[A-Za-z]\d{2}|\d{2}\/[A-Za-z]-\d{6,7}|\d{4}\d{7}[A-Za-z]\d{2}|\d{2}[A-Za-z]\d{6,7})" required
                            onblur="checkFieldConflict('rc', 'rcError')">
-                    <div class="invalid-feedback" id="rcError">Format RC invalide. Ex: 16/B-0123456 ou 16B0123456</div>
+                    <div class="invalid-feedback" id="rcError">Format RC invalide. Ex: 16/00-1234567B16 ou 16/B-0123456</div>
                 </div>
                 <div class="col-md-4 mb-4">
                     <label class="form-label">NIF (15 chiffres) *</label>
@@ -951,7 +951,7 @@
           }
         });
 
-        document.getElementById("customSector").addEventListener("input", function() {
+        document.getElementById("customSector").addEventListener("change", function() {
           const val = this.value.toLowerCase().trim();
           const sectorSelect = document.getElementById("sector");
           

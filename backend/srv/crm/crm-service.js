@@ -389,11 +389,13 @@ module.exports = class CRMService extends cds.ApplicationService {
         totalTVA      : cmd.totalTVA,
         totalTTC      : cmd.totalTTC,
         remainingAmount : cmd.totalTTC,
+        discount      : cmd.discount || 0,
         items         : items.map((item, i) => ({
           ID          : cds.utils.uuid(),
           lineNumber  : i + 1, product_ID: item.product_ID,
           description : item.description, quantity: item.quantity,
           unit        : item.unit, unitPrice: item.unitPrice,
+          discount    : item.discount || 0,
           tvaRate     : item.tvaRate, totalHT: item.totalHT,
           totalTVA    : item.totalTVA, totalTTC: item.totalTTC
         }))
@@ -431,11 +433,13 @@ module.exports = class CRMService extends cds.ApplicationService {
         totalTVA      : commande.totalTVA,
         totalTTC      : commande.totalTTC,
         remainingAmount : commande.totalTTC,
+        discount      : commande.discount || 0,
         items         : items.map((item, i) => ({
           ID          : cds.utils.uuid(),
           lineNumber  : i + 1, product_ID: item.product_ID,
           description : item.description, quantity: item.quantity,
           unit        : item.unit, unitPrice: item.unitPrice,
+          discount    : item.discount || 0,
           tvaRate     : item.tvaRate, totalHT: item.totalHT,
           totalTVA    : item.totalTVA, totalTTC: item.totalTTC
         }))

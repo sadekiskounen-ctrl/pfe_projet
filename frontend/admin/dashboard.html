@@ -18,6 +18,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
+            color-scheme: light;
             /* ☀️ SAP Morning Horizon (Light Fiori Theme) */
             --bg: #f2f5f8;
             --sidebar-bg: #ffffff;
@@ -36,6 +37,7 @@
         }
 
         body.dark-mode {
+            color-scheme: dark;
             /* 🌙 SAP Evening Horizon (Dark Fiori Theme) */
             --bg: #12171c;
             --sidebar-bg: #1a222c;
@@ -98,6 +100,11 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        select option {
+            background-color: var(--sidebar-bg) !important;
+            color: var(--text-main) !important;
+        }
         body { font-family: 'Outfit', sans-serif; background-color: var(--bg); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
         /* ── Sidebar (Hover Collapsible/Expandable) ── */
@@ -513,7 +520,7 @@
         }
 
         /* ── Animated Bell ── */
-        .bell-ring {
+        .bell-ring svg {
             animation: bellRing 0.6s ease;
         }
         @keyframes bellRing {
@@ -596,6 +603,45 @@
         @keyframes fadeInError {
             from { opacity: 0; transform: translateY(-4px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── PREMIUM GLOWING HIGHLIGHT FOR ALERTS ── */
+        @keyframes alertRowPulse {
+            0% {
+                background: rgba(239, 68, 68, 0.06) !important;
+                box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.2);
+                border-color: rgba(239, 68, 68, 0.5) !important;
+            }
+            50% {
+                background: rgba(239, 68, 68, 0.14) !important;
+                box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.45), 0 0 12px rgba(239, 68, 68, 0.2);
+                border-color: rgba(239, 68, 68, 1) !important;
+            }
+            100% {
+                background: rgba(239, 68, 68, 0.06) !important;
+                box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.2);
+                border-color: rgba(239, 68, 68, 0.5) !important;
+            }
+        }
+        .highlighted-problem-row {
+            position: relative;
+            z-index: 10;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+        .highlighted-problem-row td {
+            background: rgba(239, 68, 68, 0.06) !important;
+            border-top: 2px solid rgba(239, 68, 68, 0.6) !important;
+            border-bottom: 2px solid rgba(239, 68, 68, 0.6) !important;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            animation: alertRowPulse 2.2s infinite ease-in-out !important;
+        }
+        .highlighted-problem-row td:first-child {
+            border-left: 2px solid rgba(239, 68, 68, 0.6) !important;
+            border-radius: 12px 0 0 12px !important;
+        }
+        .highlighted-problem-row td:last-child {
+            border-right: 2px solid rgba(239, 68, 68, 0.6) !important;
+            border-radius: 0 12px 12px 0 !important;
         }
     </style>
 </head>
@@ -1617,39 +1663,39 @@
                             <div class="info-grid" style="grid-template-columns: 1fr 1fr; gap: 15px;">
                                 <div class="info-group">
                                     <label>N° RFQ (Auto)</label>
-                                    <input type="text" id="rfq-form-number" class="search-input" style="width: 100%; background: rgba(255,255,255,0.05); color: #94a3b8; border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px; cursor: not-allowed;" value="[RFQ-004 auto]" readonly>
+                                    <input type="text" id="rfq-form-number" class="search-input" style="width: 100%; background: var(--input-bg); color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 10px; cursor: not-allowed;" value="[RFQ-004 auto]" readonly>
                                 </div>
                                 <div class="info-group">
                                     <label>Date clôture</label>
-                                    <input type="date" id="rfq-form-deadline" class="search-input" style="width: 100%; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px;" required
+                                    <input type="date" id="rfq-form-deadline" class="search-input" style="width: 100%; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 10px;" required
                                       oninput=""
                                       onfocus="this.min=new Date().toISOString().split('T')[0]"
                                     >
                                 </div>
                                 <div class="info-group" style="grid-column: span 2;">
                                     <label>Objet</label>
-                                    <input type="text" id="rfq-form-title" class="search-input" style="width: 100%; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px;" placeholder="ex: Achat d'ordinateurs portables" required>
+                                    <input type="text" id="rfq-form-title" class="search-input" style="width: 100%; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 10px;" placeholder="ex: Achat d'ordinateurs portables" required>
                                 </div>
                                 <div class="info-group" style="grid-column: span 2;">
                                     <label>Description</label>
-                                    <textarea id="rfq-form-description" class="search-input" style="width: 100%; height: 80px; background: rgba(255,255,255,0.05); color: white; border: 1px solid var(--glass-border); padding: 10px; border-radius: 8px; resize: vertical;" placeholder="ex: Lot de 50 PC, RAM 16Go, SSD 512" required></textarea>
+                                    <textarea id="rfq-form-description" class="search-input" style="width: 100%; height: 80px; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border); padding: 10px; border-radius: 8px; resize: vertical;" placeholder="ex: Lot de 50 PC, RAM 16Go, SSD 512" required></textarea>
                                 </div>
                                 
                                 <div class="info-group" style="grid-column: span 2;">
                                     <label>Fournisseurs ciblés</label>
                                     <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
-                                        <select id="rfq-sector-filter" class="search-input" style="flex:1;background:rgba(255,255,255,0.07);color:white;border:1px solid var(--glass-border);border-radius:8px;padding:8px;" onchange="filterRFQSuppliersBySector()">
+                                        <select id="rfq-sector-filter" class="search-input" style="flex: 1; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 8px;" onchange="filterRFQSuppliersBySector()">
                                             <option value="">Tous secteurs d'activité</option>
                                         </select>
                                         <span style="font-size:0.75rem;color:var(--text-dim)" id="rfq-supplier-count"></span>
                                     </div>
-                                    <div id="rfq-suppliers-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 150px; overflow-y: auto; padding: 12px; border: 1px solid var(--glass-border); border-radius: 8px; background: rgba(0,0,0,0.3);">
+                                    <div id="rfq-suppliers-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 150px; overflow-y: auto; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--input-bg); color: var(--text-main);">
                                         <!-- Loaded dynamically -->
                                     </div>
                                 </div>
                             </div>
 
-                            <h4 style="margin-top: 25px; margin-bottom: 10px; color: white; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; font-weight: 600;">📦 Lignes de produits</h4>
+                            <h4 style="margin-top: 25px; margin-bottom: 10px; color: var(--text-main); border-bottom: 1px solid var(--border); padding-bottom: 5px; font-weight: 600;">📦 Lignes de produits</h4>
                             <table class="data-table" style="font-size: 0.8rem; margin-bottom: 10px;">
                                 <thead>
                                     <tr>
@@ -1663,7 +1709,7 @@
                                     <!-- Dynamic rows -->
                                 </tbody>
                             </table>
-                            <button type="button" class="btn-filter" onclick="addRfqItemRow()" style="margin-bottom: 20px; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem;">＋ Ajouter une ligne</button>
+                            <button type="button" class="btn-filter" onclick="addRfqItemRow()" style="margin-bottom: 20px; background: var(--input-bg); border: 1px solid var(--border); color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-size: 0.8rem;">＋ Ajouter une ligne</button>
 
                             <div style="display: flex; gap: 10px; margin-top: 20px;">
                                 <button type="submit" class="btn-action" style="flex: 2; padding: 12px; font-weight: 700; border-radius: 8px;">Enregistrer et publier</button>
@@ -1913,6 +1959,7 @@
                 yearSel.onchange = updateMonths;
                 monthSel.onchange = loadStats;
                 
+                ensureMockProductsExist();
                 updateMonths(); // Initial load
                 
                 // Actualisation en temps réel toutes les 5 secondes
@@ -2031,7 +2078,7 @@
 
                 // Dynamic subtitle of CA card (e.g. Ventes de Mai 2026)
                 const monthNames = { "01": "Janvier", "02": "Février", "03": "Mars", "04": "Avril", "05": "Mai", "06": "Juin", "07": "Juillet", "08": "Août", "09": "Septembre", "10": "Octobre", "11": "Novembre", "12": "Décembre" };
-                const monthLabel = monthNames[m] || "Mai";
+                const monthLabel = monthNames[String(m).padStart(2, '0')] || "Mai";
                 document.getElementById('kpi-revenue-sub').innerText = `Ventes de ${monthLabel} ${y}`;
                 
                 const titleLabel = document.getElementById('chart-title-label');
@@ -2150,6 +2197,117 @@
             switchView(viewId, el);
         }
 
+        function checkAndApplyPendingAlertHighlight() {
+            if (!window.pendingAlertHighlight) return;
+            const { targetType, targetId } = window.pendingAlertHighlight;
+            let elementId = '';
+            if (targetType === 'product') {
+                elementId = 'product-row-' + targetId;
+            } else if (targetType === 'registration') {
+                elementId = 'registration-row-' + targetId;
+            } else if (targetType === 'invoice') {
+                elementId = 'invoice-row-' + targetId;
+            }
+
+            const targetRow = document.getElementById(elementId);
+            if (targetRow) {
+                // Clear any other highlighted rows
+                document.querySelectorAll('.highlighted-problem-row').forEach(row => {
+                    row.classList.remove('highlighted-problem-row');
+                });
+
+                // Smooth scroll into view
+                targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Apply beautiful glowing premium CSS class
+                targetRow.classList.add('highlighted-problem-row');
+
+                // Clear the pending alert since we applied it
+                window.pendingAlertHighlight = null;
+            }
+        }
+
+        function resolveAlertTarget(viewId, targetType, targetId, extraCode = '') {
+            // Set the pending highlight
+            window.pendingAlertHighlight = { targetType, targetId };
+
+            // Clear any previously highlighted rows in DOM
+            document.querySelectorAll('.highlighted-problem-row').forEach(row => {
+                row.classList.remove('highlighted-problem-row');
+            });
+
+            // 1. Basculer vers la vue correspondante
+            const navItem = document.querySelector(`[onclick*="switchView('${viewId}'"]`);
+            if (navItem) {
+                switchView(viewId, navItem);
+            } else {
+                navigateToView(viewId);
+            }
+
+            // 2. Immediate fallback check in case the view is already loaded/rendered
+            setTimeout(() => {
+                checkAndApplyPendingAlertHighlight();
+            }, 100);
+
+            // 3. Second fallback check slightly later
+            setTimeout(() => {
+                checkAndApplyPendingAlertHighlight();
+            }, 600);
+        }
+
+        async function ensureMockProductsExist() {
+            try {
+                const res = await fetch('/odata/v4/admin/Produits?$filter=code eq \'SKU-CHAIR-001\' or code eq \'SKU-CIM-001\'', { headers: adminHeaders });
+                const data = await res.json();
+                const products = data.value || [];
+                
+                const hasChair = products.some(p => p.code === 'SKU-CHAIR-001');
+                const hasCiment = products.some(p => p.code === 'SKU-CIM-001');
+                
+                if (!hasChair) {
+                    await fetch('/odata/v4/admin/Produits', {
+                        method: 'POST',
+                        headers: { ...adminHeaders, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            code: 'SKU-CHAIR-001',
+                            name: 'Chaise Ergonomique',
+                            description: 'Chaise de bureau ergonomique premium',
+                            category: 'Mobilier',
+                            type: 'PRODUCT',
+                            unit: 'PIECE',
+                            unitPrice: 24500,
+                            tvaRate: 19,
+                            stock: 3,
+                            minStock: 5,
+                            isActive: true
+                        })
+                    });
+                }
+                
+                if (!hasCiment) {
+                    await fetch('/odata/v4/admin/Produits', {
+                        method: 'POST',
+                        headers: { ...adminHeaders, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            code: 'SKU-CIM-001',
+                            name: 'Ciment Portland',
+                            description: 'Sac de ciment de haute résistance',
+                            category: 'Matériaux',
+                            type: 'PRODUCT',
+                            unit: 'PIECE',
+                            unitPrice: 1200,
+                            tvaRate: 19,
+                            stock: 2,
+                            minStock: 50,
+                            isActive: true
+                        })
+                    });
+                }
+            } catch(e) {
+                console.error("Error creating mock products:", e);
+            }
+        }
+
         async function loadAlerts() {
             const list = document.getElementById('alerts-list');
             if (!list) return;
@@ -2158,68 +2316,72 @@
             
             // 1. Fetch pending registrations list (KYC)
             try {
-                const regRes = await fetch("/odata/v4/registration/Registrations?$filter=status eq 'PENDING'&$select=companyName,city", { headers: adminHeaders });
+                const regRes = await fetch("/odata/v4/registration/RegistrationRequests?$filter=status eq 'PENDING'&$select=ID,companyName,address", { headers: adminHeaders });
                 const regData = await regRes.json();
                 const pendingRegs = regData.value || [];
                 
                 pendingRegs.forEach(r => {
                     alertHtml += `
-                        <div style="background: var(--input-bg); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                        <div id="alert-reg-${r.ID}" style="background: var(--input-bg); border-left: 3px solid var(--accent); padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px;">
                             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 3px;">
                                 <div style="font-weight: 700; font-size: 0.82rem; color: var(--accent); display: flex; align-items: center; gap: 6px;">
                                     <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent);"></span> Nouvelle inscription en attente KYC
                                 </div>
-                                <div style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">L'entreprise <em>${r.companyName} (${r.city || 'Algérie'})</em> demande validation.</div>
+                                <div style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">L'entreprise <em>${r.companyName} (${r.address || 'Algérie'})</em> demande validation.</div>
                             </div>
-                            <button class="btn-resolve" onclick="navigateToView('registrations')" style="padding: 4px 10px; font-size: 0.72rem; border-radius: 6px; font-weight: 700; height: auto;">RÉSOUDRE</button>
+                            <button class="btn-resolve" onclick="resolveAlertTarget('registrations', 'registration', '${r.ID}')" style="padding: 4px 10px; font-size: 0.72rem; border-radius: 6px; font-weight: 700; height: auto;">RÉSOUDRE</button>
                         </div>`;
                 });
-            } catch(e) {}
-
+            } catch(e) {
+                console.error("Error fetching pending registrations for alerts:", e);
+            }
+ 
             // 2. Fetch price/quantity discrepancies (Factures)
             try {
-                const res = await fetch("/odata/v4/admin/AllFacturesFournisseur?$filter=matchStatus eq 'DISCREPANCY'&$select=invoiceNumber,supplierName", { headers: adminHeaders });
+                const res = await fetch("/odata/v4/admin/AllFacturesFournisseur?$filter=matchStatus eq 'DISCREPANCY'&$expand=fournisseur($select=companyName)&$select=ID,invoiceNumber", { headers: adminHeaders });
                 const data = await res.json();
                 const disputes = data.value || [];
                 
                 disputes.forEach(d => {
+                    const supName = d.fournisseur ? d.fournisseur.companyName : 'Fournisseur';
                     alertHtml += `
-                        <div style="background: var(--input-bg); border-left: 3px solid #ef4444; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                        <div id="alert-invoice-${d.ID}" style="background: var(--input-bg); border-left: 3px solid #ef4444; padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px;">
                             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 3px;">
                                 <div style="font-weight: 700; font-size: 0.82rem; color: #ef4444; display: flex; align-items: center; gap: 6px;">
                                     <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#ef4444;"></span> Écart de facturation (Litige)
                                 </div>
-                                <div style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">Facture N° <strong>${d.invoiceNumber}</strong> (Fournisseur : <em>${d.supplierName}</em>) en écart.</div>
+                                <div style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">Facture N° <strong>${d.invoiceNumber || '—'}</strong> (Fournisseur : <em>${supName}</em>) en écart.</div>
                             </div>
-                            <button class="btn-resolve" style="background:#ef4444; padding: 4px 10px; font-size: 0.72rem; border-radius: 6px; font-weight: 700; height: auto;" onclick="navigateToView('factures')">RÉSOUDRE</button>
+                            <button class="btn-resolve" style="background:#ef4444; padding: 4px 10px; font-size: 0.72rem; border-radius: 6px; font-weight: 700; height: auto;" onclick="resolveAlertTarget('factures', 'invoice', '${d.ID}')">RÉSOUDRE</button>
                         </div>`;
                 });
-            } catch(e) {}
-
-            // 3. Stock Critique mock alerts (matches reference photo for amazing UX & realism!)
-            alertHtml += `
-                <div style="background: var(--input-bg); border-left: 3px solid var(--accent-orange); padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 3px;">
-                        <div style="font-weight: 700; font-size: 0.82rem; color: var(--accent-orange); display: flex; align-items: center; gap: 6px;">
-                            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent-orange);"></span> Stock Critique / Faible
-                        </div>
-                        <div style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">Produit : <em>Chaise Ergonomique (SKU: SKU-CHAIR-001)</em>. Stock restant : <strong style="color:var(--accent-orange);">3</strong> (Min: 5).</div>
-                    </div>
-                    <button class="btn-resolve" style="background: var(--accent-orange); padding: 4px 10px; font-size: 0.72rem; border-radius: 6px; font-weight: 700; height: auto;" onclick="navigateToView('catalogue')">RÉSOUDRE</button>
-                </div>`;
-            
-            alertHtml += `
-                <div style="background: var(--input-bg); border-left: 3px solid var(--accent-orange); padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
-                    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 3px;">
-                        <div style="font-weight: 700; font-size: 0.82rem; color: var(--accent-orange); display: flex; align-items: center; gap: 6px;">
-                            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent-orange);"></span> Stock Critique / Faible
-                        </div>
-                        <div style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">Produit : <em>Ciment Portland (SKU: SKU-CIM-001)</em>. Stock restant : <strong style="color:var(--accent-orange);">2</strong> (Min: 50).</div>
-                    </div>
-                    <button class="btn-resolve" style="background: var(--accent-orange); padding: 4px 10px; font-size: 0.72rem; border-radius: 6px; font-weight: 700; height: auto;" onclick="navigateToView('catalogue')">RÉSOUDRE</button>
-                </div>`;
-
-            list.innerHTML = alertHtml;
+            } catch(e) {
+                console.error("Error fetching discrepancies for alerts:", e);
+            }
+ 
+            // 3. Dynamic Stock Critique alerts
+            try {
+                const prodRes = await fetch("/odata/v4/admin/Produits?$filter=stock lt minStock&$select=ID,code,name,stock,minStock", { headers: adminHeaders });
+                const prodData = await prodRes.json();
+                const lowStockProds = prodData.value || [];
+                
+                lowStockProds.forEach(p => {
+                    alertHtml += `
+                        <div id="alert-stock-${p.ID}" style="background: var(--input-bg); border-left: 3px solid var(--accent-orange); padding: 12px 16px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px;">
+                            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 3px;">
+                                <div style="font-weight: 700; font-size: 0.82rem; color: var(--accent-orange); display: flex; align-items: center; gap: 6px;">
+                                    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--accent-orange);"></span> Stock Critique / Faible
+                                </div>
+                                <div style="font-size: 0.78rem; color: var(--text-main); font-weight: 500;">Produit : <em>${p.name} (SKU: ${p.code || '—'})</em>. Stock restant : <strong style="color:var(--accent-orange);">${p.stock ?? 0}</strong> (Min: ${p.minStock ?? 0}).</div>
+                            </div>
+                            <button class="btn-resolve" style="background: var(--accent-orange); padding: 4px 10px; font-size: 0.72rem; border-radius: 6px; font-weight: 700; height: auto;" onclick="resolveAlertTarget('catalogue', 'product', '${p.ID}')">RÉSOUDRE</button>
+                        </div>`;
+                });
+            } catch(e) {
+                console.error("Error fetching critical stocks for alerts:", e);
+            }
+ 
+            list.innerHTML = alertHtml || '<div style="padding:15px; font-size:0.8rem; color:var(--text-dim); text-align:center;">✨ Aucune alerte active. Tout est en ordre !</div>';
         }
 
         let currentClientFilter = '';
@@ -2490,13 +2652,14 @@
                     const btnLabel = r.isReentry ? 'Re-examiner' : 'Examiner';
                     const btnStyle = r.isReentry ? 'background: #fb923c; color: black;' : '';
                     return `
-                    <tr>
+                    <tr id="registration-row-${r.ID}">
                         <td><strong>${r.companyName}</strong> ${r.isReentry ? '<span style="font-size:0.7rem; background:#fb923c; color:black; padding:2px 6px; border-radius:10px; margin-left:5px;">RE-INSCRIPTION</span>' : ''}</td>
                         <td>${r.email}</td>
                         <td>${typeLabel}</td>
                         <td><button class="btn-action" style="${btnStyle}" onclick="openExamModal('${r.ID}')">${btnLabel}</button></td>
                     </tr>
                 `}).join('') : '<tr><td colspan="4" style="text-align:center; padding:20px;">Aucun dossier en attente</td></tr>';
+                checkAndApplyPendingAlertHighlight();
             } catch(e) {}
         }
 
@@ -3382,7 +3545,7 @@
                     ? '<span style="background:rgba(251,146,60,0.15); color:var(--accent-orange); padding:3px 10px; border-radius:20px; font-size:0.75rem;">Service</span>'
                     : '<span style="background:rgba(56,189,248,0.15); color:var(--accent); padding:3px 10px; border-radius:20px; font-size:0.75rem;">Produit</span>';
                 
-                return `<tr>
+                return `<tr id="product-row-${p.ID}">
                     <td><span style="font-family:monospace; color:var(--accent); font-weight:600;">${p.code || '—'}</span></td>
                     <td style="font-weight:600;">${p.name}</td>
                     <td style="color:var(--text-dim);">${p.category || '—'}</td>
@@ -3400,6 +3563,7 @@
                     </td>
                 </tr>`;
             }).join('');
+            checkAndApplyPendingAlertHighlight();
         }
 
         function updateCatalogueKPIs(products) {
@@ -3634,7 +3798,11 @@
                     method: 'DELETE',
                     headers: adminHeaders
                 });
-                if (!res.ok && res.status !== 204) throw new Error(`Erreur HTTP ${res.status}`);
+                if (!res.ok && res.status !== 204) {
+                    const errData = await res.json().catch(() => ({}));
+                    const errMsg = errData?.error?.message || `Erreur HTTP ${res.status}`;
+                    throw new Error(errMsg);
+                }
                 await loadRfqs();
                 Toast.success("Appel d'offres supprimé", `L'appel d'offres "${rfqNumber}" a été définitivement supprimé.`);
             } catch(e) {
@@ -3671,21 +3839,11 @@
                 document.getElementById('kpi-rfqs-closed').innerText = closedRfqs;
                 document.getElementById('kpi-rfqs-offers').innerText = totalOffers;
 
-                // Calculate unselected supplier responses/offers (incoming RFQ responses)
-                let unselectedResponsesCount = 0;
-                try {
-                    const respRes = await fetch('/odata/v4/srm/RFQResponses?$filter=selected eq false&$select=ID', { headers: adminHeaders });
-                    const respData = await respRes.json();
-                    unselectedResponsesCount = (respData.value || []).length;
-                } catch (e) {
-                    unselectedResponsesCount = 0;
-                }
-
-                // Dynamically sync and update the RFQ alert badge next to the sidebar item
+                // Dynamically sync and update the RFQ alert badge next to the sidebar item (representing Open RFQs count)
                 const badge = document.getElementById('rfq-alert-badge');
                 if (badge) {
-                    if (unselectedResponsesCount > 0) {
-                        badge.textContent = unselectedResponsesCount;
+                    if (openRfqs > 0) {
+                        badge.textContent = openRfqs;
                         badge.style.display = 'block';
                         badge.classList.add('noti-badge-pulse');
                     } else {
@@ -3782,14 +3940,14 @@
             }
 
             const countEl = document.getElementById('rfq-supplier-count');
-            if (countEl) countEl.textContent = `${filtered.length} fournisseur(s)`;
 
             if (!filtered.length) {
+                if (countEl) countEl.textContent = `0 sur 0 sélectionné(s)`;
                 container.innerHTML = `<span style="color:var(--text-dim); font-size:0.8rem;">Aucun fournisseur pour ce secteur.</span>`;
                 return;
             }
 
-            // Garde les cases cochées actuellement si elles sont tou jours visibles
+            // Garde les cases cochées actuellement si elles sont toujours visibles
             const alreadyChecked = new Set(
                 [...document.querySelectorAll('input[name="rfq-targeted-suppliers"]:checked')].map(el => el.value)
             );
@@ -3797,12 +3955,23 @@
             container.innerHTML = filtered.map(bp => {
                 const isChecked = selectedIds.includes(bp.ID) || alreadyChecked.has(bp.ID) ? 'checked' : '';
                 return `
-                    <label style="display:flex; align-items:center; gap:8px; color:white; font-size:0.85rem; cursor:pointer;">
-                        <input type="checkbox" name="rfq-targeted-suppliers" value="${bp.ID}" ${isChecked} style="accent-color:var(--accent);">
+                    <label style="display:flex; align-items:center; gap:8px; color:var(--text-main); font-size:0.85rem; cursor:pointer;">
+                        <input type="checkbox" name="rfq-targeted-suppliers" value="${bp.ID}" ${isChecked} style="accent-color:var(--accent);" onchange="updateTargetSuppliersCheckedCount()">
                         ${bp.displayName}${bp.sector ? ` <span style="font-size:0.7rem;color:var(--text-dim);">(${bp.sector})</span>` : ''}
                     </label>
                 `;
             }).join('');
+
+            updateTargetSuppliersCheckedCount();
+        }
+
+        function updateTargetSuppliersCheckedCount() {
+            const container = document.getElementById('rfq-suppliers-container');
+            const countEl = document.getElementById('rfq-supplier-count');
+            if (!container || !countEl) return;
+            const total = container.querySelectorAll('input[name="rfq-targeted-suppliers"]').length;
+            const checked = container.querySelectorAll('input[name="rfq-targeted-suppliers"]:checked').length;
+            countEl.textContent = `${checked} sur ${total} sélectionné(s)`;
         }
 
         function filterRFQSuppliersBySector() {
@@ -3816,13 +3985,13 @@
             tr.id = rowId;
             tr.innerHTML = `
                 <td>
-                    <input type="text" class="search-input rfq-item-desc" style="width:100%; padding:6px; font-size:0.8rem; background:rgba(0,0,0,0.2); border:1px solid var(--glass-border); color:white; border-radius:6px;" value="${description}" placeholder="ex: PC Portable X" required>
+                    <input type="text" class="search-input rfq-item-desc" style="width:100%; padding:6px; font-size:0.8rem; background:var(--input-bg); border:1px solid var(--border); color:var(--text-main); border-radius:6px;" value="${description}" placeholder="ex: PC Portable X" required>
                 </td>
                 <td>
-                    <input type="number" class="search-input rfq-item-qty" style="width:100%; padding:6px; font-size:0.8rem; background:rgba(0,0,0,0.2); border:1px solid var(--glass-border); color:white; border-radius:6px;" value="${quantity}" placeholder="50" min="1" required>
+                    <input type="number" class="search-input rfq-item-qty" style="width:100%; padding:6px; font-size:0.8rem; background:var(--input-bg); border:1px solid var(--border); color:var(--text-main); border-radius:6px;" value="${quantity}" placeholder="50" min="1" required>
                 </td>
                 <td>
-                    <input type="number" class="search-input rfq-item-price" style="width:100%; padding:6px; font-size:0.8rem; background:rgba(0,0,0,0.2); border:1px solid var(--glass-border); color:white; border-radius:6px;" value="${targetPrice}" placeholder="Cible HT (DA)" required>
+                    <input type="number" class="search-input rfq-item-price" style="width:100%; padding:6px; font-size:0.8rem; background:var(--input-bg); border:1px solid var(--border); color:var(--text-main); border-radius:6px;" value="${targetPrice}" placeholder="Cible HT (DA)" required>
                 </td>
                 <td style="text-align:center;">
                     <button type="button" class="btn-action" style="background:#ef4444; color:white; padding:4px 8px; font-size:0.75rem;" onclick="removeRfqItemRow('${rowId}')">Supprimer</button>
@@ -4371,7 +4540,7 @@
                     const remAmt = f.remainingAmount !== undefined ? f.remainingAmount : (f.status === 'PAID' ? 0 : f.totalTTC);
                     const remHtml = `<div style="font-size:0.75rem; color:var(--text-dim); margin-top:2px;">Reste à payer : ${new Intl.NumberFormat('fr-FR').format(remAmt)} DA</div>`;
 
-                    return `<tr onclick="adminViewInvoice('${f.ID}', '${f._type}', event)" style="cursor: pointer;">
+                    return `<tr id="invoice-row-${f.ID}" onclick="adminViewInvoice('${f.ID}', '${f._type}', event)" style="cursor: pointer;">
                         <td style="font-weight:700;">${f.invoiceNumber || f.factureNumber || '-'}</td>
                         <td>${typeLabel}</td>
                         <td>${f.date || '-'}</td>
@@ -4380,6 +4549,7 @@
                         <td>${actionsHtml}</td>
                     </tr>`;
                 }).join('');
+                checkAndApplyPendingAlertHighlight();
             } catch (e) {
                 console.error('loadAdminFactures error:', e);
                 tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#f87171;">${e.message}</td></tr>`;
@@ -4554,21 +4724,25 @@
                     list.innerHTML = html || '<div style="padding:15px; font-size:0.8rem; color:var(--text-dim); text-align:center;">Aucune notification</div>';
                 }
 
-                // 3. Badge RFQ = uniquement les offres rentrantes (soumises par les fournisseurs) non sélectionnées
-                const respRes = await fetch('/odata/v4/srm/RFQResponses?$filter=selected eq false&$select=ID', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
-                const respData = await respRes.json().catch(() => ({ value: [] }));
+                // 3. Badge RFQ = uniquement les appels d'offres ouverts
+                const rfqRes = await fetch('/odata/v4/srm/RFQs?$filter=status eq \'OPEN\'&$select=ID', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
+                const rfqData = await rfqRes.json().catch(() => ({ value: [] }));
 
-                const newResponses = (respData.value || []).length;
-                const rfqNotifCount = newResponses;
+                const openRfqsCount = (rfqData.value || []).length;
                 const rfqBadge = document.getElementById('rfq-alert-badge');
                 if (rfqBadge) {
-                    rfqBadge.textContent = rfqNotifCount;
-                    rfqBadge.style.display = rfqNotifCount > 0 ? '' : 'none';
-                    if (newResponses > _lastRFQResponseCount && _lastRFQResponseCount >= 0) {
-                        Toast && Toast.show && Toast.show('info', '📩 Nouvelle offre reçue', `${newResponses} offre(s) fournisseur en attente.`, 5000);
-                    }
-                    _lastRFQResponseCount = newResponses;
+                    rfqBadge.textContent = openRfqsCount;
+                    rfqBadge.style.display = openRfqsCount > 0 ? '' : 'none';
                 }
+
+                // Check for new incoming RFQ responses quietly to show notification toasts
+                const respRes = await fetch('/odata/v4/srm/RFQResponses?$filter=selected eq false&$select=ID', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
+                const respData = await respRes.json().catch(() => ({ value: [] }));
+                const newResponsesCount = (respData.value || []).length;
+                if (newResponsesCount > _lastRFQResponseCount && _lastRFQResponseCount >= 0) {
+                    Toast && Toast.show && Toast.show('info', '📩 Nouvelle offre reçue', `${newResponsesCount} offre(s) fournisseur en attente.`, 5000);
+                }
+                _lastRFQResponseCount = newResponsesCount;
 
                 // 4. Badge Commandes = pending cash orders + unviewed confirmed orders (CRM and SRM)
                 try {

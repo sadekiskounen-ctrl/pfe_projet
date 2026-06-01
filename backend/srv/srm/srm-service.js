@@ -594,6 +594,52 @@ module.exports = class SRMService extends cds.ApplicationService {
       return SELECT.one.from(FacturesFournisseur).where({ ID: factureId });
     });
 
+    // ─────────────────────────────────────────
+    // CUSTOM DELETE: Supprimer un Appel d'Offres (RFQ) — Hook avant suppression
+    // ─────────────────────────────────────────
+    this.before('DELETE', RFQs, async (req) => {
+      let id = req.data?.ID;
+      if (!id && req.params && req.params.length > 0) {
+        const param = req.params[0];
+        id = typeof param === 'object' ? param.ID : param;
+      }
+
+      if (!id) return;
+
+      console.log(`[SRM Service] before DELETE handler for RFQ: ${id}`);
+
+      // 1. Vérifier si l'appel d'offres existe
+      const rfq = await SELECT.one.from(RFQs).where({ ID: id });
+      if (!rfq) return; // laisse le gestionnaire par défaut renvoyer un 404
+
+      // 2. Vérifier s'il est lié à un bon de commande fournisseur (PO)
+      const po = await SELECT.one.from(BonsCommande).where({ rfq_ID: id });
+      if (po) {
+        return req.error(400, `Impossible de supprimer l'appel d'offres ${rfq.rfqNumber} car il a été converti en Bon de Commande (${po.poNumber}).`);
+      }
+
+      try {
+        // Suppression des dépendances enfants d'abord pour respecter l'intégrité référentielle SQL/SQLite
+        // A. Offres Fournisseurs (RFQResponseItem)
+        const responses = await SELECT.from(RFQResponses).where({ rfq_ID: id });
+        const responseIds = responses.map(r => r.ID);
+        if (responseIds.length > 0) {
+          await DELETE.from(RFQResponseItems).where({ parent_ID: { in: responseIds } });
+        }
+
+        // B. Offres Fournisseurs (RFQResponse)
+        await DELETE.from(RFQResponses).where({ rfq_ID: id });
+
+        // C. Articles de l'appel d'offres (RFQItem)
+        await DELETE.from(RFQItems).where({ parent_ID: id });
+
+        console.log(`[SRM Service] Cleaned up child records for RFQ ${rfq.rfqNumber} successfully.`);
+      } catch (e) {
+        console.error('[SRM Service] Error during RFQ pre-deletion cleanup:', e);
+        return req.error(500, `Erreur lors du nettoyage des dépendances de l'appel d'offres : ${e.message}`);
+      }
+    });
+
     await super.init();
   }
 

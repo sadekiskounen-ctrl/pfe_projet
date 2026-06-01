@@ -5,6 +5,8 @@
 namespace sap.pme.srm;
 
 using { sap.pme as pme } from './common';
+using from './business-partner';
+using from './documents';
 using { cuid, managed }   from '@sap/cds/common';
 
 /**
