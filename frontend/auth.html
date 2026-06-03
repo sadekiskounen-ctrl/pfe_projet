@@ -3,42 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authentification — Gestion PME</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>CloudBridge | Connexion Authentifiée</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --sap-blue: #0070f2;
-            --sap-blue-dark: #0040b0;
-            --bg: #eff4f9;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --text: #1d2733;
-            --text-muted: #556b82;
-            --border: rgba(224, 229, 238, 0.5);
-            --shadow: 0 20px 40px rgba(0,0,0,0.1);
+            --primary: #0070f2;
+            --primary-dark: #0040b0;
+            --primary-light: rgba(0, 112, 242, 0.15);
+            --accent: #00d2ff;
+            --bg: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.78);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: rgba(226, 232, 240, 0.8);
+            --shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #354a5f 0%, #eff4f9 100%);
-            color: var(--text);
+            color: var(--text-main);
             min-height: 100vh;
-            margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+            background: var(--bg);
             padding: 20px;
         }
 
+        /* ── BACKGROUND ANIMATIONS (Mesh Liquid Gradients) ── */
+        .bg-glow-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .glow-circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.65;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+
+        .glow-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #c084fc 0%, rgba(192, 132, 252, 0) 70%);
+            top: -10%;
+            left: -10%;
+            animation-duration: 25s;
+        }
+
+        .glow-2 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #38bdf8 0%, rgba(56, 189, 248, 0) 70%);
+            bottom: -20%;
+            right: -10%;
+            animation-delay: -5s;
+            animation-duration: 30s;
+        }
+
+        .glow-3 {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, #818cf8 0%, rgba(129, 140, 248, 0) 70%);
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -10s;
+            animation-duration: 20s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(50px, 30px) scale(1.1) rotate(180deg); }
+            100% { transform: translate(-30px, -50px) scale(0.9) rotate(360deg); }
+        }
+
+        /* ── AUTH CONTAINER ── */
         .auth-container {
             background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 28px;
             box-shadow: var(--shadow);
             width: 100%;
-            max-width: 480px;
+            max-width: 460px;
             overflow: hidden;
-            border: 1px solid var(--border);
-            animation: fadeIn 0.6s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            z-index: 2;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
         @keyframes fadeIn {
@@ -47,63 +116,104 @@
         }
 
         .auth-header {
-            background: linear-gradient(135deg, var(--sap-blue-dark), var(--sap-blue));
-            padding: 4rem 2rem;
+            padding: 2.5rem 2rem 1.5rem;
             text-align: center;
-            color: white;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
         }
 
-        .auth-header::after {
+        .brand-logo-frame {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+        }
+
+        .brand-logo-frame::before {
             content: '';
             position: absolute;
-            bottom: -20px;
-            left: 0;
-            right: 0;
-            height: 40px;
-            background: var(--card-bg);
-            border-radius: 50% 50% 0 0;
+            inset: -4px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            opacity: 0.15;
+            filter: blur(6px);
+        }
+
+        .brand-logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 8px 20px rgba(0, 112, 242, 0.18);
+            object-fit: cover;
+            z-index: 2;
         }
 
         .auth-header h1 {
-            font-size: 1.75rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
             letter-spacing: -0.5px;
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
+        .auth-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        /* ── BODY ── */
         .auth-body {
-            padding: 3rem 2.5rem 2.5rem;
+            padding: 0 2.25rem 2.25rem;
         }
 
+        /* ── ROLE SELECTOR ── */
         .role-selector {
             display: flex;
-            background: #f1f5f9;
-            padding: 6px;
-            border-radius: 12px;
+            background: rgba(226, 232, 240, 0.6);
+            padding: 5px;
+            border-radius: 14px;
             margin-bottom: 2rem;
+            border: 1px solid rgba(226, 232, 240, 0.4);
         }
 
         .role-option {
             flex: 1;
             padding: 10px;
-            border-radius: 8px;
+            border-radius: 10px;
             text-align: center;
             cursor: pointer;
             font-size: 0.85rem;
             font-weight: 600;
             color: var(--text-muted);
-            transition: all 0.3s;
+            transition: all 0.25s ease;
+        }
+
+        .role-option:hover {
+            color: var(--text-main);
         }
 
         .role-option.active {
             background: white;
-            color: var(--sap-blue);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            color: var(--primary);
+            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.05), 
+                        0 0 1px rgba(0, 112, 242, 0.1);
         }
 
+        /* ── FORM & INPUTS ── */
         .form-group {
             margin-bottom: 1.5rem;
+            text-align: left;
         }
 
         label {
@@ -111,117 +221,175 @@
             font-size: 0.85rem;
             font-weight: 600;
             margin-bottom: 0.6rem;
-            color: var(--text);
+            color: var(--text-main);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            pointer-events: none;
+            transition: color 0.3s;
         }
 
         input {
             width: 100%;
-            padding: 14px 16px;
-            border: 1.5px solid var(--border);
-            border-radius: 12px;
-            font-size: 1rem;
+            padding: 14px 16px 14px 44px;
+            border: 1.5px solid rgba(226, 232, 240, 0.9);
+            border-radius: 14px;
+            font-size: 0.95rem;
             outline: none;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
             box-sizing: border-box;
-            background: white;
+            background: rgba(255, 255, 255, 0.7);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+        }
+
+        input::placeholder {
+            color: #94a3b8;
         }
 
         input:focus {
-            border-color: var(--sap-blue);
+            background: #ffffff;
+            border-color: var(--primary);
             box-shadow: 0 0 0 4px rgba(0, 112, 242, 0.1);
         }
 
+        input:focus ~ .input-icon {
+            color: var(--primary);
+        }
+
+        /* ── ACTION BUTTONS ── */
         .btn-primary {
             width: 100%;
-            background: linear-gradient(135deg, var(--sap-blue), var(--sap-blue-dark));
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
             padding: 16px;
-            border-radius: 12px;
-            font-size: 1rem;
+            border-radius: 14px;
+            font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
             margin-top: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 112, 242, 0.2);
+            font-family: 'Inter', sans-serif;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 112, 242, 0.3);
+            box-shadow: 0 8px 24px rgba(0, 112, 242, 0.3);
         }
 
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* ── FOOTER ── */
         .auth-footer {
             text-align: center;
-            padding: 2rem;
-            background: rgba(248, 250, 252, 0.5);
-            border-top: 1px solid var(--border);
-            font-size: 0.9rem;
+            padding: 1.75rem 2rem;
+            background: rgba(248, 250, 252, 0.6);
+            border-top: 1px solid rgba(226, 232, 240, 0.8);
+            font-size: 0.85rem;
             color: var(--text-muted);
+            font-weight: 500;
+            line-height: 1.5;
         }
 
         .auth-footer a {
-            color: var(--sap-blue);
+            color: var(--primary);
             text-decoration: none;
             font-weight: 700;
+            transition: color 0.2s;
         }
 
         .auth-footer a:hover {
+            color: var(--primary-dark);
             text-decoration: underline;
         }
 
+        /* ── ERROR MESSAGE ── */
         #errorMsg {
-            color: #ef4444;
-            background: #fee2e2;
-            padding: 12px;
+            color: #b91c1c;
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            padding: 12px 16px;
             border-radius: 12px;
             font-size: 0.85rem;
             margin-bottom: 1.5rem;
             display: none;
             text-align: center;
-            font-weight: 500;
+            font-weight: 550;
+            line-height: 1.4;
+            animation: shake 0.4s;
         }
     </style>
 </head>
 <body>
 
-<div class="auth-container">
-    <div class="auth-header">
-        <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" style="width: 70px; background: white; padding: 5px; border-radius: 5px; margin-bottom: 20px;">
-        <h1>Gestion PME</h1>
-        <p style="opacity: 0.8; font-size: 0.9rem;">Accédez à votre écosystème SAP BTP</p>
+    <!-- ANIMATED GLOW BACKGROUNDS -->
+    <div class="bg-glow-container">
+        <div class="glow-circle glow-1"></div>
+        <div class="glow-circle glow-2"></div>
+        <div class="glow-circle glow-3"></div>
     </div>
 
-    <div class="auth-body">
-        <div id="errorMsg">Identifiants incorrects. Veuillez vérifier vos informations.</div>
-        
-        <div class="role-selector">
-            <div class="role-option active" data-role="client" onclick="selectRole('client')">Client</div>
-            <div class="role-option" data-role="fournisseur" onclick="selectRole('fournisseur')">Fournisseur</div>
-            <div class="role-option" data-role="admin" onclick="selectRole('admin')">Admin</div>
+    <!-- CONNEXION CONTAINER -->
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="brand-logo-frame">
+                <img src="/images/logo_round.png" alt="CloudBridge Logo" class="brand-logo">
+            </div>
+            <h1>CloudBridge</h1>
+            <p>Gestion Client et Fournisseurs</p>
         </div>
 
-        <form id="loginForm">
-            <input type="hidden" id="selectedRole" value="client">
-
-            <div class="form-group">
-                <label for="username">Email ou Identifiant</label>
-                <input type="text" id="username" placeholder="votre@email.com" required oninput="this.value = this.value.toLowerCase()">
+        <div class="auth-body">
+            <div id="errorMsg">Identifiants incorrects. Veuillez vérifier vos informations.</div>
+            
+            <div class="role-selector">
+                <div class="role-option active" data-role="client" onclick="selectRole('client')">Client</div>
+                <div class="role-option" data-role="fournisseur" onclick="selectRole('fournisseur')">Fournisseur</div>
+                <div class="role-option" data-role="admin" onclick="selectRole('admin')">Admin</div>
             </div>
 
-            <div class="form-group">
-                <label for="password">Mot de passe</label>
-                <input type="password" id="password" placeholder="••••••••" required>
-            </div>
+            <form id="loginForm">
+                <input type="hidden" id="selectedRole" value="client">
 
-            <button type="submit" class="btn-primary">Connexion sécurisée</button>
-        </form>
-    </div>
+                <div class="form-group">
+                    <label for="username">Email ou Identifiant</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="username" placeholder="votre@email.com" required oninput="this.value = this.value.toLowerCase()">
+                        <i class="fas fa-envelope input-icon"></i>
+                    </div>
+                </div>
 
-    <div class="auth-footer">
-        Nouveau sur la plateforme ? <br/>
-        <a href="/registration/index.html">Créer un compte entreprise</a>
+                <div class="form-group">
+                    <label for="password">Mot de passe</label>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" placeholder="••••••••" required>
+                        <i class="fas fa-lock input-icon"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Connexion sécurisée</button>
+            </form>
+        </div>
+
+        <div class="auth-footer">
+            Nouveau sur la plateforme ? <br/>
+            <a href="/registration/index.html">Créer un compte entreprise</a>
+        </div>
     </div>
-</div>
 
 <script>
     function selectRole(role) {
@@ -250,6 +418,9 @@
         e.preventDefault();
         const errorDiv = document.getElementById('errorMsg');
         errorDiv.style.display = 'none';
+        errorDiv.style.background = '#fef2f2';
+        errorDiv.style.color = '#b91c1c';
+        errorDiv.style.border = '1px solid #fca5a5';
         errorDiv.innerText = "Identifiants incorrects. Veuillez vérifier vos informations.";
 
         const role = document.getElementById('selectedRole').value;
@@ -290,11 +461,12 @@
                     errorDiv.style.display = 'block';
                     errorDiv.style.background = '#fff3cd';
                     errorDiv.style.color = '#856404';
+                    errorDiv.style.border = '1px solid #ffeeba';
                     return;
                 }
 
                 if (data && data.status === 'REJECTED') {
-                    errorDiv.innerHTML = `<strong>Dossier refusé</strong><br>Votre demande d'inscription a été rejetée par l'administrateur.<br><strong>Motif :</strong> ${data.blockReason || 'Aucun motif fourni.'}<br><br>Veuillez vous rendre sur la <a href="/registration/index.html" style="color: #721c24; text-decoration: underline; font-weight: bold;">page d'inscription</a> pour soumettre une nouvelle demande corrigée.`;
+                    errorDiv.innerHTML = `<strong>Dossier refusé</strong><br>Votre demande d'inscription a été rejetée.<br><strong>Motif :</strong> ${data.blockReason || 'Aucun motif fourni.'}<br><br>Veuillez vous rendre sur la <a href="/registration/index.html" style="color: #721c24; text-decoration: underline; font-weight: bold;">page d'inscription</a> pour soumettre une nouvelle demande corrigée.`;
                     errorDiv.style.display = 'block';
                     errorDiv.style.background = '#f8d7da';
                     errorDiv.style.color = '#721c24';
@@ -374,7 +546,7 @@
             else if (targetApp === 'admin' || finalRole === 'admin') window.location.href = '/admin/dashboard.html';
             else window.location.href = '/index.html';
         } else {
-            document.getElementById('errorMsg').style.display = 'block';
+            errorDiv.style.display = 'block';
             // Animation de secousse
             const container = document.querySelector('.auth-container');
             container.style.animation = 'none';

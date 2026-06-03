@@ -1,7 +1,18 @@
 const cds = require("@sap/cds");
+const { sendWelcomeRegistration, sendAccountStatus } = require("../lib/email-service");
 
 module.exports = cds.service.impl(async function () {
   const { RegistrationRequests, SubmitRegistration } = this.entities;
+
+  // --- Envoi d'email automatique après soumission d'une inscription ---
+  this.after("CREATE", SubmitRegistration, async (data) => {
+    try {
+      console.log(`[Registration] Envoi de l'email de bienvenue (PENDING) à : ${data.email}`);
+      await sendWelcomeRegistration(data.email, data.companyName, data.companyName, data.type);
+    } catch (e) {
+      console.warn("[Registration] Échec de l'envoi de l'email de bienvenue :", e.message);
+    }
+  });
 
   // --- LOGIQUE DE RÉ-INSCRIPTION ---
   this.before("CREATE", SubmitRegistration, async (req) => {
@@ -346,6 +357,15 @@ module.exports = cds.service.impl(async function () {
       await UPDATE(RegistrationRequests)
         .set({ status: "APPROVED" })
         .where({ ID: id });
+
+      // Envoi de l'email d'approbation réel
+      try {
+        console.log(`[Registration] Envoi de l'email d'approbation (APPROVED) à : ${reg.email}`);
+        await sendAccountStatus(reg.email, reg.companyName, true);
+      } catch (mailErr) {
+        console.warn("[Registration] Échec de l'envoi de l'email d'approbation :", mailErr.message);
+      }
+
       return `Succès : Business Partner ${nextBP} créé pour ${reg.companyName}`;
     } catch (err) {
       console.error("Erreur création BP:", err);
@@ -359,9 +379,27 @@ module.exports = cds.service.impl(async function () {
   this.on("rejectRegistration", async (req) => {
     const { id, reason } = req.data;
     console.log(`[Registration] Rejecting request ${id} for: ${reason}`);
+
+    // Récupérer les détails de la demande d'inscription pour l'envoi de l'email
+    const reg = await SELECT.one
+      .from(RegistrationRequests)
+      .columns("email", "companyName")
+      .where({ ID: id });
+
     await UPDATE(RegistrationRequests)
       .set({ status: "REJECTED", adminComment: reason })
       .where({ ID: id });
+
+    if (reg) {
+      // Envoi de l'email de rejet réel
+      try {
+        console.log(`[Registration] Envoi de l'email de rejet (REJECTED) à : ${reg.email}`);
+        await sendAccountStatus(reg.email, reg.companyName, false, reason);
+      } catch (mailErr) {
+        console.warn("[Registration] Échec de l'envoi de l'email de rejet :", mailErr.message);
+      }
+    }
+
     return "Demande rejetée";
   });
 

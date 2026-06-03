@@ -46,11 +46,7 @@ module.exports = class CRMService extends cds.ApplicationService {
       req.data.status = req.data.status || 'PENDING';
     });
 
-    // ── Welcome email after B2B registration ──
-    this.after('CREATE', ClientsB2B, async (data) => {
-      try { await sendWelcomeB2B(data.email, data.contactName, data.companyName); }
-      catch (e) { console.warn('Welcome email failed:', e.message); }
-    });
+
 
     // ── Sync profile updates with BusinessPartner (B2B/B2C) ──
     this.after('UPDATE', ClientsB2B, async (data, req) => {

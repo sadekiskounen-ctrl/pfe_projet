@@ -3,7 +3,7 @@
   "sap.app": {
     "id": "gestionpme.admin.dashboard",
     "type": "application",
-    "title": "Administration — Gestion PME",
+    "title": "Administration — CloudBridge",
     "description": "Backoffice administrateur",
     "applicationVersion": { "version": "1.0.0" },
     "dataSources": {

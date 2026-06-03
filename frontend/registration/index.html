@@ -3,9 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inscription — Gestion PME</title>
+    <title>Inscription — CloudBridge</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
     <link
@@ -16,31 +16,132 @@
       :root {
         --sap-blue: #0070f2;
         --sap-blue-dark: #0040b0;
-        --bg: #f4f7f6;
-        --card-bg: #ffffff;
-        --text: #1d2733;
-        --border: #e0e5ee;
+        --sap-blue-light: rgba(0, 112, 242, 0.15);
+        --accent: #00d2ff;
+        --bg: #f8fafc;
+        --card-bg: rgba(255, 255, 255, 0.78);
+        --text: #1e293b;
+        --text-muted: #64748b;
+        --border: rgba(226, 232, 240, 0.8);
+        --shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.08);
       }
 
       body {
-        background-color: var(--bg);
         font-family: "Inter", sans-serif;
         color: var(--text);
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
+        overflow-x: hidden;
+        position: relative;
+        background: var(--bg);
         padding: 40px 20px;
+      }
+
+      /* ── BACKGROUND ANIMATIONS (Mesh Liquid Gradients) ── */
+      .bg-glow-container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      .glow-circle {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(120px);
+        opacity: 0.65;
+        animation: float 20s infinite alternate ease-in-out;
+      }
+
+      .glow-1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, #c084fc 0%, rgba(192, 132, 252, 0) 70%);
+        top: -10%;
+        left: -10%;
+        animation-duration: 25s;
+      }
+
+      .glow-2 {
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, #38bdf8 0%, rgba(56, 189, 248, 0) 70%);
+        bottom: -20%;
+        right: -10%;
+        animation-delay: -5s;
+        animation-duration: 30s;
+      }
+
+      .glow-3 {
+        width: 450px;
+        height: 450px;
+        background: radial-gradient(circle, #818cf8 0%, rgba(129, 140, 248, 0) 70%);
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        animation-delay: -10s;
+        animation-duration: 20s;
+      }
+
+      @keyframes float {
+        0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        50% { transform: translate(50px, 30px) scale(1.1) rotate(180deg); }
+        100% { transform: translate(-30px, -50px) scale(0.9) rotate(360deg); }
       }
 
       .wizard-container {
         background: var(--card-bg);
-        border-radius: 20px;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-radius: 28px;
         padding: 40px;
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        box-shadow: var(--shadow);
         width: 100%;
         max-width: 800px;
-        border: 1px solid var(--border);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        z-index: 2;
+        animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      @keyframes cardAppear {
+        from { opacity: 0; transform: translateY(30px) scale(0.97); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+      }
+
+      .brand-logo-frame {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 4px;
+      }
+
+      .brand-logo-frame::before {
+        content: '';
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--sap-blue), var(--accent));
+        opacity: 0.15;
+        filter: blur(6px);
+      }
+
+      .brand-logo {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 2px solid #ffffff;
+        box-shadow: 0 8px 20px rgba(0, 112, 242, 0.18);
+        object-fit: cover;
+        z-index: 2;
       }
 
       /* Progress Bar */
@@ -72,7 +173,7 @@
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        color: var(--border);
+        color: var(--text-muted);
         position: relative;
         z-index: 2;
         transition: all 0.3s;
@@ -100,10 +201,15 @@
         white-space: nowrap;
         left: 50%;
         transform: translateX(-50%);
-        color: var(--border);
+        color: var(--text-muted);
       }
 
       .step-indicator.active .step-label {
+        color: var(--sap-blue);
+        font-weight: 700;
+      }
+
+      .step-indicator.completed .step-label {
         color: var(--sap-blue);
       }
 
@@ -131,24 +237,32 @@
         font-weight: 600;
         font-size: 0.9rem;
         margin-bottom: 8px;
+        color: var(--text);
       }
-      .form-control {
-        border-radius: 10px;
+      .form-control, .form-select {
+        border-radius: 12px;
         padding: 12px 16px;
         border: 1.5px solid var(--border);
+        background: rgba(255, 255, 255, 0.7);
         transition: all 0.2s;
+        color: var(--text);
       }
-      .form-control:focus {
+      .form-control:focus, .form-select:focus {
+        background: #ffffff;
         border-color: var(--sap-blue);
-        box-shadow: 0 0 0 3px rgba(0, 112, 242, 0.1);
+        box-shadow: 0 0 0 4px rgba(0, 112, 242, 0.1);
+        color: var(--text);
       }
 
       .btn-primary {
-        background: var(--sap-blue);
+        background: linear-gradient(135deg, var(--sap-blue), var(--sap-blue-dark));
         border: none;
         padding: 12px 30px;
-        border-radius: 10px;
+        border-radius: 12px;
         font-weight: 600;
+        color: white;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(0, 112, 242, 0.2);
       }
       .btn-primary:disabled {
         background: #a0aec0;
@@ -156,19 +270,22 @@
         transform: none;
         box-shadow: none;
       }
-      .btn-primary:hover {
-        background: var(--sap-blue-dark);
+      .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 112, 242, 0.3);
       }
       .btn-secondary {
-        background: #e2e8f0;
+        background: rgba(226, 232, 240, 0.6);
         color: var(--text);
-        border: none;
+        border: 1px solid rgba(226, 232, 240, 0.4);
         padding: 12px 30px;
-        border-radius: 10px;
+        border-radius: 12px;
         font-weight: 600;
+        transition: all 0.3s;
       }
       .btn-secondary:hover {
-        background: #cbd5e1;
+        background: rgba(226, 232, 240, 0.9);
+        color: var(--text);
       }
 
       .invalid-feedback {
@@ -187,19 +304,32 @@
         margin-bottom: 30px;
       }
 
+      @media (max-width: 576px) {
+        .card-type-selector {
+          flex-direction: column;
+        }
+      }
+
       .card-type {
         flex: 1;
         padding: 20px;
         border: 2px solid var(--border);
-        border-radius: 15px;
+        border-radius: 16px;
         cursor: pointer;
         text-align: center;
         transition: all 0.2s;
+        background: rgba(255, 255, 255, 0.4);
+      }
+
+      .card-type:hover {
+        border-color: var(--sap-blue-light);
+        background: rgba(255, 255, 255, 0.8);
       }
 
       .card-type.active {
         border-color: var(--sap-blue);
-        background: rgba(0, 112, 242, 0.04);
+        background: rgba(0, 112, 242, 0.08);
+        box-shadow: 0 4px 12px rgba(0, 112, 242, 0.05);
       }
 
       .card-type input {
@@ -210,8 +340,8 @@
       .custom-alert-overlay {
         position: fixed;
         top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(28, 42, 56, 0.4);
-        backdrop-filter: blur(4px);
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(8px);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -223,14 +353,16 @@
         opacity: 1;
       }
       .custom-alert-box {
-        background: white;
-        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(16px);
+        border-radius: 18px;
         width: 90%;
         max-width: 450px;
         padding: 24px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         transform: scale(0.9);
         transition: transform 0.25s ease;
+        border: 1px solid rgba(255, 255, 255, 0.6);
         border-left: 5px solid var(--sap-blue, #0070f2);
       }
       .custom-alert-overlay.show .custom-alert-box {
@@ -249,11 +381,11 @@
       .custom-alert-header h4 {
         margin: 0;
         font-weight: 700;
-        color: var(--text, #2c3e50);
+        color: var(--text);
         font-size: 1.15rem;
       }
       .custom-alert-body {
-        color: #4a5568;
+        color: var(--text-muted);
         font-size: 0.95rem;
         line-height: 1.5;
         margin-bottom: 20px;
@@ -265,6 +397,13 @@
     </style>
   </head>
   <body>
+    <!-- ANIMATED GLOW BACKGROUNDS -->
+    <div class="bg-glow-container">
+        <div class="glow-circle glow-1"></div>
+        <div class="glow-circle glow-2"></div>
+        <div class="glow-circle glow-3"></div>
+    </div>
+
     <!-- Custom Elegant Dialog/Modal -->
     <div id="customAlert" class="custom-alert-overlay" style="display: none;">
         <div class="custom-alert-box">
@@ -280,10 +419,12 @@
     </div>
 
     <div class="wizard-container">
-      <div class="text-center mb-5">
-          <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" style="width: 70px; margin-bottom: 10px;">
-          <h2 class="fw-bold">PME Connect</h2>
-          <p class="text-muted">Portail d'Inscription Partenaires</p>
+      <div class="text-center mb-5" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
+          <div class="brand-logo-frame">
+              <img src="/images/logo_round.png" alt="CloudBridge Logo" class="brand-logo">
+          </div>
+          <h2 class="fw-bold" style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 2rem; background: linear-gradient(135deg, var(--sap-blue), var(--sap-blue-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">CloudBridge</h2>
+          <p class="text-muted" style="font-size: 0.9rem; margin: 0;">Portail d'Inscription Partenaires</p>
       </div>
       <div class="progress-steps">
         <div class="step-indicator active" id="ind1">

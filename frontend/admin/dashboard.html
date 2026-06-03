@@ -12,7 +12,7 @@
             window.location.href = '/auth.html?app=admin';
         }
     </script>
-    <title>PME Cloud Control Center — Admin</title>
+    <title>CloudBridge Control Center — Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -141,6 +141,11 @@
         
         .brand img {
             width: 46px !important;
+            height: 46px !important;
+            border-radius: 50% !important;
+            border: 2px solid var(--accent) !important;
+            object-fit: cover !important;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
             margin-right: 0 !important;
             transition: all 0.35s ease;
         }
@@ -152,9 +157,12 @@
         .brand-logo { font-size: 2rem; }
         
         .brand-name { 
-            font-weight: 700; 
-            font-size: 1.2rem; 
+            font-weight: 800; 
+            font-size: 1.25rem; 
             letter-spacing: -0.5px; 
+            background: linear-gradient(135deg, var(--accent), var(--accent-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             opacity: 0; 
             transform: translateX(-10px); 
             transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
@@ -712,8 +720,8 @@
     </script>
     <aside class="sidebar">
         <div class="brand">
-            <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" style="width: 50px; margin-right: 10px;">
-            <span class="brand-name">PME CLOUD</span>
+            <img src="/images/logo_round.png" alt="CloudBridge Logo" style="width: 50px; margin-right: 10px;">
+            <span class="brand-name">CloudBridge</span>
         </div>
         <nav class="nav-menu">
             <div class="nav-item" onclick="switchView('overview', this)">

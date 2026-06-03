@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PME Connect | Portail Fournisseur</title>
-<meta name="description" content="Portail Fournisseur PME Connect — Appels d'offres, bons de commande et suivi 3-way match.">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<title>CloudBridge | Portail Fournisseur</title>
+<meta name="description" content="Portail Fournisseur CloudBridge — Appels d'offres, bons de commande et suivi 3-way match.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="/auth-interceptor.js"></script>
 <script>
@@ -56,35 +56,293 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
 /* SIDEBAR */
 .sidebar {
-  width: var(--sidebar-w); min-height: 100vh; background: var(--bg-card);
-  border-right: 1px solid var(--border-light); display: flex; flex-direction: column;
-  position: fixed; left: 0; top: 0; bottom: 0; z-index: 100;
+  width: 78px;
+  min-height: 100vh;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
+  transition: width var(--transition), padding var(--transition);
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 24px 8px;
 }
-.sidebar-logo { padding: 24px 20px; border-bottom: 1px solid var(--border-light); }
-.logo-mark { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: 800; color: white; margin-bottom: 10px; }
-.sidebar-logo h2 { font-size: 1rem; font-weight: 700; }
-.sidebar-logo p  { font-size: 0.72rem; color: var(--text-dim); margin-top: 2px; }
-.supplier-badge { display: inline-block; margin-top: 6px; padding: 3px 10px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; background: rgba(0,201,167,0.15); color: var(--accent); letter-spacing: 0.5px; }
+.sidebar:hover {
+  width: 260px;
+  padding: 24px 16px;
+}
 
-.sidebar-nav { flex: 1; padding: 16px 0; overflow-y: auto; }
-.nav-section-label { font-size: 0.64rem; font-weight: 700; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; padding: 12px 20px 6px; }
-.nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 20px; color: var(--text-dim); cursor: pointer; border-radius: 10px; margin: 2px 10px; font-size: 0.85rem; font-weight: 500; transition: all var(--transition); }
-.nav-item:hover { background: var(--border-light); color: var(--text); }
-.nav-item.active { background: var(--nav-item-active-bg); color: var(--accent); font-weight: 600; }
-.nav-icon { width: 18px; text-align: center; font-size: 0.9rem; }
-.nav-badge { margin-left: auto; background: var(--accent); color: var(--bg); border-radius: 10px; padding: 1px 7px; font-size: 0.65rem; font-weight: 700; }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2.5rem;
+  padding: 0 8px;
+  transition: padding var(--transition);
+}
+.sidebar:hover .brand {
+  padding: 0 16px;
+}
 
-.sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); }
-.user-info { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; cursor: pointer; transition: background var(--transition); }
-.user-info:hover { background: var(--border-light); }
-.avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: white; flex-shrink: 0; }
-.user-name  { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user-email { font-size: 0.7rem; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.btn-logout { background: none; border: 1px solid rgba(255,101,132,0.3); color: var(--accent-red); padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; margin-top: 10px; width: 100%; transition: all var(--transition); }
-.btn-logout:hover { background: rgba(255,101,132,0.1); }
+.brand-logo-img {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 50% !important;
+  border: 2px solid var(--accent) !important;
+  object-fit: cover !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+  margin-right: 0 !important;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.sidebar:hover .brand-logo-img {
+  margin-right: 4px !important;
+}
+
+.brand-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  transform: translateX(-10px);
+  transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+}
+.sidebar:hover .brand-meta {
+  opacity: 1;
+  visibility: visible;
+  position: relative;
+  transform: translateX(0);
+  transition-delay: 0.1s;
+}
+
+.brand-name {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.supplier-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: rgba(0,201,167,0.15);
+  color: var(--accent);
+  letter-spacing: 0.5px;
+  width: fit-content;
+}
+
+.portal-badge-top {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  width: fit-content;
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+  color: #00c9a7;
+  background: rgba(0, 201, 167, 0.15);
+  opacity: 1;
+  visibility: visible;
+  transition: all var(--transition);
+  height: auto;
+}
+body.dark-mode .portal-badge-top {
+  color: #00c9a7;
+  background: rgba(0, 201, 167, 0.25);
+}
+.sidebar:hover .portal-badge-top {
+  opacity: 0;
+  visibility: hidden;
+  height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  overflow: hidden;
+}
+#rfqStatusFilter {
+  display: none !important;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.nav-section-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 12px 16px 6px;
+}
+.nav-item {
+  padding: 12px 14px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--text-dim);
+  transition: all var(--transition);
+  margin: 4px 0;
+  text-decoration: none;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
+}
+.nav-item:hover, .nav-item.active {
+  background: var(--nav-item-active-bg);
+  color: var(--accent);
+}
+.nav-item.active {
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  flex-shrink: 0;
+  transition: margin-right var(--transition);
+  font-size: 1rem;
+}
+.sidebar:hover .nav-icon {
+  margin-right: 10px;
+}
+
+.nav-badge {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  box-shadow: 0 0 0 0 rgba(10, 110, 209, 0.5);
+}
+
+.sidebar-footer {
+  padding: 16px 14px;
+  border-top: 1px solid var(--border-light);
+}
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.user-info:hover {
+  background: var(--border-light);
+}
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+.user-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.user-email {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.btn-logout {
+  background: none;
+  border: 1px solid rgba(255,101,132,0.3);
+  color: var(--accent2);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+  transition: all var(--transition);
+}
+.btn-logout:hover {
+  background: rgba(255,101,132,0.1);
+}
 
 /* MAIN */
-.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; overflow-y: auto; }
+.main {
+  margin-left: 78px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-y: auto;
+  transition: margin-left var(--transition);
+}
+.sidebar:hover ~ .main {
+  margin-left: 260px;
+}
+
+/* Collapsed sidebar visibility transitions */
+.nav-text {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity var(--transition), transform var(--transition);
+  display: inline-block;
+}
+.sidebar:hover .nav-text {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.nav-section-label,
+.user-info .user-name,
+.user-info .user-email,
+.btn-logout {
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.sidebar:hover .nav-section-label,
+.sidebar:hover .user-info .user-name,
+.sidebar:hover .user-info .user-email,
+.sidebar:hover .btn-logout {
+  opacity: 1;
+}
 .topbar { position: sticky; top: 0; z-index: 50; background: var(--bg-card); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; padding: 14px 32px; gap: 16px; }
 .page-title { font-size: 1.1rem; font-weight: 700; flex: 1; }
 .content { padding: 28px 32px; flex: 1; }
@@ -235,27 +493,28 @@ body.dark-mode .toast.info {
 /* PULSING BADGE — Enhanced with glow */
 .noti-badge-pulse { animation: badgePulse 1.2s ease-in-out infinite; }
 @keyframes badgePulse {
-  0%,100% { transform:scale(1); opacity:1; box-shadow: 0 0 0 0 rgba(0,201,167,0.4); }
-  50% { transform:scale(1.18); opacity:0.9; box-shadow: 0 0 8px 2px rgba(0,201,167,0.35); }
+  0%,100% { transform:translateY(-50%) scale(1); opacity:1; box-shadow: 0 0 0 0 rgba(0,201,167,0.4); }
+  50% { transform:translateY(-50%) scale(1.18); opacity:0.9; box-shadow: 0 0 8px 2px rgba(0,201,167,0.35); }
 }
 
-/* NOTIFICATION DOT — Glowing indicator in front of nav items */
+/* NOTIFICATION DOT — Glowing indicator */
 .noti-dot {
   width: 8px; height: 8px; border-radius: 50%;
-  display: inline-block; margin-right: 6px; flex-shrink: 0;
+  display: none; flex-shrink: 0;
   animation: dotBlink 1.4s ease-in-out infinite;
+  position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
 }
 .noti-dot.dot-green { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
 .noti-dot.dot-gold  { background: var(--accent-gold); box-shadow: 0 0 6px var(--accent-gold); }
 .noti-dot.dot-red   { background: var(--accent-red); box-shadow: 0 0 6px var(--accent-red); }
 .noti-dot.dot-purple{ background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
 @keyframes dotBlink {
-  0%,100% { opacity:1; transform:scale(1); }
-  50% { opacity:0.35; transform:scale(0.7); }
+  0%,100% { opacity:1; transform:translateY(-50%) scale(1); }
+  50% { opacity:0.35; transform:translateY(-50%) scale(0.7); }
 }
 
 /* NAV ITEM with new notification — subtle highlight */
-.nav-item.has-notif { background: rgba(0,201,167,0.06); }
+.nav-item.has-notif { background: var(--nav-item-active-bg); }
 .nav-item.has-notif .nav-icon { color: var(--accent); }
 
 /* LIVE INDICATOR in topbar */
@@ -372,36 +631,40 @@ input:checked + .slider-toggle:before {
 
 <!-- SIDEBAR -->
 <aside class="sidebar">
-  <div class="sidebar-logo">
-    <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" class="brand-logo-img" style="width: 50px; margin-bottom: 10px; transition: all 0.25s ease;">
-    <h2>PME Connect</h2>
-    <p>Portail Fournisseur</p>
-    <span class="supplier-badge">FOURNISSEUR</span>
+  <div class="brand" style="flex-direction: column; align-items: center; text-align: center; gap: 8px; display: flex; width: 100%;">
+    <div class="brand-logo-wrapper" style="display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center;">
+      <img src="/images/logo_round.png" alt="CloudBridge Logo" class="brand-logo-img">
+      <div class="brand-meta">
+        <span class="brand-name">CloudBridge</span>
+        <span class="supplier-badge">FOURNISSEUR</span>
+      </div>
+    </div>
+    <span class="portal-badge-top" id="portalBadgeTop">FR</span>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section-label">Tableau de bord</div>
     <div class="nav-item active" id="nav-dashboard" onclick="showView('dashboard',this)">
-      <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span> Tableau de bord
+      <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span> <span class="nav-text">Tableau de bord</span>
     </div>
     <div class="nav-section-label">Achats</div>
     <div class="nav-item" id="nav-rfqs" onclick="showView('rfqs',this)">
       <span class="noti-dot dot-green" id="rfqDot" style="display:none"></span>
-      <span class="nav-icon"><i class="fas fa-file-contract"></i></span> Appels d'Offres
+      <span class="nav-icon"><i class="fas fa-file-contract"></i></span> <span class="nav-text">Appels d'Offres</span>
       <span class="nav-badge noti-badge-pulse" id="rfqBadge" style="display:none">0</span>
     </div>
     <div class="nav-item" id="nav-pos" onclick="showView('pos',this)">
       <span class="noti-dot dot-purple" id="poDot" style="display:none"></span>
-      <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span> Bons de Commande
+      <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span> <span class="nav-text">Bons de Commande</span>
       <span class="nav-badge noti-badge-pulse" id="poBadge" style="display:none">0</span>
     </div>
     <div class="nav-item" id="nav-match" onclick="showView('match',this)">
       <span class="noti-dot dot-gold" id="matchDot" style="display:none"></span>
-      <span class="nav-icon"><i class="fas fa-layer-group"></i></span> 3-Way Match
+      <span class="nav-icon"><i class="fas fa-layer-group"></i></span> <span class="nav-text">3-Way Match</span>
       <span class="nav-badge noti-badge-pulse" id="matchBadge" style="display:none;background:var(--accent-gold)">0</span>
     </div>
     <div class="nav-section-label">Mon compte</div>
     <div class="nav-item" id="nav-profil" onclick="showView('profil',this)">
-      <span class="nav-icon"><i class="fas fa-id-card"></i></span> Profil & KYC
+      <span class="nav-icon"><i class="fas fa-id-card"></i></span> <span class="nav-text">Profil & KYC</span>
     </div>
   </nav>
   <div class="sidebar-footer">

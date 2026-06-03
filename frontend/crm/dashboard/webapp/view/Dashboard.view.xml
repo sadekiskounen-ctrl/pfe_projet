@@ -11,7 +11,7 @@
     <pages>
       <Page
         id="dashboardPage"
-        title="Dashboard CRM — Gestion PME"
+        title="Dashboard CRM — CloudBridge"
         showHeader="true">
 
         <customHeader>

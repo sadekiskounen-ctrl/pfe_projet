@@ -3,35 +3,401 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PME Connect | Accueil</title>
+    <title>CloudBridge | Portail Unique de Gestion</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f0f2f5; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; }
-        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 500px; }
-        h1 { color: #0070f2; margin-bottom: 10px; }
-        p { color: #64748b; margin-bottom: 30px; }
-        .btn { display: block; padding: 15px; margin: 10px 0; border-radius: 10px; text-decoration: none; font-weight: bold; transition: 0.3s; }
-        .btn-admin { background: #1d2d3e; color: white; }
-        .btn-reg { background: #0070f2; color: white; }
-        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        :root {
+            --primary: #0070f2;
+            --primary-dark: #0040b0;
+            --primary-light: rgba(0, 112, 242, 0.15);
+            --accent: #00d2ff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+            background: #f8fafc;
+            padding: 20px;
+        }
+
+        /* ── BACKGROUND ANIMATIONS (Mesh Liquid Gradients) ── */
+        .bg-glow-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .glow-circle {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.65;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+
+        .glow-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #c084fc 0%, rgba(192, 132, 252, 0) 70%);
+            top: -10%;
+            left: -10%;
+            animation-duration: 25s;
+        }
+
+        .glow-2 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #38bdf8 0%, rgba(56, 189, 248, 0) 70%);
+            bottom: -20%;
+            right: -10%;
+            animation-delay: -5s;
+            animation-duration: 30s;
+        }
+
+        .glow-3 {
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, #818cf8 0%, rgba(129, 140, 248, 0) 70%);
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: -10s;
+            animation-duration: 20s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(50px, 30px) scale(1.1) rotate(180deg); }
+            100% { transform: translate(-30px, -50px) scale(0.9) rotate(360deg); }
+        }
+
+        /* ── PORTAL CARD CONTAINER ── */
+        .portal-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 3rem 2.5rem;
+            width: 100%;
+            max-width: 960px;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.08), 
+                        0 0 0 1px rgba(0, 112, 242, 0.05);
+            z-index: 2;
+            text-align: center;
+            animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(30px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* ── BRANDING ── */
+        .brand-header {
+            margin-bottom: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo-frame {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-logo-frame::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            opacity: 0.15;
+            filter: blur(6px);
+        }
+
+        .brand-logo {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px solid #ffffff;
+            box-shadow: 0 10px 25px rgba(0, 112, 242, 0.2);
+            object-fit: cover;
+            position: relative;
+            z-index: 2;
+        }
+
+        .brand-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin: 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 50%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-weight: 500;
+            max-width: 520px;
+            line-height: 1.5;
+            margin: 0 auto;
+        }
+
+        /* ── NAVIGATION GRID (HORIZONTAL ROW) ── */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+            .portal-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        .action-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 16px;
+            padding: 2rem 1.5rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+        }
+
+        .action-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .action-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            background: #ffffff;
+            border-color: rgba(0, 112, 242, 0.3);
+            box-shadow: 0 16px 32px rgba(0, 112, 242, 0.08);
+        }
+
+        .action-icon-box {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .icon-connexion {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+        .icon-admin {
+            background: rgba(30, 41, 59, 0.08);
+            color: #334155;
+        }
+        .icon-reg {
+            background: rgba(0, 112, 242, 0.1);
+            color: var(--primary);
+        }
+
+        .action-card:hover .action-icon-box {
+            transform: scale(1.08);
+        }
+
+        .action-card:hover .icon-connexion {
+            background: #22c55e;
+            color: white;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+        .action-card:hover .icon-admin {
+            background: #1e293b;
+            color: white;
+            box-shadow: 0 4px 12px rgba(30, 41, 59, 0.3);
+        }
+        .action-card:hover .icon-reg {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 112, 242, 0.3);
+        }
+
+        .action-info {
+            width: 100%;
+        }
+
+        .action-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .action-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 450;
+            line-height: 1.45;
+        }
+
+        /* ── FOOTER & STATUS ── */
+        .divider {
+            height: 1px;
+            background: rgba(226, 232, 240, 0.8);
+            margin: 1.5rem 0;
+            border: 0;
+        }
+
+        .status-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 550;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(34, 197, 94, 0.1);
+            color: #15803d;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div style="margin-bottom: 20px;">
-            <img src="https://www.sap.com/dam/application/shared/logos/sap-logo-svg.svg" alt="SAP Logo" style="width: 80px;">
+
+    <!-- ANIMATED GLOW BACKGROUNDS -->
+    <div class="bg-glow-container">
+        <div class="glow-circle glow-1"></div>
+        <div class="glow-circle glow-2"></div>
+        <div class="glow-circle glow-3"></div>
+    </div>
+
+    <!-- MAIN PORTAL CONTAINER -->
+    <div class="portal-card">
+        <div class="brand-header">
+            <div class="brand-logo-frame">
+                <img src="/images/logo_round.png" alt="CloudBridge Logo" class="brand-logo">
+            </div>
+            <h1 class="brand-title">CloudBridge</h1>
+            <p class="brand-subtitle">Bienvenue sur votre passerelle applicative unifiée. Choisissez un espace ou enregistrez votre entreprise pour commencer.</p>
         </div>
-        <h1>PME Connect</h1>
-        <p>Bienvenue sur votre plateforme de gestion. Choisissez un espace pour commencer :</p>
-        
-        <a href="/auth.html" class="btn" style="background: #4ade80; color: #1d2d3e; margin-bottom: 20px;">🔑 Connexion (Compte existant)</a>
-        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">
-        
-        <a href="/admin/dashboard.html" class="btn btn-admin">💻 Accéder au Dashboard Admin</a>
-        <a href="/registration/index.html" class="btn btn-reg">📝 Inscription Nouveau Partenaire</a>
-        
-        <div style="margin-top: 20px; font-size: 12px; color: #94a3b8;">
-            Statut du serveur : <span style="color: #22c55e;">● Connecté</span>
+
+        <div class="actions-grid">
+            <!-- CONNEXION PARTENAIRE -->
+            <a href="/auth.html" class="action-card">
+                <div class="action-icon-box icon-connexion">
+                    <i class="fas fa-key"></i>
+                </div>
+                <div class="action-info">
+                    <div class="action-title">Espace Partenaire</div>
+                    <div class="action-desc">Accédez à votre espace Client ou Fournisseur pour gérer vos documents (devis, commandes, factures).</div>
+                </div>
+            </a>
+
+            <!-- INSCRIPTION -->
+            <a href="/registration/index.html" class="action-card">
+                <div class="action-icon-box icon-reg">
+                    <i class="fas fa-file-signature"></i>
+                </div>
+                <div class="action-info">
+                    <div class="action-title">Devenir Partenaire</div>
+                    <div class="action-desc">Nouveau sur la plateforme ? Soumettez votre demande d'inscription d'entreprise en quelques clics.</div>
+                </div>
+            </a>
+
+            <!-- BACKOFFICE ADMIN -->
+            <a href="/admin/dashboard.html" class="action-card">
+                <div class="action-icon-box icon-admin">
+                    <i class="fas fa-laptop-code"></i>
+                </div>
+                <div class="action-info">
+                    <div class="action-title">Console Admin</div>
+                    <div class="action-desc">Console réservée aux gestionnaires internes (Audit, validation des comptes et reporting SAP BTP).</div>
+                </div>
+            </a>
+        </div>
+
+        <hr class="divider">
+
+        <div class="status-container">
+            <span>Solution Cloud Intégrée — SAP BTP</span>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                <span>Services opérationnels</span>
+            </div>
         </div>
     </div>
+
 </body>
 </html>

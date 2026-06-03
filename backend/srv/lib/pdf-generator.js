@@ -6,6 +6,8 @@
 'use strict';
 
 const PDFDocument = require('pdfkit');
+const path = require('path');
+const fs = require('fs');
 
 /**
  * Generate a Devis PDF buffer
@@ -171,7 +173,7 @@ async function generateRegistrationPDF(reg) {
 
     // ── Certification Text ──
     doc.moveDown(3);
-    doc.fontSize(10).font('Helvetica-Oblique').text('Cette attestation certifie que la demande d\'inscription a été reçue et traitée par le système de gestion PME Cloud.');
+    doc.fontSize(10).font('Helvetica-Oblique').text('Cette attestation certifie que la demande d\'inscription a été reçue et traitée par le système de gestion CloudBridge.');
     doc.font('Helvetica').text(`Généré le : ${new Date().toLocaleString('fr-FR')}`);
 
     // ── Signature Placeholder ──
@@ -190,22 +192,36 @@ async function generateRegistrationPDF(reg) {
 
 function _drawHeader(doc, type, number, companyInfo) {
   const ci = companyInfo || {};
-  // Company info (top left)
-  doc.fontSize(18).fillColor('#1a3a5c').font('Helvetica-Bold');
-  doc.text(ci.companyName || 'GESTION PME', 50, 50);
-  doc.fontSize(9).fillColor('#666666').font('Helvetica');
-  doc.text(ci.tagline || 'Solution de Gestion Cloud');
-  doc.text(`${ci.email || 'contact@gestionpme.dz'} | ${ci.phone || '+213 21 00 00 00'}`);
+  const logoPath = path.join(__dirname, '..', '..', '..', 'frontend', 'images', 'logo.png');
+  
+  if (fs.existsSync(logoPath)) {
+    // Draw logo image
+    doc.image(logoPath, 50, 45, { width: 65 });
+    
+    // Company info shifted to the right
+    doc.fontSize(14).fillColor('#1a3a5c').font('Helvetica-Bold');
+    doc.text(ci.companyName || 'CloudBridge', 130, 48);
+    doc.fontSize(8).fillColor('#666666').font('Helvetica');
+    doc.text(ci.tagline || 'Solution Cloud - SAP BTP', 130, 64);
+    doc.text(`${ci.email || 'contact@cloudbridge.dz'} | ${ci.phone || '+213 21 00 00 00'}`, 130, 75);
+  } else {
+    // Fallback: Company info (top left)
+    doc.fontSize(18).fillColor('#1a3a5c').font('Helvetica-Bold');
+    doc.text(ci.companyName || 'CloudBridge', 50, 50);
+    doc.fontSize(9).fillColor('#666666').font('Helvetica');
+    doc.text(ci.tagline || 'Solution Cloud - SAP BTP');
+    doc.text(`${ci.email || 'contact@cloudbridge.dz'} | ${ci.phone || '+213 21 00 00 00'}`);
+  }
 
   // Document type (top right)
-  doc.fontSize(type.length > 12 ? 16 : 22).fillColor('#1a3a5c').font('Helvetica-Bold');
-  doc.text(type, 290, 50, { align: 'right', width: 255 });
-  doc.fontSize(11).fillColor('#333333').font('Helvetica');
-  doc.text(`N° ${number}`, 290, doc.y + 4, { align: 'right', width: 255 });
+  doc.fontSize(type.length > 12 ? 14 : 20).fillColor('#1a3a5c').font('Helvetica-Bold');
+  doc.text(type, 290, 48, { align: 'right', width: 255 });
+  doc.fontSize(10).fillColor('#333333').font('Helvetica');
+  doc.text(`N° ${number}`, 290, doc.y + 2, { align: 'right', width: 255 });
 
   // Horizontal line
-  doc.moveDown(2);
-  doc.moveTo(50, doc.y).lineTo(545, doc.y).strokeColor('#1a3a5c').lineWidth(2).stroke();
+  doc.moveTo(50, 95).lineTo(545, 95).strokeColor('#1a3a5c').lineWidth(1.5).stroke();
+  doc.y = 105;
 }
 
 function _drawItemsTable(doc, items) {
@@ -283,7 +299,7 @@ function _drawFooter(doc, companyInfo) {
   doc.fontSize(8).fillColor('#888888').font('Helvetica');
   const footerY = 780;
   doc.moveTo(50, footerY - 10).lineTo(545, footerY - 10).strokeColor('#cccccc').lineWidth(0.5).stroke();
-  const footerText = `${ci.companyName || 'Gestion PME'} — ${ci.tagline || 'Solution Cloud'} | ${ci.email || 'contact@gestionpme.dz'} | RC: ${ci.rc || 'N/A'}`;
+  const footerText = `${ci.companyName || 'CloudBridge'} — ${ci.tagline || 'Solution Cloud de Gestion - SAP BTP'} | ${ci.email || 'contact@cloudbridge.dz'} | RC: ${ci.rc || 'N/A'}`;
   doc.text(footerText, 50, footerY, {
     align: 'center', width: 495
   });
