@@ -34,7 +34,7 @@
             <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMarginBottom">
               <VBox>
                 <Title text="⚙️ Administration" level="H1" />
-                <Text text="Backoffice — CloudBridge" class="sapUiTinyMarginTop" />
+                <Text text="Backoffice — Bridgify Cloud" class="sapUiTinyMarginTop" />
               </VBox>
               <HBox>
                 <Button text="Actualiser" icon="sap-icon://refresh" press="onRefresh" class="sapUiSmallMarginEnd" />

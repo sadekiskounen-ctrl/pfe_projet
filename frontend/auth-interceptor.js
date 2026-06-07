@@ -29,7 +29,7 @@
         // 2. Surcharge de XMLHttpRequest (requis par SAPUI5 / Fiori Elements)
         const originalOpen = XMLHttpRequest.prototype.open;
         XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
-            this._url = url.toString();
+            this._url = url ? url.toString() : '';
             return originalOpen.apply(this, arguments);
         };
 

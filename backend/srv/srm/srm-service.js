@@ -98,7 +98,9 @@ module.exports = class SRMService extends cds.ApplicationService {
           title     : '📩 Nouvelle offre reçue',
           message   : `Le fournisseur ${supplier ? supplier.companyName : 'inconnu'} a soumis une offre pour l'appel d'offres : ${rfq.title}`,
           notifType : 'INFO',
-          isRead    : false
+          isRead    : false,
+          entityName: 'RFQ',
+          entityId  : rfqId
         });
       } catch (e) {
         console.warn('Failed to insert admin notification:', e.message);
@@ -167,6 +169,13 @@ module.exports = class SRMService extends cds.ApplicationService {
         status              : 'CLOSED',
         statusDate          : new Date().toISOString()
       }).where({ ID: rfqId });
+
+      try {
+        const { Notification } = cds.entities('sap.pme.admin');
+        await UPDATE(Notification).set({ isRead: true }).where({ entityName: 'RFQ', entityId: rfqId });
+      } catch (e) {
+        console.warn('Failed to auto-resolve RFQ notifications:', e.message);
+      }
 
       return SELECT.one.from(RFQs).where({ ID: rfqId });
     });
@@ -253,7 +262,9 @@ module.exports = class SRMService extends cds.ApplicationService {
           title: `PO ${po.poNumber} accepté`,
           message: `Le fournisseur a accepté le bon de commande ${po.poNumber}. Vous pouvez valider la réception (GR).`,
           isRead: false,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          entityName: 'PO',
+          entityId: poId
         });
       } catch (e) {
         console.warn('Failed to insert admin notification:', e.message);
@@ -367,14 +378,17 @@ module.exports = class SRMService extends cds.ApplicationService {
       const receptionItems = (grItems || []).map(gi => {
         const poItem = poItemsList.find(p => p.ID === gi.poItemId);
         if (!poItem) return null;
+        const rec = parseFloat(gi.receivedQty || 0);
+        const acc = parseFloat(gi.acceptedQty != null ? gi.acceptedQty : rec);
+        const rej = parseFloat(gi.rejectedQty || Math.max(0, rec - acc) || 0);
         return {
           ID           : cds.utils.uuid(),
           poItem_ID    : gi.poItemId,
           product_ID   : poItem.product_ID,
           orderedQty   : parseFloat(poItem.quantity),
-          receivedQty  : parseFloat(gi.receivedQty),
-          acceptedQty  : parseFloat(gi.acceptedQty != null ? gi.acceptedQty : gi.receivedQty),
-          rejectedQty  : parseFloat(gi.rejectedQty || 0),
+          receivedQty  : rec,
+          acceptedQty  : acc,
+          rejectedQty  : rej,
           notes        : gi.notes || ''
         };
       }).filter(Boolean);
@@ -390,6 +404,48 @@ module.exports = class SRMService extends cds.ApplicationService {
         items         : receptionItems
       });
 
+      // Check for discrepancies and alert supplier
+      let totalRejected = 0;
+      let totalMissing = 0;
+      let issueDetails = [];
+
+      for (const gi of receptionItems) {
+        const poItem = poItemsList.find(p => p.ID === gi.poItem_ID);
+        const descName = poItem ? poItem.description : 'Article';
+        if (gi.rejectedQty > 0) {
+          totalRejected += gi.rejectedQty;
+          issueDetails.push(`- <strong>${gi.rejectedQty}</strong> unité(s) de "${descName}" rejetée(s)`);
+        }
+        const missing = gi.orderedQty - gi.acceptedQty;
+        if (missing > 0) {
+          totalMissing += missing;
+          issueDetails.push(`- <strong>${missing}</strong> unité(s) de "${descName}" manquante(s) (Commandé: ${gi.orderedQty}, Accepté: ${gi.acceptedQty})`);
+        }
+      }
+
+      if (totalRejected > 0 || totalMissing > 0) {
+        try {
+          const supplier = await SELECT.one.from(Fournisseurs).where({ ID: po.fournisseur_ID });
+          if (supplier && supplier.email) {
+            const { sendWorkflowNotification } = require('../lib/email-service');
+            const subject = `⚠️ Alerte Écart de Réception - Bon de Commande ${po.poNumber}`;
+            const message = `
+              Bonjour ${supplier.companyName || 'Fournisseur'},<br/><br/>
+              Lors de la validation de la réception des marchandises pour le bon de commande N° <strong>${po.poNumber}</strong> (Bon de réception N° <strong>${grNum}</strong>), notre équipe a constaté des écarts :<br/><br/>
+              <strong>Détails des anomalies :</strong><br/>
+              ${issueDetails.join('<br/>')}<br/><br/>
+              Merci de prendre contact avec notre service achats pour régulariser cette situation.<br/><br/>
+              Cordialement,<br/>
+              L'équipe administrative de Bridgify Cloud.
+            `;
+            await sendWorkflowNotification(supplier.email, subject, message);
+            console.log(`[Notification] Alert email sent to supplier: ${supplier.email} for PO ${po.poNumber}`);
+          }
+        } catch (err) {
+          console.error('Failed to send supplier notification email:', err);
+        }
+      }
+
       // Update PO item receivedQty
       for (const gi of receptionItems) {
         await UPDATE(POItems).set({
@@ -403,6 +459,13 @@ module.exports = class SRMService extends cds.ApplicationService {
         statusDate : new Date().toISOString()
       }).where({ ID: poId });
 
+      try {
+        const { Notification } = cds.entities('sap.pme.admin');
+        await UPDATE(Notification).set({ isRead: true }).where({ entityId: poId });
+      } catch (e) {
+        console.warn('Failed to auto-resolve PO notifications:', e.message);
+      }
+
       return SELECT.one.from(Receptions).where({ ID: gr.ID });
     });
 
@@ -415,6 +478,9 @@ module.exports = class SRMService extends cds.ApplicationService {
       const po = await SELECT.one.from(BonsCommande).where({ ID: poId });
       if (!po) return req.error(404, 'Bon de commande introuvable');
       if (po.status !== 'DELIVERED') return req.error(400, 'Le PO doit être livré avant de facturer');
+
+      const existingInvoice = await SELECT.one.from(FacturesFournisseur).where({ bonCommande_ID: poId });
+      if (existingInvoice) return req.error(400, 'Une facture a déjà été soumise pour ce bon de commande');
 
       const poItemsList = await SELECT.from(POItems).where({ parent_ID: poId });
 
@@ -509,7 +575,11 @@ module.exports = class SRMService extends cds.ApplicationService {
       if (!gr) return req.error(404, 'Bon de réception introuvable');
       const po = await SELECT.one.from(BonsCommande).where({ ID: gr.bonCommande_ID });
       const fournisseur = po ? await SELECT.one.from(Fournisseurs).where({ ID: po.fournisseur_ID }) : null;
-      const items = await SELECT.from(ReceptionItems).columns(i => { i('*'), i.product(p => p('*')) }).where({ parent_ID: grId });
+      const items = await SELECT.from(ReceptionItems).columns(i => {
+        i('*');
+        i.product(p => p('*'));
+        i.poItem(pi => pi('*'));
+      }).where({ parent_ID: grId });
       const pdfBuffer = await generateGRFournisseurPDF({ ...gr, items, bonCommande: { ...po, fournisseur } });
       return pdfBuffer.toString('base64');
     });
@@ -592,6 +662,127 @@ module.exports = class SRMService extends cds.ApplicationService {
       }
 
       return SELECT.one.from(FacturesFournisseur).where({ ID: factureId });
+    });
+
+    // ─────────────────────────────────────────
+    // ACTION: Résoudre l'écart de réception (Renvoyer la marchandise)
+    // ─────────────────────────────────────────
+    this.on('resolveDiscrepancy', async (req) => {
+      const { poId, items } = req.data;
+      const po = await SELECT.one.from(BonsCommande).where({ ID: poId });
+      if (!po) return req.error(404, 'Bon de commande introuvable');
+
+      const receptions = await SELECT.from(Receptions).where({ bonCommande_ID: poId });
+      if (receptions.length === 0) return req.error(400, "Aucune réception n'est enregistrée pour ce bon de commande");
+
+      for (const inputItem of (items || [])) {
+        const targetResend = parseFloat(inputItem.resendQty) || 0;
+        
+        // Find the matching reception item across receptions
+        for (const gr of receptions) {
+          const gi = await SELECT.one.from(ReceptionItems).where({ parent_ID: gr.ID, poItem_ID: inputItem.poItemId });
+          if (gi) {
+            const maxAllowed = parseFloat(gi.orderedQty) - parseFloat(gi.acceptedQty);
+            if (targetResend > maxAllowed + 0.001) {
+              return req.error(400, `La quantité renvoyée (${targetResend}) ne peut pas dépasser l'écart (${maxAllowed})`);
+            }
+            await UPDATE(ReceptionItems).set({ resendQty: targetResend }).where({ ID: gi.ID });
+          }
+        }
+      }
+
+      // Update PO status to TO_APPROVE
+      await UPDATE(BonsCommande).set({
+        status: 'TO_APPROVE',
+        statusDate: new Date().toISOString()
+      }).where({ ID: poId });
+
+      // Create notification for admin
+      try {
+        const { Notification } = cds.entities('sap.pme.admin');
+        await INSERT.into(Notification).entries({
+          ID: cds.utils.uuid(),
+          title: `🔄 Réception PO ${po.poNumber} à valider`,
+          message: `Le fournisseur a renvoyé la marchandise pour résoudre l'écart sur le bon de commande ${po.poNumber}. Veuillez vérifier et valider la nouvelle réception.`,
+          isRead: false,
+          createdAt: new Date().toISOString(),
+          entityName: 'PO_RESEND',
+          entityId: poId
+        });
+      } catch (e) {
+        console.warn('Failed to insert admin notification:', e.message);
+      }
+
+      return SELECT.one.from(BonsCommande).where({ ID: poId });
+    });
+
+    // ─────────────────────────────────────────
+    // ACTION: Approuver la nouvelle réception par l'admin
+    // ─────────────────────────────────────────
+    this.on('approveDiscrepancyResolution', async (req) => {
+      const { poId, items } = req.data;
+      const po = await SELECT.one.from(BonsCommande).where({ ID: poId });
+      if (!po) return req.error(404, 'Bon de commande introuvable');
+      if (po.status !== 'TO_APPROVE') {
+        return req.error(400, "Ce bon de commande n'est pas en attente de validation de remplacement");
+      }
+
+      const receptions = await SELECT.from(Receptions).where({ bonCommande_ID: poId });
+      if (receptions.length === 0) return req.error(400, "Aucune réception n'est enregistrée pour ce bon de commande");
+
+      const itemsList = items || [];
+
+      for (const gr of receptions) {
+        const grItems = await SELECT.from(ReceptionItems).where({ parent_ID: gr.ID });
+        for (const gi of grItems) {
+          const inputItem = itemsList.find(it => it.poItemId === gi.poItem_ID);
+          
+          let resend = parseFloat(gi.resendQty) || 0;
+          let accepted = resend;
+          let rejected = 0;
+
+          if (inputItem) {
+            accepted = parseFloat(inputItem.acceptedQty) || 0;
+            rejected = parseFloat(inputItem.rejectedQty) || 0;
+            resend = accepted + rejected;
+          }
+
+          if (resend > 0) {
+            const newReceived = parseFloat(gi.receivedQty) + resend;
+            const newAccepted = parseFloat(gi.acceptedQty) + accepted;
+            const newRejected = parseFloat(gi.rejectedQty) + rejected;
+            
+            await UPDATE(ReceptionItems).set({
+              receivedQty : newReceived,
+              acceptedQty : newAccepted,
+              rejectedQty : newRejected,
+              resendQty   : 0
+            }).where({ ID: gi.ID });
+
+            // Update corresponding POItem receivedQty
+            if (gi.poItem_ID) {
+              await UPDATE(POItems).set({
+                receivedQty: newReceived
+              }).where({ ID: gi.poItem_ID });
+            }
+          }
+        }
+      }
+
+      // Update PO status back to DELIVERED (fully received/validated)
+      await UPDATE(BonsCommande).set({
+        status     : 'DELIVERED',
+        statusDate : new Date().toISOString()
+      }).where({ ID: poId });
+
+      try {
+        const { Notification } = cds.entities('sap.pme.admin');
+        await UPDATE(Notification).set({ isRead: true }).where({ entityId: poId });
+      } catch (e) {
+        console.warn('Failed to auto-resolve PO discrepancy notifications:', e.message);
+      }
+
+      return SELECT.one.from(BonsCommande).where({ ID: poId });
     });
 
     // ─────────────────────────────────────────

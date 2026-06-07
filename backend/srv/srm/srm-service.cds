@@ -177,6 +177,18 @@ service SRMService {
     factureId: UUID
   ) returns FacturesFournisseur;
 
+  type ResendItem_Input {
+    poItemId  : UUID;
+    resendQty : Decimal(13, 3);
+  }
+  type ApproveItem_Input {
+    poItemId    : UUID;
+    acceptedQty : Decimal(13, 3);
+    rejectedQty : Decimal(13, 3);
+  }
+  action resolveDiscrepancy(poId: UUID, items: array of ResendItem_Input) returns BonsCommande;
+  action approveDiscrepancyResolution(poId: UUID, items: array of ApproveItem_Input) returns BonsCommande;
+
   function downloadPOPDF(poId: UUID) returns String;
   function downloadGRPDF(grId: UUID) returns String;
   function downloadSupplierInvoicePDF(factureId: UUID) returns String;

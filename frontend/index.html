@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CloudBridge | Portail Unique de Gestion</title>
+    <title>Bridgify Cloud | Portail Unique de Gestion</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -12,10 +12,15 @@
             --primary-dark: #0040b0;
             --primary-light: rgba(0, 112, 242, 0.15);
             --accent: #00d2ff;
+            --bg: #f8fafc;
             --text-main: #1e293b;
             --text-muted: #64748b;
             --glass-bg: rgba(255, 255, 255, 0.75);
             --glass-border: rgba(255, 255, 255, 0.6);
+            --card-border: rgba(226, 232, 240, 0.8);
+            --card-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.08);
+            --card-type-bg: rgba(255, 255, 255, 0.6);
+            --divider: rgba(226, 232, 240, 0.8);
         }
 
         * {
@@ -33,8 +38,9 @@
             justify-content: center;
             overflow-x: hidden;
             position: relative;
-            background: #f8fafc;
+            background: var(--bg);
             padding: 20px;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         /* ── BACKGROUND ANIMATIONS (Mesh Liquid Gradients) ── */
@@ -103,11 +109,12 @@
             padding: 3rem 2.5rem;
             width: 100%;
             max-width: 960px;
-            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.08), 
+            box-shadow: var(--card-shadow), 
                         0 0 0 1px rgba(0, 112, 242, 0.05);
             z-index: 2;
             text-align: center;
             animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+            transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         @keyframes cardAppear {
@@ -198,8 +205,8 @@
             gap: 16px;
             padding: 2rem 1.5rem;
             border-radius: 20px;
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            background: var(--card-type-bg);
+            border: 1px solid var(--card-border);
             text-decoration: none;
             color: var(--text-main);
             transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -223,7 +230,7 @@
 
         .action-card:hover {
             transform: translateY(-5px);
-            background: #ffffff;
+            background: var(--hover-card-bg, #ffffff);
             border-color: rgba(0, 112, 242, 0.3);
             box-shadow: 0 16px 32px rgba(0, 112, 242, 0.08);
         }
@@ -294,7 +301,7 @@
         /* ── FOOTER & STATUS ── */
         .divider {
             height: 1px;
-            background: rgba(226, 232, 240, 0.8);
+            background: var(--divider);
             margin: 1.5rem 0;
             border: 0;
         }
@@ -332,9 +339,86 @@
             50% { transform: scale(1.2); opacity: 1; }
             100% { transform: scale(0.9); opacity: 0.6; }
         }
+
+        /* ── DARK MODE STYLES ── */
+        body.dark-mode {
+            --bg: #0b0f17;
+            --text-main: #f0f6fc;
+            --text-muted: #8b949e;
+            --glass-bg: rgba(13, 17, 23, 0.85);
+            --glass-border: rgba(56, 139, 253, 0.15);
+            --card-border: rgba(48, 54, 61, 0.7);
+            --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            --card-type-bg: rgba(22, 27, 34, 0.4);
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --primary-light: rgba(59, 130, 246, 0.15);
+            --accent: #60a5fa;
+            --divider: rgba(48, 54, 61, 0.8);
+            --hover-card-bg: rgba(22, 27, 34, 0.8);
+        }
+
+        body.dark-mode .brand-logo {
+            border: 3px solid rgba(56, 139, 253, 0.2);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        body.dark-mode .status-badge {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+        }
+
+        body.dark-mode .action-icon-box.icon-admin {
+            background: rgba(48, 54, 61, 0.4);
+            color: #8b949e;
+        }
+
+        body.dark-mode .action-card:hover .icon-admin {
+            background: #1e293b;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ── THEME TOGGLE BUTTON ── */
+        .theme-toggle {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 1000;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-main);
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.08);
+            border-color: var(--primary);
+        }
     </style>
 </head>
 <body>
+    <script>
+        if (localStorage.getItem('theme-dark') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    <!-- FLOATING THEME TOGGLE -->
+    <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()" title="Changer de thème">
+        <span id="theme-icon">☀️</span>
+    </button>
 
     <!-- ANIMATED GLOW BACKGROUNDS -->
     <div class="bg-glow-container">
@@ -347,9 +431,9 @@
     <div class="portal-card">
         <div class="brand-header">
             <div class="brand-logo-frame">
-                <img src="/images/logo_round.png" alt="CloudBridge Logo" class="brand-logo">
+                <img src="/images/logo_round.png" alt="Bridgify Cloud Logo" class="brand-logo">
             </div>
-            <h1 class="brand-title">CloudBridge</h1>
+            <h1 class="brand-title">Bridgify Cloud</h1>
             <p class="brand-subtitle">Bienvenue sur votre passerelle applicative unifiée. Choisissez un espace ou enregistrez votre entreprise pour commencer.</p>
         </div>
 
@@ -398,6 +482,29 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Theme Management functions
+        function initTheme() {
+            const isDark = localStorage.getItem('theme-dark') === 'true';
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme-dark', isDark ? 'true' : 'false');
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+        }
+
+        initTheme();
+    </script>
 
 </body>
 </html>

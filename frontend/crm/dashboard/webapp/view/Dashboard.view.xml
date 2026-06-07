@@ -11,7 +11,7 @@
     <pages>
       <Page
         id="dashboardPage"
-        title="Dashboard CRM — CloudBridge"
+        title="Dashboard CRM — Bridgify Cloud"
         showHeader="true">
 
         <customHeader>

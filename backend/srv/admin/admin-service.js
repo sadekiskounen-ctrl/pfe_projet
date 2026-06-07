@@ -3,7 +3,7 @@
 // ============================================================
 
 const cds = require('@sap/cds');
-const { generateRegistrationPDF, generateFacturePDF, generateDevisPDF, generateCommandePDF } = require('../lib/pdf-generator');
+const { generateRegistrationPDF, generateFacturePDF, generateDevisPDF, generateCommandePDF, generateInvoiceFournisseurPDF } = require('../lib/pdf-generator');
 
 module.exports = class AdminService extends cds.ApplicationService {
 
@@ -176,15 +176,10 @@ module.exports = class AdminService extends cds.ApplicationService {
       if (suppFact) {
         const items = await SELECT.from(FactureFournisseurItem).where({ parent_ID: factId });
         const supplier = await SELECT.one.from(cds.entities('sap.pme.srm').Fournisseur).where({ ID: suppFact.fournisseur_ID });
-        const pdfBuffer = await generateFacturePDF({
+        const pdfBuffer = await generateInvoiceFournisseurPDF({
           ...suppFact,
           items,
-          clientB2B: {
-            companyName: supplier ? supplier.companyName : 'Fournisseur',
-            email: supplier ? supplier.email : '',
-            phone: supplier ? supplier.phone : '',
-            rc: supplier ? supplier.rc : ''
-          }
+          fournisseur: supplier
         });
         return pdfBuffer.toString('base64');
       }

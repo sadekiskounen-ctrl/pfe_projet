@@ -245,6 +245,7 @@ entity ReceptionItem : cuid {
   receivedQty  : Decimal(13, 3);
   acceptedQty  : Decimal(13, 3);
   rejectedQty  : Decimal(13, 3) default 0;
+  resendQty    : Decimal(13, 3) default 0;
   notes        : String(500);
 }
 

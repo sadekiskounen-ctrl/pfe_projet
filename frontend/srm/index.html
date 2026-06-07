@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CloudBridge | Portail Fournisseur</title>
-<meta name="description" content="Portail Fournisseur CloudBridge — Appels d'offres, bons de commande et suivi 3-way match.">
+<title>Bridgify Cloud | Portail Fournisseur</title>
+<meta name="description" content="Portail Fournisseur Bridgify Cloud — Appels d'offres, bons de commande et suivi 3-way match.">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="/auth-interceptor.js"></script>
@@ -15,42 +15,64 @@
   }
 </script>
 <style>
+body, input, select, textarea, button {
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Custom scrollbars like admin */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
 :root {
   /* ☀️ SAP Morning Horizon (Light Fiori Theme) */
-  --bg: #f2f5f8;
+  --bg: #F0F4F8;
   --bg-card: #ffffff;
-  --bg-card2: #f7f9fa;
-  --accent: #0a6ed1; /* Sapphire brand accent */
-  --accent2: #e9730c; /* Warning Orange */
-  --accent-gold: #f5a623;
-  --accent-red: #bb0000; /* Error Red */
-  --text: #1a1c1e;
-  --text-dim: #6a6d70;
-  --border: #d9d9d9;
-  --border-light: rgba(0,0,0,0.08);
-  --shadow: 0 4px 12px rgba(0,0,0,0.03);
+  --bg-card2: #F8FAFC;
+  --accent: #2563EB; /* Sapphire brand accent replaced with electric blue BTP */
+  --accent2: #D97706; /* Warning Orange */
+  --accent-gold: #D97706;
+  --accent-red: #DC2626;
+  --text: #000000;
+  --text-dim: #4B5563;
+  --border: #E2E8F0;
+  --border-light: rgba(0, 0, 0, 0.05);
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-accent: 0 4px 12px rgba(37, 99, 235, 0.15);
   --radius: 12px;
-  --sidebar-w: 260px;
-  --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
-  --nav-item-active-bg: rgba(10, 110, 209, 0.12);
+  --transition: 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+  --nav-item-active-bg: rgba(37, 99, 235, 0.08);
 }
 
 body.dark-mode {
   /* 🌙 SAP Evening Horizon (Dark Fiori Theme) */
-  --bg: #12171c;
-  --bg-card: #1a222c;
-  --bg-card2: #212833;
-  --accent: #3596ff; /* Luminous brand accent */
-  --accent2: #ff9a2e;
-  --accent-gold: #f5a623;
-  --accent-red: #ef4444;
+  --bg: #0D1117;
+  --bg-card: #161B22;
+  --bg-card2: #21262D;
+  --accent: #3B82F6; /* Luminous Brand Accent */
+  --accent2: #F59E0B;
+  --accent-gold: #F59E0B;
+  --accent-red: #EF4444;
   --text: #ffffff;
-  --text-dim: #a1a8b0;
-  --border: rgba(255,255,255,0.08);
-  --border-light: rgba(255,255,255,0.06);
-  --shadow: 0 8px 32px rgba(0,0,0,0.4);
-  --nav-item-active-bg: rgba(53, 150, 255, 0.18);
+  --text-dim: #9CA3AF;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-light: rgba(255, 255, 255, 0.06);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-accent: 0 4px 20px rgba(59, 130, 246, 0.3);
+  --nav-item-active-bg: rgba(59, 130, 246, 0.12);
 }
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow: hidden; }
 
@@ -381,14 +403,16 @@ body.dark-mode .portal-badge-top {
 .badge-submitted{ background: rgba(108,99,255,0.15); color: var(--accent2); }
 
 /* BUTTONS */
-.btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 9px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: none; transition: all var(--transition); }
-.btn-primary { background: linear-gradient(135deg, var(--accent), #00a886); color: #0c1118; }
+.btn { display: inline-flex; align-items: center; gap: 7px; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; border: none; transition: all var(--transition); }
+.btn-primary { background: var(--accent); color: #ffffff !important; }
 .btn-primary:hover { transform: translateY(-1px); opacity: 0.9; }
-.btn-accent2 { background: linear-gradient(135deg, var(--accent2), #9c56ff); color: white; }
-.btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border-light); }
+.btn-accent2 { background: var(--accent2); color: white; }
+.btn-accent2:hover { transform: translateY(-1px); opacity: 0.9; }
+.btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
 .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
-.btn-danger { background: rgba(255,101,132,0.15); color: var(--accent-red); border: 1px solid rgba(255,101,132,0.3); }
-.btn-sm { padding: 5px 11px; font-size: 0.75rem; border-radius: 7px; }
+.btn-danger { background: rgba(220, 38, 38, 0.1); color: var(--accent-red); border: 1px solid rgba(220, 38, 38, 0.2); }
+.btn-danger:hover { background: rgba(220, 38, 38, 0.15); transform: translateY(-1px); }
+.btn-sm { padding: 5px 11px; font-size: 0.75rem; border-radius: 6px; }
 
 /* MODAL */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 300; align-items: center; justify-content: center; padding: 20px; display: none; }
@@ -534,6 +558,11 @@ body.dark-mode .toast.info {
   50% { opacity:0.6; box-shadow: 0 0 6px 2px rgba(0,201,167,0.3); }
 }
 
+@keyframes pulseAlert {
+  0% { box-shadow: 0 4px 6px -4px rgba(239,68,68,0.1), 0 10px 15px -3px rgba(239,68,68,0.1); border-color: #ef4444; }
+  100% { box-shadow: 0 0 20px 4px rgba(239,68,68,0.2), 0 4px 6px -4px rgba(239,68,68,0.15); border-color: #fca5a5; }
+}
+
 /* STAT CARD notification highlight */
 .stat-card.has-update { border-color: rgba(0,201,167,0.3); animation: statFlash 0.6s ease; }
 @keyframes statFlash {
@@ -610,6 +639,44 @@ input:checked + .slider-toggle:before {
 .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
 .btn-dialog-primary { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-family: inherit; }
 .btn-dialog-secondary { background: var(--border-light); color: var(--text-dim); border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-family: inherit; }
+
+/* Collapsed Sidebar Badges */
+.sidebar:not(:hover) .nav-badge {
+  opacity: 1 !important;
+  right: auto !important;
+  left: 36px !important;
+  top: 3px !important;
+  font-size: 11px !important;
+  padding: 2px 6px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+  z-index: 100 !important;
+  transform: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+@keyframes badgePulseClosed {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
+.sidebar:not(:hover) .nav-badge.noti-badge-pulse {
+  animation: badgePulseClosed 2s infinite ease-in-out !important;
+}
+
+.sidebar:not(:hover) .nav-item.has-notif .noti-dot {
+  display: none !important;
+}
+
+/* Prevent nav-item from clipping the badges when sidebar is collapsed */
+.sidebar:not(:hover) .nav-item {
+  overflow: visible !important;
+}
 </style>
 </head>
 <body>
@@ -633,9 +700,9 @@ input:checked + .slider-toggle:before {
 <aside class="sidebar">
   <div class="brand" style="flex-direction: column; align-items: center; text-align: center; gap: 8px; display: flex; width: 100%;">
     <div class="brand-logo-wrapper" style="display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center;">
-      <img src="/images/logo_round.png" alt="CloudBridge Logo" class="brand-logo-img">
+      <img src="/images/logo_round.png" alt="Bridgify Cloud Logo" class="brand-logo-img">
       <div class="brand-meta">
-        <span class="brand-name">CloudBridge</span>
+        <span class="brand-name">Bridgify Cloud</span>
         <span class="supplier-badge">FOURNISSEUR</span>
       </div>
     </div>
@@ -710,6 +777,8 @@ input:checked + .slider-toggle:before {
           <div><div class="stat-val" id="kpi-rating">—</div><div class="stat-lbl">Note fournisseur</div></div>
         </div>
       </div>
+      <!-- Critical alerts for delivery/reception discrepancies -->
+      <div id="criticalDashboardAlerts" style="display:none; margin-bottom:20px;"></div>
       <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius);padding:24px;margin-bottom:20px">
         <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:16px;color:var(--accent)"><i class="fas fa-bell" style="margin-right:8px"></i>Appels d'offres récents</h3>
         <div id="recentRFQs"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div></div>
@@ -889,6 +958,19 @@ input:checked + .slider-toggle:before {
   </div>
 </div>
 
+<!-- MODAL: RÉSOUDRE L'ÉCART (RENVOYER MARCHANDISE) -->
+<div class="modal-overlay" id="resolveDiscrepancyModal">
+  <div class="modal-box" style="max-width:750px">
+    <div class="modal-title"><i class="fas fa-truck-loading" style="color:var(--accent)"></i> Renvoyer la marchandise</div>
+    <div class="modal-subtitle" id="resolveModalSubtitle">Résolution de l'écart pour le PO N° —</div>
+    <div id="resolveItemsContainer"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeResolveDiscrepancyModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="submitResolveDiscrepancy()"><i class="fas fa-paper-plane"></i> Confirmer le renvoi</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: CRÉER FACTURE FOURNISSEUR -->
 <div class="modal-overlay" id="supplierInvoiceModal">
   <div class="modal-box" style="max-width:750px">
@@ -912,7 +994,7 @@ input:checked + .slider-toggle:before {
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeInvoiceModal()">Annuler</button>
-      <button class="btn btn-primary" onclick="submitSupplierInvoice()"><i class="fas fa-paper-plane"></i> Soumettre la facture</button>
+      <button class="btn btn-primary" id="submitInvoiceBtn" onclick="submitSupplierInvoice()"><i class="fas fa-paper-plane"></i> Soumettre la facture</button>
     </div>
   </div>
 </div>
@@ -1055,7 +1137,7 @@ async function loadDashboard() {
   // Open RFQs (all, since supplier can see open ones)
   const [rfqRes, poRes, matchRes] = await Promise.all([
     fetch(`/odata/v4/srm/RFQs?$filter=status eq 'OPEN'&$expand=items&$orderby=deadline asc`),
-    fetch(`/odata/v4/srm/BonsCommande?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID}`)}&$orderby=createdAt desc&$top=10`),
+    fetch(`/odata/v4/srm/BonsCommande?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID}`)}&$expand=receptions($expand=items)&$orderby=createdAt desc&$top=10`),
     fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID} and matchStatus eq 'PENDING'`)}&$select=ID`)
   ]);
 
@@ -1072,6 +1154,94 @@ async function loadDashboard() {
   document.getElementById('kpi-rfqs').textContent         = openRFQs;
   document.getElementById('kpi-pos').textContent          = posList.length;
   document.getElementById('kpi-pending-match').textContent = pendingMatch;
+
+  // Check for critical delivery rejections/anomalies
+  let criticalAlertsHtml = '';
+  posList.forEach(po => {
+    if (po.status === 'TO_APPROVE') {
+      criticalAlertsHtml += `
+        <div style="background:linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border:2px solid #3b82f6; border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 10px 15px -3px rgba(59,130,246,0.1), 0 4px 6px -4px rgba(59,130,246,0.1);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
+            <div style="display:flex; gap:14px; align-items:flex-start;">
+              <div style="background:#3b82f6; color:white; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0;">
+                <i class="fas fa-truck-loading"></i>
+              </div>
+              <div style="text-align: left;">
+                <h4 style="color:#1e3a8a; font-size:1.05rem; font-weight:800; margin:0 0 4px 0; letter-spacing:-0.2px">🔄 MARCHANDISE RENVOYÉE - EN ATTENTE DE VALIDATION</h4>
+                <p style="color:#1e3a8a; font-size:0.88rem; margin:0; line-height:1.4">
+                  Le renvoi de marchandise pour le bon de commande N° <strong>${po.poNumber}</strong> a été enregistré. Le processus reprendra dès que l'administration aura physiquement vérifié et approuvé la réception.
+                </p>
+                <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+                  <button class="btn btn-accent2 btn-sm" onclick="viewPO('${po.ID}')" style="background:#3b82f6; color:white; font-weight:700; border-color:#3b82f6;"><i class="fas fa-search"></i> Consulter les détails</button>
+                </div>
+              </div>
+            </div>
+            <span style="background:#dbeafe; border:1px solid #bfdbfe; color:#1e40af; font-size:0.7rem; font-weight:800; padding:4px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px">En attente</span>
+          </div>
+        </div>
+      `;
+    } else if (po.status === 'DELIVERED' && po.receptions && po.receptions.length > 0) {
+      let totalMissing = 0;
+      let totalRejected = 0;
+      let hasDiscrepancy = false;
+      po.receptions.forEach(gr => {
+        if (gr.items) {
+          gr.items.forEach(item => {
+            const accepted = parseFloat(item.acceptedQty) || 0;
+            const ordered = parseFloat(item.orderedQty) || 0;
+            const received = parseFloat(item.receivedQty) || 0;
+            if (accepted < ordered) {
+              hasDiscrepancy = true;
+              const missing = Math.max(0, ordered - received);
+              const rejected = Math.max(0, ordered - accepted - missing);
+              totalMissing += missing;
+              totalRejected += rejected;
+            }
+          });
+        }
+      });
+
+      if (hasDiscrepancy) {
+        criticalAlertsHtml += `
+          <div style="background:linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%); border:2px solid #ef4444; border-radius:12px; padding:20px; margin-bottom:20px; box-shadow:0 10px 15px -3px rgba(239,68,68,0.1), 0 4px 6px -4px rgba(239,68,68,0.1); animation: pulseAlert 2s infinite alternate;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
+              <div style="display:flex; gap:14px; align-items:flex-start;">
+                <div style="background:#ef4444; color:white; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; box-shadow:0 0 10px rgba(239,68,68,0.4)">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div style="text-align: left;">
+                  <h4 style="color:#991b1b; font-size:1.05rem; font-weight:800; margin:0 0 4px 0; letter-spacing:-0.2px">🚨 ALERTE CRITIQUE : ÉCART DE LIVRAISON CONSTATÉ</h4>
+                  <p style="color:#7f1d1d; font-size:0.88rem; margin:0 0 8px 0; line-height:1.4">
+                    Des anomalies ont été enregistrées par l'administration lors de la réception du bon de commande N° <strong>${po.poNumber}</strong> :
+                    <ul style="margin:4px 0 8px 16px; padding:0; font-size:0.85rem; color:#7f1d1d">
+                      ${totalMissing > 0 ? `<li><strong>${totalMissing} pièces manquantes</strong> (non livrées)</li>` : ''}
+                      ${totalRejected > 0 ? `<li><strong>${totalRejected} pièces rejetées</strong> par l'administration</li>` : ''}
+                    </ul>
+                  </p>
+                  <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <button class="btn btn-accent2 btn-sm" onclick="viewPO('${po.ID}')" style="background:#dc2626; color:white; font-weight:700; border-color:#dc2626;"><i class="fas fa-search"></i> Consulter les détails</button>
+                    <button class="btn btn-accent2 btn-sm" onclick="openResolveDiscrepancyModal('${po.ID}', '${po.poNumber}')" style="background:#10b981; color:white; font-weight:700; border-color:#10b981; display:inline-flex; align-items:center; gap:6px; cursor:pointer;"><i class="fas fa-truck"></i> Renvoyer la marchandise</button>
+                    <button class="btn btn-ghost btn-sm" onclick="viewGRPDF('${po.receptions[0].ID}', '${po.receptions[0].receiptNumber}')" style="color:#991b1b; font-weight:700; padding: 0;"><i class="fas fa-file-pdf"></i> Télécharger le Bon de Réception (PDF)</button>
+                  </div>
+                </div>
+              </div>
+              <span style="background:#fee2e2; border:1px solid #fca5a5; color:#b91c1c; font-size:0.7rem; font-weight:800; padding:4px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px">Urgent</span>
+            </div>
+          </div>
+        `;
+      }
+    }
+  });
+
+  const alertsContainer = document.getElementById('criticalDashboardAlerts');
+  if (alertsContainer) {
+    if (criticalAlertsHtml) {
+      alertsContainer.innerHTML = criticalAlertsHtml;
+      alertsContainer.style.display = 'block';
+    } else {
+      alertsContainer.style.display = 'none';
+    }
+  }
 
   // Recent RFQs on dashboard
   const container = document.getElementById('recentRFQs');
@@ -1241,23 +1411,62 @@ async function loadPOs(isSilent = false) {
   }
   try {
     const enc = encodeURIComponent(`fournisseur_ID eq ${profile.ID}`);
-    const res  = await fetch(`/odata/v4/srm/BonsCommande?$filter=${enc}&$orderby=createdAt desc`);
-    const data = await res.json();
+    const [poRes, factRes] = await Promise.all([
+      fetch(`/odata/v4/srm/BonsCommande?$filter=${enc}&$expand=receptions($expand=items)&$orderby=createdAt desc`),
+      fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${enc}&$select=bonCommande_ID`)
+    ]);
+    if (!poRes.ok) {
+      const err = await poRes.json().catch(() => ({}));
+      throw new Error(err.error?.message || "Erreur de chargement des commandes");
+    }
+    if (!factRes.ok) {
+      const err = await factRes.json().catch(() => ({}));
+      throw new Error(err.error?.message || "Erreur de chargement des factures");
+    }
+    const data = await poRes.json();
+    const factData = await factRes.json();
     posList = data.value || [];
+    const invoicedPoIds = (factData.value || []).map(f => f.bonCommande_ID).filter(Boolean);
     if (!posList.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>Aucun bon de commande.</td></tr>'; return; }
-    const statusMap = { SENT:'badge-pending', CONFIRMED:'badge-confirmed', DELIVERED:'badge-matched', CANCELLED:'badge-closed' };
+    const statusMap = { SENT:'badge-pending', CONFIRMED:'badge-confirmed', DELIVERED:'badge-matched', CANCELLED:'badge-closed', TO_APPROVE:'badge-pending' };
     tbody.innerHTML = posList.map(po => {
       let actionBtns = `<button class="btn btn-ghost btn-sm" onclick="viewPO('${po.ID}')"><i class="fas fa-eye"></i> Voir</button>`;
       if (po.status === 'SENT') {
         actionBtns += ` <button class="btn btn-accent2 btn-sm accept-btn-${po.ID}" onclick="acceptPurchaseOrder('${po.ID}')"><i class="fas fa-check"></i> Accepter</button>`;
       }
       if (po.status === 'DELIVERED') {
-        actionBtns += ` <button class="btn btn-accent2 btn-sm noti-badge-pulse" onclick="openCreateInvoiceModal('${po.ID}', '${po.poNumber}')" style="font-weight:700; animation: badgePulse 1.2s infinite;"><i class="fas fa-file-invoice"></i> Soumettre Facture 🔔</button>`;
+        const hasInvoice = invoicedPoIds.includes(po.ID);
+        if (hasInvoice) {
+          actionBtns += ` <span class="badge badge-submitted" style="font-weight:700;"><i class="fas fa-clock"></i> En attente</span>`;
+        } else {
+          actionBtns += ` <button class="btn btn-accent2 btn-sm noti-badge-pulse" onclick="openCreateInvoiceModal('${po.ID}', '${po.poNumber}')" style="font-weight:700; animation: badgePulse 1.2s infinite;"><i class="fas fa-file-invoice"></i> Soumettre Facture 🔔</button>`;
+        }
       }
 
-      let statusBadge = `<span class="badge ${statusMap[po.status]||'badge-pending'}">${po.status||'—'}</span>`;
+      let statusLabelText = po.status;
+      if (po.status === 'TO_APPROVE') {
+        statusLabelText = 'Attente Approbation';
+      }
+      let statusBadge = `<span class="badge ${statusMap[po.status]||'badge-pending'}">${statusLabelText||'—'}</span>`;
       if (po.status === 'DELIVERED') {
-        statusBadge += ` <span class="badge noti-badge-pulse" style="background:#f5a623; color:#12171c; font-size:0.65rem; font-weight:800; margin-left:6px; display:inline-block; vertical-align:middle; animation: badgePulse 1.2s infinite;">GR VALIDÉE 🔔</span>`;
+        let hasAnomaly = false;
+        if (po.receptions && po.receptions.length > 0) {
+          for (const gr of po.receptions) {
+            if (gr.items) {
+              for (const item of gr.items) {
+                if ((parseFloat(item.acceptedQty) || 0) < (parseFloat(item.orderedQty) || 0)) {
+                  hasAnomaly = true;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        if (hasAnomaly) {
+          statusBadge += ` <span class="badge noti-badge-pulse" style="background:#ef4444; color:#ffffff; font-size:0.65rem; font-weight:800; margin-left:6px; display:inline-block; vertical-align:middle; animation: badgePulse 1.2s infinite;">⚠️ ÉCART DE RÉCEPTION</span>`;
+        } else {
+          statusBadge += ` <span class="badge noti-badge-pulse" style="background:#10b981; color:#ffffff; font-size:0.65rem; font-weight:800; margin-left:6px; display:inline-block; vertical-align:middle;">GR VALIDÉE ✓</span>`;
+        }
       }
 
       return `
@@ -1277,9 +1486,91 @@ async function loadPOs(isSilent = false) {
 async function viewPO(poId) {
   showLoader(true);
   try {
-    const res  = await fetch(`/odata/v4/srm/BonsCommande(ID=${poId})?$expand=items`);
+    const res  = await fetch(`/odata/v4/srm/BonsCommande(ID=${poId})?$expand=items,receptions($expand=items($expand=product,poItem))`);
     const data = await res.json();
     const items = data.items || [];
+    
+    let grHtml = '';
+    if (data.receptions && data.receptions.length > 0) {
+      grHtml = `
+        <div style="margin-top:20px; border-top:1px dashed var(--border); padding-top:15px">
+          <h4 style="margin-bottom:10px; color:var(--text); font-weight:700;"><i class="fas fa-truck"></i> Historique des Réceptions (GR)</h4>
+          ${data.receptions.map(gr => {
+            let grItemsHtml = '';
+            let anomalyAlert = '';
+            let totalMissing = 0;
+            let totalRejected = 0;
+
+            if (gr.items && gr.items.length > 0) {
+              grItemsHtml = `
+                <table class="offer-items-table" style="margin-top:10px; font-size:0.8rem; width:100%">
+                  <thead>
+                    <tr><th>#</th><th>Description</th><th style="text-align:center">Commandé</th><th style="text-align:center">Reçu</th><th style="text-align:center">Accepté</th><th style="text-align:center">Rejeté</th></tr>
+                  </thead>
+                  <tbody>
+                    ${gr.items.map((gi, idx) => {
+                      const desc = (gi.product && gi.product.name) || (gi.poItem && gi.poItem.description) || gi.description || `Article #${idx+1}`;
+                      const rej = parseFloat(gi.rejectedQty) || 0;
+                      const mis = Math.max(0, (parseFloat(gi.orderedQty) || 0) - (parseFloat(gi.receivedQty) || 0));
+                      totalMissing += mis;
+                      totalRejected += rej;
+                      return `
+                        <tr>
+                          <td>${idx+1}</td>
+                          <td>${desc}</td>
+                          <td style="font-family:monospace; text-align:center">${gi.orderedQty}</td>
+                          <td style="font-family:monospace; text-align:center">${gi.receivedQty}</td>
+                          <td style="font-family:monospace; text-align:center; color:green; font-weight:bold">${gi.acceptedQty}</td>
+                          <td style="font-family:monospace; text-align:center; color:${rej > 0 ? 'red' : 'inherit'}; font-weight:${rej > 0 ? 'bold' : 'normal'}">${gi.rejectedQty}</td>
+                        </tr>
+                      `;
+                    }).join('')}
+                  </tbody>
+                </table>
+              `;
+            }
+
+            if (data.status === 'TO_APPROVE') {
+              anomalyAlert = `
+                <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2); border-radius:8px; padding:12px; margin-bottom:10px; color:#1e3a8a; font-size:0.85rem">
+                  <strong>🔄 Statut de résolution :</strong><br/>
+                  La marchandise de remplacement a été renvoyée. En attente de validation par l'administration.
+                </div>
+              `;
+            } else if (totalMissing > 0 || totalRejected > 0) {
+              anomalyAlert = `
+                <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); border-radius:8px; padding:12px; margin-bottom:10px; color:#ef4444; font-size:0.85rem">
+                  <strong>⚠️ Alerte Écart de Réception :</strong><br/>
+                  ${totalMissing > 0 ? `- ${totalMissing} pièce(s) manquante(s) (non livrée(s))<br/>` : ''}
+                  ${totalRejected > 0 ? `- ${totalRejected} pièce(s) rejetée(s) par l'administrateur<br/>` : ''}
+                  <div style="margin-top:10px;">
+                    <button class="btn btn-accent2 btn-sm" onclick="openResolveDiscrepancyModal('${data.ID}', '${data.poNumber}')" style="background:#10b981; color:white; font-weight:700; border-color:#10b981; display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+                      <i class="fas fa-truck"></i> Renvoyer la marchandise (Résoudre l'écart)
+                    </button>
+                  </div>
+                </div>
+              `;
+            }
+
+            return `
+              <div style="background:var(--bg-card2); border:1px solid var(--border); border-radius:10px; padding:15px; margin-bottom:15px">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px">
+                  <div>
+                    <span style="font-weight:700; color:var(--text);">${gr.receiptNumber}</span>
+                    <span style="font-size:0.8rem; color:var(--text-dim); margin-left:8px">${fmtDate(gr.date)}</span>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" onclick="viewGRPDF('${gr.ID}', '${gr.receiptNumber}')"><i class="fas fa-file-pdf"></i> PDF</button>
+                </div>
+                ${anomalyAlert}
+                ${grItemsHtml}
+                ${gr.notes ? `<div style="font-size:0.8rem; color:var(--text-dim); margin-top:8px"><strong>Notes :</strong> ${gr.notes}</div>` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
     document.getElementById('poModalContent').innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
         <div><div style="font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">N° PO</div><div style="font-family:monospace;font-weight:700">${data.poNumber||'—'}</div></div>
@@ -1303,6 +1594,7 @@ async function viewPO(poId) {
         <div><span style="color:var(--text-dim);font-size:0.82rem">TVA: </span><strong>${fmt(data.totalTVA)} DA</strong></div>
         <div style="font-size:1.1rem"><span style="color:var(--text-dim);font-size:0.82rem">Total TTC: </span><strong style="color:var(--accent)">${fmt(data.totalTTC)} DA</strong></div>
       </div>
+      ${grHtml}
     `;
     document.getElementById('poModal').classList.add('open');
   } catch(e) { toast('error', e.message); }
@@ -1344,6 +1636,147 @@ async function acceptPurchaseOrder(poId) {
   }
 }
 
+let resolvePoId = null;
+let resolveItemsList = [];
+
+async function openResolveDiscrepancyModal(poId, poNumber) {
+  resolvePoId = poId;
+  document.getElementById('resolveModalSubtitle').textContent = `Résolution de l'écart pour le PO N° ${poNumber || '—'}`;
+  showLoader(true);
+  try {
+    const res = await fetch(`/odata/v4/srm/BonsCommande(ID=${poId})?$expand=items,receptions($expand=items($expand=product,poItem))`);
+    const data = await res.json();
+    
+    const itemsWithDiscrepancy = [];
+    if (data.receptions) {
+      data.receptions.forEach(gr => {
+        if (gr.items) {
+          gr.items.forEach(gi => {
+            const ordered = parseFloat(gi.orderedQty) || 0;
+            const accepted = parseFloat(gi.acceptedQty) || 0;
+            const discrepancy = ordered - accepted;
+            if (discrepancy > 0) {
+              const poItemId = gi.poItem_ID || gi.poItem?.ID;
+              const desc = (gi.product && gi.product.name) || (gi.poItem && gi.poItem.description) || gi.description || "Article";
+              if (!itemsWithDiscrepancy.some(x => x.poItemId === poItemId)) {
+                itemsWithDiscrepancy.push({
+                  poItemId,
+                  description: desc,
+                  orderedQty: ordered,
+                  acceptedQty: accepted,
+                  discrepancy: discrepancy
+                });
+              }
+            }
+          });
+        }
+      });
+    }
+
+    resolveItemsList = itemsWithDiscrepancy;
+
+    if (itemsWithDiscrepancy.length === 0) {
+      toast('info', "Aucun écart à résoudre sur ce bon de commande.");
+      showLoader(false);
+      return;
+    }
+
+    document.getElementById('resolveItemsContainer').innerHTML = `
+      <table class="offer-items-table">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th style="text-align:center">Commandé</th>
+            <th style="text-align:center">Accepté</th>
+            <th style="text-align:center">Écart (Max)</th>
+            <th style="text-align:center">Quantité Renvoyée</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${itemsWithDiscrepancy.map((item, i) => `
+            <tr>
+              <td>${item.description}</td>
+              <td style="font-family:monospace; text-align:center">${item.orderedQty}</td>
+              <td style="font-family:monospace; text-align:center; color:green; font-weight:bold">${item.acceptedQty}</td>
+              <td style="font-family:monospace; text-align:center; color:red; font-weight:bold">${item.discrepancy}</td>
+              <td>
+                <input type="number" class="price-input resolve-resendQty" data-idx="${i}" 
+                  value="${item.discrepancy}" min="0" max="${item.discrepancy}" step="0.001" 
+                  style="width: 120px; text-align: center;">
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+
+    document.getElementById('resolveDiscrepancyModal').classList.add('open');
+  } catch(e) { 
+    toast('error', e.message); 
+  } finally { 
+    showLoader(false); 
+  }
+}
+
+function closeResolveDiscrepancyModal() {
+  document.getElementById('resolveDiscrepancyModal').classList.remove('open');
+}
+
+async function submitResolveDiscrepancy() {
+  if (!resolvePoId || !resolveItemsList.length) return;
+  
+  const items = [];
+  for (let i = 0; i < resolveItemsList.length; i++) {
+    const item = resolveItemsList[i];
+    const inputEl = document.querySelector(`.resolve-resendQty[data-idx="${i}"]`);
+    const val = parseFloat(inputEl?.value || 0);
+    const maxVal = item.discrepancy;
+    
+    if (isNaN(val) || val < 0) {
+      toast('error', `Veuillez saisir une quantité valide pour ${item.description}`);
+      return;
+    }
+    
+    if (val > maxVal + 0.001) {
+      toast('error', `La quantité pour ${item.description} ne peut pas dépasser l'écart de ${maxVal}`);
+      return;
+    }
+    
+    items.push({
+      poItemId: item.poItemId,
+      resendQty: val
+    });
+  }
+
+  if (items.every(item => item.resendQty === 0)) {
+    toast('error', "Veuillez renvoyer au moins un article avec une quantité supérieure à 0.");
+    return;
+  }
+
+  showLoader(true);
+  try {
+    const res = await fetch('/odata/v4/srm/resolveDiscrepancy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ poId: resolvePoId, items })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Erreur lors de la résolution');
+    
+    toast('success', "Le renvoi de la marchandise a été enregistré. En attente de validation administrative.");
+    closeResolveDiscrepancyModal();
+    closePOModal();
+    await loadDashboard();
+    await loadPOs(true);
+    await loadMatch(true);
+    await refreshNotifications(true);
+  } catch(e) {
+    toast('error', e.message);
+  } finally {
+    showLoader(false);
+  }
+}
+
 // ═══════════════════════════════════════════════════════
 // CRÉER GR (RÉCEPTION MARCHANDISE)
 // ═══════════════════════════════════════════════════════
@@ -1367,9 +1800,9 @@ async function openGRModal(poId, poNumber) {
             <td>${i + 1}</td>
             <td>${item.description || '—'}</td>
             <td style="font-family:monospace">${item.quantity} ${item.unit || ''}</td>
-            <td><input type="number" class="price-input gr-receivedQty" data-idx="${i}" value="${item.quantity}" min="0" step="0.001"></td>
-            <td><input type="number" class="price-input gr-acceptedQty" data-idx="${i}" value="${item.quantity}" min="0" step="0.001"></td>
-            <td><input type="number" class="price-input gr-rejectedQty" data-idx="${i}" value="0" min="0" step="0.001"></td>
+            <td><input type="number" class="price-input gr-receivedQty" data-idx="${i}" value="${item.quantity}" min="0" step="0.001" oninput="recalcGR(${i})"></td>
+            <td><input type="number" class="price-input gr-acceptedQty" data-idx="${i}" value="${item.quantity}" min="0" step="0.001" oninput="recalcGR(${i})"></td>
+            <td><input type="number" class="price-input gr-rejectedQty" data-idx="${i}" id="gr-rejectedQty-${i}" value="0" min="0" step="0.001"></td>
           </tr>
         `).join('')}</tbody>
       </table>
@@ -1379,6 +1812,17 @@ async function openGRModal(poId, poNumber) {
   finally { showLoader(false); }
 }
 function closeGRModal() { document.getElementById('grModal').classList.remove('open'); }
+
+function recalcGR(i) {
+  const recEl = document.querySelector(`.gr-receivedQty[data-idx="${i}"]`);
+  const accEl = document.querySelector(`.gr-acceptedQty[data-idx="${i}"]`);
+  const rejEl = document.getElementById(`gr-rejectedQty-${i}`);
+  if (recEl && accEl && rejEl) {
+    const rec = parseFloat(recEl.value) || 0;
+    const acc = parseFloat(accEl.value) || 0;
+    rejEl.value = Math.max(0, rec - acc);
+  }
+}
 
 async function submitGR() {
   if (!grPoId || !grPoItems.length) return;
@@ -1446,7 +1890,14 @@ async function openCreateInvoiceModal(poId, poNumber) {
   } catch(e) { toast('error', e.message); }
   finally { showLoader(false); }
 }
-function closeInvoiceModal() { document.getElementById('supplierInvoiceModal').classList.remove('open'); }
+function closeInvoiceModal() {
+  document.getElementById('supplierInvoiceModal').classList.remove('open');
+  const btn = document.getElementById('submitInvoiceBtn');
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Soumettre la facture';
+  }
+}
 
 function recalcInvoice() {
   let totalHT = 0, totalTVA = 0, totalTTC = 0;
@@ -1470,6 +1921,11 @@ function recalcInvoice() {
 
 async function submitSupplierInvoice() {
   if (!invPoId || !invPoItems.length) return;
+  const btn = document.getElementById('submitInvoiceBtn');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+  }
   showLoader(true);
   try {
     const items = invPoItems.map((item, i) => ({
@@ -1517,6 +1973,23 @@ async function loadMatch(isSilent = false) {
     const res  = await fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${enc}&$expand=bonCommande,reception&$orderby=createdAt desc`);
     const data = await res.json();
     matchList = data.value || [];
+
+    // Mark matched/discrepant invoices as viewed
+    let viewed = JSON.parse(localStorage.getItem('viewedMatchedInvoices') || '[]');
+    let changed = false;
+    matchList.forEach(f => {
+      if (f.matchStatus && f.matchStatus !== 'PENDING') {
+        if (!viewed.includes(f.ID)) {
+          viewed.push(f.ID);
+          changed = true;
+        }
+      }
+    });
+    if (changed) {
+      localStorage.setItem('viewedMatchedInvoices', JSON.stringify(viewed));
+      refreshNotifications(false);
+    }
+
     if (!matchList.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="fas fa-layer-group" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>Aucune facture à apparier.</td></tr>'; return; }
     const matchBadge = { PENDING:'badge-pending', MATCHED:'badge-matched', DISCREPANCY:'badge-discrepancy' };
     const matchLabel = { PENDING:'En attente', MATCHED:'Apparié ✓', DISCREPANCY:'Écart détecté' };
@@ -1718,7 +2191,7 @@ async function viewInvoicePDF(factureId, invoiceNumber) {
 // ═══════════════════════════════════════════════════════
 // POLLING (5s) — Auto-refresh badges, KPIs & active view
 // ═══════════════════════════════════════════════════════
-let prevCounts = { rfq: -1, po: -1, po_new: -1, match: -1, match_actionable: -1 };
+let prevCounts = { rfq: -1, po: -1, po_new: -1, match: -1, match_new: -1 };
 
 function updateNavIndicator(dotEl, navEl, badgeEl, count, prevCount) {
   // Update badge
@@ -1748,15 +2221,14 @@ function getActiveViewId() {
 async function refreshNotifications(isInitial = false) {
   if (!profile) return;
   try {
-    const [rfqRes, poRes, matchRes, actionableMatchRes] = await Promise.all([
+    const [rfqRes, poRes, invoicesRes] = await Promise.all([
       fetch(`/odata/v4/srm/RFQs?$filter=status eq 'OPEN'&$select=ID`),
       fetch(`/odata/v4/srm/BonsCommande?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID}`)}&$select=ID,status`),
-      fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID} and matchStatus eq 'PENDING'`)}&$select=ID`),
-      fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID} and (status eq 'PENDING_CASH' or matchStatus eq 'DISCREPANCY')`)}&$select=ID`)
+      fetch(`/odata/v4/srm/FacturesFournisseur?$filter=${encodeURIComponent(`fournisseur_ID eq ${profile.ID}`)}&$select=ID,matchStatus,status`)
     ]);
 
-    if (!rfqRes.ok || !poRes.ok || !matchRes.ok || !actionableMatchRes.ok) {
-      console.warn("Polling requests failed:", rfqRes.status, poRes.status, matchRes.status, actionableMatchRes.status);
+    if (!rfqRes.ok || !poRes.ok || !invoicesRes.ok) {
+      console.warn("Polling requests failed:", rfqRes.status, poRes.status, invoicesRes.status);
       return;
     }
 
@@ -1764,8 +2236,11 @@ async function refreshNotifications(isInitial = false) {
     const poData     = (await poRes.json()).value || [];
     const poCount    = poData.length;
     const poNewCount = poData.filter(p => p.status === 'SENT' || p.status === 'DELIVERED').length;
-    const matchCount = ((await matchRes.json()).value || []).length;
-    const actionableMatchCount = ((await actionableMatchRes.json()).value || []).length;
+    const invoices   = ((await invoicesRes.json()).value || []);
+    const matchCount = invoices.filter(f => f.matchStatus === 'PENDING').length;
+
+    const viewed = JSON.parse(localStorage.getItem('viewedMatchedInvoices') || '[]');
+    const newMatchedCount = invoices.filter(f => f.matchStatus && f.matchStatus !== 'PENDING' && !viewed.includes(f.ID)).length;
 
     // Fetch latest supplier rating & KYC status in the background
     const ratingRes = await fetch(`/odata/v4/srm/Fournisseurs(ID=${profile.ID})?$select=kycStatus,kycDate,kycBy&$expand=bp($select=rating)`);
@@ -1839,7 +2314,7 @@ async function refreshNotifications(isInitial = false) {
       document.getElementById('matchDot'),
       document.getElementById('nav-match'),
       document.getElementById('matchBadge'),
-      actionableMatchCount, isInitial ? -1 : prevCounts.match_actionable
+      newMatchedCount, isInitial ? -1 : prevCounts.match_new
     );
 
     prevCounts = { 
@@ -1847,7 +2322,7 @@ async function refreshNotifications(isInitial = false) {
       po: poCount, 
       po_new: poNewCount, 
       match: matchCount, 
-      match_actionable: actionableMatchCount 
+      match_new: newMatchedCount 
     };
 
     // Auto-refresh the currently active view silently in the background

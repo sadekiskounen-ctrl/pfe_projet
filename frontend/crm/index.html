@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CloudBridge | Espace Client</title>
+    <title>Bridgify Cloud | Espace Client</title>
     <meta
       name="description"
-      content="Portail client CloudBridge — Catalogue, devis et commandes en ligne."
+      content="Portail client Bridgify Cloud — Catalogue, devis et commandes en ligne."
     />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap"
@@ -19,44 +19,64 @@
     <!-- auth-interceptor.js est externe — actif pour injecter les headers de sécurité -->
     <script src="/auth-interceptor.js"></script>
     <style>
+      body, input, select, textarea, button {
+        font-family: 'Inter', sans-serif !important;
+      }
+
+      /* Custom scrollbars like admin */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--text-dim);
+      }
+
       /* ☀️ SAP Morning Horizon & Evening Horizon variables */
       :root {
         /* ☀️ SAP Morning Horizon (Light Fiori Theme) */
-        --bg: #f2f5f8;
+        --bg: #F0F4F8;
         --bg-card: #ffffff;
-        --bg-card2: #f7f9fa;
-        --accent: #0a6ed1; /* Sapphire brand accent */
-        --accent2: #e9730c; /* Warning Orange / Secondary brand accent */
-        --accent-green: #107e3e; /* Success Green */
-        --accent-gold: #f5a623;
-        --text: #1a1c1e;
-        --text-dim: #6a6d70;
-        --border: #d9d9d9;
-        --border-light: rgba(0, 0, 0, 0.08);
-        --shadow: 0 4px 12px rgba(0,0,0,0.03);
-        --shadow-accent: 0 4px 12px rgba(10, 110, 209, 0.15);
-        --radius: 16px;
+        --bg-card2: #F8FAFC;
+        --accent: #2563EB; /* Sapphire brand accent replaced with electric blue BTP */
+        --accent2: #D97706; /* Warning Orange / Secondary brand accent */
+        --accent-green: #059669; /* Success Green */
+        --accent-gold: #D97706;
+        --text: #000000;
+        --text-dim: #4B5563;
+        --border: #E2E8F0;
+        --border-light: rgba(0, 0, 0, 0.05);
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        --shadow-accent: 0 4px 12px rgba(37, 99, 235, 0.15);
+        --radius: 12px;
         --sidebar-w: 250px;
-        --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        --nav-item-active-bg: rgba(10, 110, 209, 0.12);
+        --transition: 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+        --nav-item-active-bg: rgba(37, 99, 235, 0.08);
       }
 
       body.dark-mode {
         /* 🌙 SAP Evening Horizon (Dark Fiori Theme) */
-        --bg: #12171c;
-        --bg-card: #1a222c;
-        --bg-card2: #212833;
-        --accent: #3596ff; /* Luminous Brand Accent */
-        --accent2: #ff9a2e;
-        --accent-green: #4ade80;
-        --accent-gold: #f5a623;
+        --bg: #0D1117;
+        --bg-card: #161B22;
+        --bg-card2: #21262D;
+        --accent: #3B82F6; /* Luminous Brand Accent */
+        --accent2: #F59E0B;
+        --accent-green: #10B981;
+        --accent-gold: #F59E0B;
         --text: #ffffff;
-        --text-dim: #a1a8b0;
+        --text-dim: #9CA3AF;
         --border: rgba(255, 255, 255, 0.08);
         --border-light: rgba(255, 255, 255, 0.06);
         --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        --shadow-accent: 0 4px 20px rgba(53, 150, 255, 0.3);
-        --nav-item-active-bg: rgba(53, 150, 255, 0.18);
+        --shadow-accent: 0 4px 20px rgba(59, 130, 246, 0.3);
+        --nav-item-active-bg: rgba(59, 130, 246, 0.12);
       }
 
       /* Premium Switch Toggle CSS */
@@ -664,7 +684,7 @@
       }
       .add-btn {
         margin-left: auto;
-        background: linear-gradient(135deg, var(--accent), #9c56ff);
+        background: var(--accent);
         border: none;
         color: #fff;
         padding: 7px 14px;
@@ -672,10 +692,11 @@
         font-size: 0.78rem;
         font-weight: 700;
         cursor: pointer;
-        transition: opacity var(--transition);
+        transition: all var(--transition);
       }
       .add-btn:hover {
-        opacity: 0.85;
+        opacity: 0.9;
+        transform: translateY(-1px);
       }
 
       /* ── TABLES ── */
@@ -779,28 +800,30 @@
         transition: all var(--transition);
       }
       .btn-primary {
-        background: linear-gradient(135deg, var(--accent), #9c56ff);
+        background: var(--accent);
         color: #fff;
       }
       .btn-primary:hover {
-        opacity: 0.87;
+        opacity: 0.9;
         transform: translateY(-1px);
       }
       .btn-success {
-        background: rgba(0, 217, 166, 0.15);
+        background: rgba(5, 150, 105, 0.1);
         color: var(--accent-green);
-        border: 1px solid rgba(0, 217, 166, 0.3);
+        border: 1px solid rgba(5, 150, 105, 0.2);
       }
       .btn-success:hover {
-        background: rgba(0, 217, 166, 0.25);
+        background: rgba(5, 150, 105, 0.15);
+        transform: translateY(-1px);
       }
       .btn-danger {
-        background: rgba(255, 101, 132, 0.15);
-        color: var(--accent2);
-        border: 1px solid rgba(255, 101, 132, 0.3);
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--accent-red, #DC2626);
+        border: 1px solid rgba(220, 38, 38, 0.2);
       }
       .btn-danger:hover {
-        background: rgba(255, 101, 132, 0.25);
+        background: rgba(220, 38, 38, 0.15);
+        transform: translateY(-1px);
       }
       .btn-ghost {
         background: transparent;
@@ -1457,6 +1480,44 @@
       .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
       .btn-dialog-primary { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-family: inherit; }
       .btn-dialog-secondary { background: var(--border-light); color: var(--text-dim); border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-family: inherit; }
+
+      /* Collapsed Sidebar Badges */
+      .sidebar:not(:hover) .nav-badge {
+        opacity: 1 !important;
+        right: auto !important;
+        left: 36px !important;
+        top: 3px !important;
+        font-size: 11px !important;
+        padding: 2px 6px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+        border-radius: 10px !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+        z-index: 100 !important;
+        transform: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      @keyframes badgePulseClosed {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.25); }
+        100% { transform: scale(1); }
+      }
+
+      .sidebar:not(:hover) .nav-badge.noti-badge-pulse {
+        animation: badgePulseClosed 2s infinite ease-in-out !important;
+      }
+
+      .sidebar:not(:hover) .nav-item.has-notif .noti-dot {
+        display: none !important;
+      }
+
+      /* Prevent nav-item from clipping the badges when sidebar is collapsed */
+      .sidebar:not(:hover) .nav-item {
+        overflow: visible !important;
+      }
     </style>
   </head>
   <body>
@@ -1483,9 +1544,9 @@
     <aside class="sidebar" id="sidebar">
       <div class="brand" style="flex-direction: column; align-items: center; text-align: center; gap: 8px;">
         <div class="brand-logo-wrapper" style="display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center;">
-          <img src="/images/logo_round.png" alt="CloudBridge Logo" class="brand-logo-img">
+          <img src="/images/logo_round.png" alt="Bridgify Cloud Logo" class="brand-logo-img">
           <div class="brand-meta">
-            <span class="brand-name">CloudBridge</span>
+            <span class="brand-name">Bridgify Cloud</span>
             <span class="client-badge" id="clientBadge">B2B</span>
           </div>
         </div>

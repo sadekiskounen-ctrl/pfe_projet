@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inscription — CloudBridge</title>
+    <title>Inscription — Bridgify Cloud</title>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800&display=swap"
       rel="stylesheet"
@@ -11,6 +11,10 @@
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
       :root {
@@ -37,6 +41,7 @@
         position: relative;
         background: var(--bg);
         padding: 40px 20px;
+        transition: background 0.3s ease, color 0.3s ease;
       }
 
       /* ── BACKGROUND ANIMATIONS (Mesh Liquid Gradients) ── */
@@ -107,6 +112,7 @@
         border: 1px solid rgba(255, 255, 255, 0.6);
         z-index: 2;
         animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
       }
 
       @keyframes cardAppear {
@@ -394,9 +400,202 @@
         display: flex;
         justify-content: flex-end;
       }
+
+      /* ── DARK MODE STYLES ── */
+      body.dark-mode {
+        --bg: #0b0f17;
+        --card-bg: rgba(13, 17, 23, 0.85);
+        --text: #f0f6fc;
+        --text-muted: #8b949e;
+        --border: rgba(48, 54, 61, 0.7);
+        --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        --sap-blue: #3b82f6;
+        --sap-blue-dark: #1d4ed8;
+        --sap-blue-light: rgba(59, 130, 246, 0.15);
+        --accent: #60a5fa;
+      }
+
+      body.dark-mode h1, 
+      body.dark-mode h2, 
+      body.dark-mode h3, 
+      body.dark-mode h4, 
+      body.dark-mode h5, 
+      body.dark-mode h6,
+      body.dark-mode .form-label {
+        color: var(--text) !important;
+      }
+
+      body.dark-mode .text-muted {
+        color: var(--text-muted) !important;
+      }
+
+      body.dark-mode .form-control, 
+      body.dark-mode .form-select {
+        background: rgba(22, 27, 34, 0.7);
+        border-color: rgba(48, 54, 61, 0.8);
+        color: #f0f6fc;
+      }
+
+      body.dark-mode .form-control::placeholder {
+        color: #6a737d;
+      }
+
+      body.dark-mode .form-control:focus, 
+      body.dark-mode .form-select:focus {
+        background: #161b22;
+        color: #f0f6fc;
+        border-color: var(--sap-blue);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+      }
+
+      body.dark-mode .form-control[type=file]::file-selector-button {
+        background-color: rgba(33, 38, 45, 0.8);
+        color: #f0f6fc;
+        border-color: rgba(48, 54, 61, 0.8);
+      }
+
+      body.dark-mode .form-control[type=file]::file-selector-button:hover {
+        background-color: rgba(33, 38, 45, 1);
+      }
+
+      body.dark-mode option {
+        background-color: #161b22;
+        color: #f0f6fc;
+      }
+
+      body.dark-mode .card-type {
+        background: rgba(22, 27, 34, 0.4);
+        border-color: var(--border);
+      }
+
+      body.dark-mode .card-type:hover {
+        background: rgba(22, 27, 34, 0.8);
+        border-color: var(--sap-blue-light);
+        transform: translateY(-2px);
+      }
+
+      body.dark-mode .card-type.active {
+        background: rgba(59, 130, 246, 0.12);
+        border-color: var(--sap-blue);
+        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);
+      }
+
+      body.dark-mode .card-type.active strong {
+        color: var(--sap-blue);
+      }
+
+      .card-type.active strong {
+        color: var(--sap-blue);
+      }
+
+      .card-type {
+        transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      }
+
+      /* alert-info glassmorphism */
+      .alert-info {
+        background: rgba(0, 112, 242, 0.05);
+        border: 1px solid rgba(0, 112, 242, 0.15);
+        color: var(--sap-blue-dark);
+        border-radius: 12px;
+        font-size: 0.9rem;
+      }
+
+      body.dark-mode .alert-info {
+        background: rgba(59, 130, 246, 0.08);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        color: #93c5fd;
+      }
+
+      body.dark-mode .step-indicator {
+        background: #161b22;
+        border-color: var(--border);
+        color: var(--text-muted);
+      }
+
+      body.dark-mode .step-indicator.active {
+        background: #1e293b;
+        border-color: var(--sap-blue);
+        color: var(--sap-blue);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.25);
+      }
+
+      body.dark-mode .step-indicator.completed {
+        background: var(--sap-blue);
+        border-color: var(--sap-blue);
+        color: white;
+      }
+
+      body.dark-mode .btn-secondary {
+        background: rgba(33, 38, 45, 0.6);
+        color: var(--text);
+        border: 1px solid rgba(48, 54, 61, 0.8);
+      }
+
+      body.dark-mode .btn-secondary:hover {
+        background: rgba(33, 38, 45, 0.9);
+        color: var(--text);
+      }
+
+      body.dark-mode .wizard-container {
+        border: 1px solid rgba(56, 139, 253, 0.15);
+        box-shadow: 0 0 40px rgba(56, 139, 253, 0.05), var(--shadow);
+      }
+
+      body.dark-mode .custom-alert-box {
+        background: rgba(22, 27, 34, 0.9);
+        border-color: rgba(48, 54, 61, 0.6);
+      }
+
+      body.dark-mode .form-control.is-invalid,
+      body.dark-mode .form-select.is-invalid {
+        border-color: #f87171 !important;
+      }
+
+      body.dark-mode .invalid-feedback {
+        color: #f87171 !important;
+      }
+
+      /* ── THEME TOGGLE BUTTON ── */
+      .theme-toggle {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 1000;
+        background: var(--card-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.2rem;
+        color: var(--text);
+        box-shadow: var(--shadow);
+        transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      }
+
+      .theme-toggle:hover {
+        transform: scale(1.08);
+        border-color: var(--sap-blue);
+      }
     </style>
   </head>
   <body>
+    <script>
+        if (localStorage.getItem('theme-dark') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    <!-- FLOATING THEME TOGGLE -->
+    <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()" title="Changer de thème">
+        <span id="theme-icon">☀️</span>
+    </button>
     <!-- ANIMATED GLOW BACKGROUNDS -->
     <div class="bg-glow-container">
         <div class="glow-circle glow-1"></div>
@@ -421,9 +620,9 @@
     <div class="wizard-container">
       <div class="text-center mb-5" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px;">
           <div class="brand-logo-frame">
-              <img src="/images/logo_round.png" alt="CloudBridge Logo" class="brand-logo">
+              <img src="/images/logo_round.png" alt="Bridgify Cloud Logo" class="brand-logo">
           </div>
-          <h2 class="fw-bold" style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 2rem; background: linear-gradient(135deg, var(--sap-blue), var(--sap-blue-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">CloudBridge</h2>
+          <h2 class="fw-bold" style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 2rem; background: linear-gradient(135deg, var(--sap-blue), var(--sap-blue-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">Bridgify Cloud</h2>
           <p class="text-muted" style="font-size: 0.9rem; margin: 0;">Portail d'Inscription Partenaires</p>
       </div>
       <div class="progress-steps">
@@ -719,8 +918,8 @@
         </div>
       </form>
 
-      <div class="text-center mt-4 pt-3" style="border-top: 1px solid #eee;">
-          <p class="text-muted">Vous avez déjà un compte ? <a href="/auth.html" style="color: #0070f2; font-weight: bold; text-decoration: none;">Connectez-vous ici</a></p>
+      <div class="text-center mt-4 pt-3" style="border-top: 1px solid var(--border);">
+          <p class="text-muted">Vous avez déjà un compte ? <a href="/auth.html" style="color: var(--sap-blue); font-weight: bold; text-decoration: none;">Connectez-vous ici</a></p>
       </div>
 
       <div id="successMsg" class="text-center mt-4" style="display: none">
@@ -1065,10 +1264,7 @@
 
             if (response.ok) {
               console.log("Succès ! Inscription enregistrée dans HANA.");
-              document.getElementById("registrationForm").style.display =
-                "none";
-              document.getElementById("successMsg").style.display = "block";
-              document.querySelector(".progress-steps").style.display = "none";
+              window.location.href = "/auth.html?registered=true";
             } else {
               const err = await response.json();
               console.error("Erreur Serveur:", err);
@@ -1113,6 +1309,27 @@
             toggleCustomSector(); // Automatically hide custom field and reset
           }
         });
+
+        // Theme Management functions
+        function initTheme() {
+            const isDark = localStorage.getItem('theme-dark') === 'true';
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme-dark', isDark ? 'true' : 'false');
+            const icon = document.getElementById('theme-icon');
+            if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+        }
+
+        initTheme();
     </script>
   </body>
 </html>

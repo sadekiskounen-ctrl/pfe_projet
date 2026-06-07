@@ -33,7 +33,7 @@ function _createTransport() {
   });
 }
 
-const FROM_ADDRESS = process.env.EMAIL_FROM || 'noreply@cloudbridge.dz';
+const FROM_ADDRESS = process.env.EMAIL_FROM || 'noreply@bridgify.dz';
 
 // ── Email Templates ──
 
@@ -67,11 +67,11 @@ async function sendWelcomeRegistration(clientEmail, clientName, companyName, typ
   return transport.sendMail({
     from: FROM_ADDRESS,
     to: clientEmail,
-    subject: `Bienvenue sur CloudBridge — ${companyName}`,
+    subject: `Bienvenue sur Bridgify Cloud — ${companyName}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">
         <div style="background:#1a3a5c;padding:30px;text-align:center">
-          <h1 style="color:#fff;margin:0">CloudBridge</h1>
+          <h1 style="color:#fff;margin:0">Bridgify Cloud</h1>
           <p style="color:#9bc4e8;margin:5px 0">Solution Cloud de Gestion - SAP BTP</p>
         </div>
         <div style="padding:30px;background:#f9f9f9">
@@ -88,7 +88,7 @@ async function sendWelcomeRegistration(clientEmail, clientName, companyName, typ
         </div>
         <div style="background:#1a3a5c;padding:15px;text-align:center">
           <p style="color:#9bc4e8;margin:0;font-size:12px">
-            © 2026 CloudBridge | contact@cloudbridge.dz
+            © 2026 Bridgify Cloud | contact@bridgify.dz
           </p>
         </div>
       </div>
@@ -115,11 +115,11 @@ async function sendAccountStatus(clientEmail, clientName, approved, reason) {
   return transport.sendMail({
     from: FROM_ADDRESS,
     to: clientEmail,
-    subject: `Votre compte CloudBridge a été ${status}`,
+    subject: `Votre compte Bridgify Cloud a été ${status}`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
         <div style="background:#1a3a5c;padding:30px;text-align:center">
-          <h1 style="color:#fff;margin:0">CloudBridge</h1>
+          <h1 style="color:#fff;margin:0">Bridgify Cloud</h1>
         </div>
         <div style="padding:30px;background:#f9f9f9">
           <h2 style="color:${color}">Compte ${status}</h2>
@@ -130,7 +130,7 @@ async function sendAccountStatus(clientEmail, clientName, approved, reason) {
           }
         </div>
         <div style="background:#1a3a5c;padding:15px;text-align:center">
-          <p style="color:#9bc4e8;margin:0;font-size:12px">© 2026 CloudBridge</p>
+          <p style="color:#9bc4e8;margin:0;font-size:12px">© 2026 Bridgify Cloud</p>
         </div>
       </div>
     `
@@ -145,11 +145,11 @@ async function sendDevis(clientEmail, clientName, devisNumber, pdfBuffer) {
   return transport.sendMail({
     from: FROM_ADDRESS,
     to: clientEmail,
-    subject: `Votre devis ${devisNumber} — CloudBridge`,
+    subject: `Votre devis ${devisNumber} — Bridgify Cloud`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
         <div style="background:#1a3a5c;padding:30px;text-align:center">
-          <h1 style="color:#fff;margin:0">CloudBridge</h1>
+          <h1 style="color:#fff;margin:0">Bridgify Cloud</h1>
         </div>
         <div style="padding:30px;background:#f9f9f9">
           <h2 style="color:#1a3a5c">Bonjour ${clientName},</h2>
@@ -158,7 +158,7 @@ async function sendDevis(clientEmail, clientName, devisNumber, pdfBuffer) {
           <p>Pour toute question, n'hésitez pas à nous contacter.</p>
         </div>
         <div style="background:#1a3a5c;padding:15px;text-align:center">
-          <p style="color:#9bc4e8;margin:0;font-size:12px">© 2026 CloudBridge</p>
+          <p style="color:#9bc4e8;margin:0;font-size:12px">© 2026 Bridgify Cloud</p>
         </div>
       </div>
     `,
@@ -178,11 +178,11 @@ async function sendFacture(clientEmail, clientName, invoiceNumber, dueDate, tota
   return transport.sendMail({
     from: FROM_ADDRESS,
     to: clientEmail,
-    subject: `Facture ${invoiceNumber} — CloudBridge`,
+    subject: `Facture ${invoiceNumber} — Bridgify Cloud`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
         <div style="background:#1a3a5c;padding:30px;text-align:center">
-          <h1 style="color:#fff;margin:0">CloudBridge</h1>
+          <h1 style="color:#fff;margin:0">Bridgify Cloud</h1>
         </div>
         <div style="padding:30px;background:#f9f9f9">
           <h2 style="color:#1a3a5c">Bonjour ${clientName},</h2>
@@ -194,7 +194,7 @@ async function sendFacture(clientEmail, clientName, invoiceNumber, dueDate, tota
           <p>Merci de procéder au règlement avant la date d'échéance.</p>
         </div>
         <div style="background:#1a3a5c;padding:15px;text-align:center">
-          <p style="color:#9bc4e8;margin:0;font-size:12px">© 2026 CloudBridge</p>
+          <p style="color:#9bc4e8;margin:0;font-size:12px">© 2026 Bridgify Cloud</p>
         </div>
       </div>
     `,
@@ -218,7 +218,7 @@ async function sendWorkflowNotification(toEmail, subject, message) {
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
         <div style="background:#1a3a5c;padding:20px;text-align:center">
-          <h2 style="color:#fff;margin:0">Notification CloudBridge</h2>
+          <h2 style="color:#fff;margin:0">Notification Bridgify Cloud</h2>
         </div>
         <div style="padding:25px;background:#f9f9f9">
           <p>${message}</p>
