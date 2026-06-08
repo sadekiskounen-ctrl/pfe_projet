@@ -603,10 +603,18 @@ async function generateRegistrationPDF(reg) {
 function _drawHeader(doc, type, number, companyInfo) {
   const ci = companyInfo || {};
   const logoCandidates = [
-    path.join(__dirname, '..', '..', 'app', 'images', 'logo_round.png'),
+    // Dynamic process root paths (robust for SAP BTP CF container where root is process.cwd())
+    path.join(process.cwd(), 'app', 'images', 'logo.png'),
+    path.join(process.cwd(), 'app', 'images', 'logo_round.png'),
+    path.join(process.cwd(), 'frontend', 'images', 'logo.png'),
+    path.join(process.cwd(), 'frontend', 'images', 'logo_round.png'),
+    // Relative dirname paths (fallback)
+    path.join(__dirname, '..', 'app', 'images', 'logo.png'),
+    path.join(__dirname, '..', 'app', 'images', 'logo_round.png'),
     path.join(__dirname, '..', '..', 'app', 'images', 'logo.png'),
-    path.join(__dirname, '..', '..', '..', 'frontend', 'images', 'logo_round.png'),
+    path.join(__dirname, '..', '..', 'app', 'images', 'logo_round.png'),
     path.join(__dirname, '..', '..', '..', 'frontend', 'images', 'logo.png'),
+    path.join(__dirname, '..', '..', '..', 'frontend', 'images', 'logo_round.png'),
   ];
   const effectiveLogo = logoCandidates.find(p => fs.existsSync(p)) || null;
 
