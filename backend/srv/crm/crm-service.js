@@ -535,9 +535,11 @@ module.exports = class CRMService extends cds.ApplicationService {
         const clientEmail = devis.clientB2B_ID
           ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B, devis.clientB2B_ID).columns('email', 'contactName')
           : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C, devis.clientB2C_ID).columns('email', 'firstName');
-        await sendDevis(clientEmail.email, clientEmail.contactName || clientEmail.firstName, devis.devisNumber, pdfBuffer);
+        sendDevis(clientEmail.email, clientEmail.contactName || clientEmail.firstName, devis.devisNumber, pdfBuffer).catch((err) => {
+          console.error('Send devis email error in background:', err.message);
+        });
         return true;
-      } catch (e) { console.error('Send devis email error:', e.message); return false; }
+      } catch (e) { console.error('Prepare devis email error:', e.message); return false; }
     });
 
     // ── Action: Send Facture by Email ──
@@ -550,10 +552,12 @@ module.exports = class CRMService extends cds.ApplicationService {
         const clientEmail = facture.clientB2B_ID
           ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B, facture.clientB2B_ID).columns('email', 'contactName')
           : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C, facture.clientB2C_ID).columns('email', 'firstName');
-        await sendFacture(clientEmail.email, clientEmail.contactName || clientEmail.firstName,
-          facture.invoiceNumber, facture.dueDate, facture.totalTTC, facture.currency_code, pdfBuffer);
+        sendFacture(clientEmail.email, clientEmail.contactName || clientEmail.firstName,
+          facture.invoiceNumber, facture.dueDate, facture.totalTTC, facture.currency_code, pdfBuffer).catch((err) => {
+            console.error('Send facture email error in background:', err.message);
+          });
         return true;
-      } catch (e) { console.error('Send facture email error:', e.message); return false; }
+      } catch (e) { console.error('Prepare facture email error:', e.message); return false; }
     });
 
     await super.init();

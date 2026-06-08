@@ -602,14 +602,18 @@ async function generateRegistrationPDF(reg) {
 
 function _drawHeader(doc, type, number, companyInfo) {
   const ci = companyInfo || {};
-  const logoPath = path.join(__dirname, '..', '..', '..', 'frontend', 'images', 'logo_round.png');
-  const logoAlt  = path.join(__dirname, '..', '..', '..', 'frontend', 'images', 'logo.png');
+  const logoCandidates = [
+    path.join(__dirname, '..', '..', 'app', 'images', 'logo_round.png'),
+    path.join(__dirname, '..', '..', 'app', 'images', 'logo.png'),
+    path.join(__dirname, '..', '..', '..', 'frontend', 'images', 'logo_round.png'),
+    path.join(__dirname, '..', '..', '..', 'frontend', 'images', 'logo.png'),
+  ];
+  const effectiveLogo = logoCandidates.find(p => fs.existsSync(p)) || null;
 
   // Draw a very thin header line in accent blue
   doc.rect(50, 40, 495, 2).fill('#2563EB');
 
   // Logo (left side, slightly below the line)
-  const effectiveLogo = fs.existsSync(logoPath) ? logoPath : (fs.existsSync(logoAlt) ? logoAlt : null);
   if (effectiveLogo) {
     doc.image(effectiveLogo, 50, 52, { width: 42, height: 42 });
   }

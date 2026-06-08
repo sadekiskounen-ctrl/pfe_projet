@@ -2,6 +2,13 @@ const cds = require('@sap/cds');
 const cors = require('cors');
 const express = require('express');
 
+// Force dummy auth regardless of bound XSUAA service instances
+// This is critical: on SAP BTP, CDS auto-detects bound XSUAA and overrides 'dummy' with JWT validation
+// Since this app uses custom Basic Auth middleware, we must prevent that override
+if (cds.env && cds.env.requires) {
+    cds.env.requires.auth = { kind: 'dummy', strategy: 'dummy' };
+}
+
 cds.on('bootstrap', (app) => {
     // Augmenter la limite de taille pour les fichiers PDF (Base64)
     app.use(express.json({ limit: '50mb' }));
@@ -14,6 +21,17 @@ cds.on('bootstrap', (app) => {
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
         allowedHeaders: ['Authorization', 'Content-Type', 'X-CSRF-Token']
     }));
+
+    // Autoriser l'accès public (anonyme) aux endpoints d'inscription
+    app.use('/odata/v4/registration', (req, res, next) => {
+        const publicEndpoints = ['/SubmitRegistration', '/checkAvailability', '/checkStatus', '/login'];
+        const hasAuth = !!(req.headers.authorization || req.headers.Authorization);
+        if (!hasAuth && publicEndpoints.some(ep => req.path.startsWith(ep))) {
+            // Créer un utilisateur factice pour les routes publiques sans auth
+            req.user = new cds.User({ id: 'anonymous', roles: ['any', 'authenticated-user'] });
+        }
+        next();
+    });
 
     // Middleware d'authentification personnalisé (Basic Auth)
     app.use(async (req, res, next) => {
@@ -31,6 +49,20 @@ cds.on('bootstrap', (app) => {
                 if (email === 'commercial') resolvedEmail = 'commercial@pme.dz';
                 if (email === 'client') resolvedEmail = 'clientb2b@pme.dz';
                 if (email === 'fournisseur') resolvedEmail = 'fournisseur@pme.dz';
+
+                // 0. Vérification des comptes système hardcodés (fonctionnel même en mode dummy/production)
+                const systemAccounts = {
+                    'admin@pme.dz':      { password: 'admin',      roles: ['Admin', 'authenticated-user'] },
+                    'admin':             { password: 'admin',      roles: ['Admin', 'authenticated-user'] },
+                    'commercial@pme.dz': { password: 'commercial', roles: ['Commercial', 'authenticated-user'] },
+                    'commercial':        { password: 'commercial', roles: ['Commercial', 'authenticated-user'] },
+                };
+                const sysUser = systemAccounts[email] || systemAccounts[resolvedEmail];
+                if (sysUser && sysUser.password === password) {
+                    req.user = new cds.User({ id: resolvedEmail, roles: sysUser.roles });
+                    console.log(`[Custom Auth] System account authenticated: ${resolvedEmail} with roles: ${sysUser.roles}`);
+                    return next();
+                }
 
                 // 1. Vérification des utilisateurs de test configurés dans .cdsrc.json ou package.json
                 const devUsers = cds.env.auth?.users || {};
@@ -72,7 +104,7 @@ cds.on('bootstrap', (app) => {
                             if (role === 'CLIENT_B2C') role = 'ClientB2C';
                             if (role === 'FOURNISSEUR') role = 'Fournisseur';
 
-                            const roles = [role];
+                            const roles = [role, 'authenticated-user'];
                             req.user = new cds.User({ id: email, roles: roles });
                             console.log(`[Custom Auth] Authenticated DB user: ${email} with role: ${role}`);
                             return next();
@@ -85,7 +117,156 @@ cds.on('bootstrap', (app) => {
         }
         next();
     });
+
+    function requireAdmin(req, res, next) {
+        if (req.user && req.user.is('Admin')) return next();
+        return res.status(401).json({ error: { message: 'Authentification administrateur requise.' } });
+    }
+
+    // Custom route — Auto-create a Fournisseur (bypasses OData @readonly)
+    app.post('/api/create-fournisseur', requireAdmin, async (req, res) => {
+        try {
+            const { companyName, email, nif, rc, rib, street, country } = req.body;
+            if (!companyName) {
+                return res.status(400).json({ error: { message: 'companyName est obligatoire.' } });
+            }
+            const db = await cds.connect.to('db');
+            const { Fournisseur } = db.entities('sap.pme.srm');
+            const newRecord = await db.run(
+                INSERT.into(Fournisseur).entries({
+                    companyName,
+                    email: email || `${companyName.toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,30)}@fournisseur-import.dz`,
+                    nif:   nif    || null,
+                    rc:    rc     || null,
+                    rib:   rib    || null,
+                    street: street || null,
+                    country: country || 'DZ',
+                    kycStatus: 'PENDING',
+                    score: 0
+                })
+            );
+            // Retrieve the created record to get its generated ID
+            const created = await db.run(
+                SELECT.one.from(Fournisseur).where({ companyName }).orderBy({ createdAt: 'desc' })
+            );
+            console.log('[create-fournisseur] Created supplier:', created?.ID, companyName);
+            return res.status(201).json({ ID: created?.ID, companyName });
+        } catch (err) {
+            console.error('[create-fournisseur] Error:', err);
+            return res.status(500).json({ error: { message: err.message || 'Erreur création fournisseur' } });
+        }
+    });
+
+    // Custom route for Gemini Invoice AI Extraction
+    app.post('/api/extract-invoice', requireAdmin, async (req, res) => {
+        try {
+            const { fileData, mimeType } = req.body;
+            let apiKey = process.env.GEMINI_API_KEY || req.headers['x-gemini-key'];
+            if (!apiKey) {
+                return res.status(400).json({ error: { message: "Clé API Gemini manquante. Veuillez configurer GEMINI_API_KEY ou fournir l'en-tête X-Gemini-Key." } });
+            }
+
+            console.log('[Gemini Extractor] Received file for extraction. MimeType:', mimeType);
+
+            const prompt = `Analyze this invoice document and extract the following information. Return ONLY a valid JSON object matching the following structure (do not include any markdown formatting or extra characters, just the raw JSON):
+{
+  "numero": "Invoice number or identifier",
+  "date": "Invoice date in DD/MM/YYYY format",
+  "bc": "Purchase order reference (Bon de commande) if present, e.g. PO-00001",
+  "modePaiement": "Payment method (e.g. ESPECES, VIREMENT, CHEQUE)",
+  "fournisseur": "Supplier company name",
+  "nif": "Supplier NIF (Numéro d'Identification Fiscale, typically 15 digits)",
+  "rc": "Supplier RC (Registre du Commerce)",
+  "rib": "Supplier RIB (24 digits bank account number)",
+  "adresse": "Supplier address",
+  "ht": number (Total amount HT),
+  "tvaPercent": number (TVA percent, default to 19 if not specified),
+  "tva": number (Total TVA amount),
+  "ttc": number (Total TTC amount),
+  "confidence": "high" or "medium" or "low" (Confidence level of the extraction),
+  "lignes": [
+    {
+      "description": "Item description",
+      "quantite": number,
+      "prixUnitaireHT": number,
+      "totalHT": number
+    }
+  ]
+}`;
+
+            const models = ['gemini-2.5-flash-preview-05-20', 'gemini-2.0-flash', 'gemini-2.5-flash', 'gemini-2.0-flash-lite'];
+            let lastError = null;
+            let result = null;
+
+            for (const model of models) {
+                try {
+                    console.log(`[Gemini Extractor] Trying model: ${model}`);
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            contents: [
+                                {
+                                    parts: [
+                                        { text: prompt },
+                                        {
+                                            inlineData: {
+                                                mimeType: mimeType,
+                                                data: fileData
+                                            }
+                                        }
+                                    ]
+                                }
+                            ],
+                            generationConfig: {
+                                responseMimeType: "application/json"
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        result = await response.json();
+                        console.log(`[Gemini Extractor] Success with model: ${model}`);
+                        break;
+                    } else {
+                        const errText = await response.text();
+                        console.warn(`[Gemini Extractor] Model ${model} failed with: ${errText}`);
+                        lastError = new Error(`Gemini API Error for ${model}: ${errText}`);
+                    }
+                } catch (e) {
+                    console.warn(`[Gemini Extractor] Connection error for ${model}:`, e.message);
+                    lastError = e;
+                }
+            }
+
+            if (!result) {
+                return res.status(500).json({ error: { message: lastError ? lastError.message : "All Gemini model candidates failed." } });
+            }
+
+            const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!textResponse) {
+                return res.status(500).json({ error: { message: "Réponse vide de l'IA Gemini." } });
+            }
+
+            // Parse extracted text to JSON
+            const jsonStart = textResponse.indexOf('{');
+            const jsonEnd = textResponse.lastIndexOf('}');
+            if (jsonStart === -1 || jsonEnd === -1) {
+                return res.status(500).json({ error: { message: "Impossible de parser le JSON extrait par l'IA.", rawText: textResponse } });
+            }
+            const cleanJsonText = textResponse.substring(jsonStart, jsonEnd + 1);
+            const extractedData = JSON.parse(cleanJsonText);
+
+            return res.json(extractedData);
+        } catch (err) {
+            console.error('[Gemini Extractor] Extraction error:', err);
+            return res.status(500).json({ error: { message: err.message } });
+        }
+    });
 });
+
 
 cds.on('served', async () => {
     console.log('[Sync] Starting automatic database synchronization...');

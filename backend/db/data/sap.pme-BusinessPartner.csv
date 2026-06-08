@@ -6,4 +6,3 @@ ID;bpNumber;displayName;bpType;status;email;phone;nif;rc;ai;blockReason;password
 36f7799d-963a-40af-b8cf-745760e51395;BP2003;LogiPlus Spa;FOURNISSEUR;BLOCKED;logi@fournisseur.dz;+213 25 00 00 05;998877665544332;25/00-5544332B25;25012345678;Dossier incomplet;pme2026;Constantine;00999999000000000000;3;Transport & Logistique
 bbbb0004-0000-4000-a000-000000000004;BP1003;Ahmed Benali;CLIENT_B2C;ACTIVE;ahmed.benali@gmail.com;+213 555 10 20 30;;;;;pme2026;Alger;00412345678901234567;;
 bbbb0005-0000-4000-a000-000000000005;BP1004;Fatima Zohra Kaci;CLIENT_B2C;ACTIVE;fz.kaci@outlook.com;+213 555 40 50 60;;;;;pme2026;Sétif;00512345678901234567;;
-

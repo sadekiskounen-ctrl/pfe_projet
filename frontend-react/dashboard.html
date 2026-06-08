@@ -9,7 +9,7 @@
         const isLoggedIn = sessionStorage.getItem('isLoggedIn');
         const userRole = sessionStorage.getItem('userRole');
         if (isLoggedIn !== 'true' || userRole !== 'admin') {
-            window.location.href = '/auth.html?app=admin';
+            window.location.href = '/admin/auth.html';
         }
     </script>
     <title>Bridgify Cloud Control Center — Admin</title>

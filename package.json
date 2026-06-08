@@ -77,7 +77,8 @@
           "kind": "hana"
         },
         "auth": {
-          "kind": "xsuaa"
+          "kind": "dummy",
+          "strategy": "dummy"
         }
       }
     },

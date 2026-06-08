@@ -57,6 +57,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build MTA archive
+        run: npm run mta:build
+
       - name: Install MBT & CF CLI
         run: |
           npm install -g mbt
@@ -71,7 +74,7 @@ jobs:
           ./cf target -o ${{ env.CF_ORG }} -s $CF_SPACE
 
       - name: Deploy to Development Space
-        run: ./cf deploy mta_archives/gestion-pme-dev.mtar --retries 1 -f
+        run: ./cf deploy mta_archives/gestion-pme_1.0.0.mtar --retries 1 -f
 
   # ── Job 3: Deploy to Production ─────────────────────────────
   deploy-prod:
@@ -96,6 +99,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Build MTA archive
+        run: npm run mta:build
 
       - name: Install MBT & CF CLI
         run: |

@@ -108,7 +108,7 @@
             border-radius: 32px;
             padding: 3rem 2.5rem;
             width: 100%;
-            max-width: 960px;
+            max-width: 720px;
             box-shadow: var(--card-shadow), 
                         0 0 0 1px rgba(0, 112, 242, 0.05);
             z-index: 2;
@@ -183,7 +183,7 @@
         /* ── NAVIGATION GRID (HORIZONTAL ROW) ── */
         .actions-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             margin-bottom: 2rem;
         }
@@ -460,16 +460,7 @@
                 </div>
             </a>
 
-            <!-- BACKOFFICE ADMIN -->
-            <a href="/admin/dashboard.html" class="action-card">
-                <div class="action-icon-box icon-admin">
-                    <i class="fas fa-laptop-code"></i>
-                </div>
-                <div class="action-info">
-                    <div class="action-title">Console Admin</div>
-                    <div class="action-desc">Console réservée aux gestionnaires internes (Audit, validation des comptes et reporting SAP BTP).</div>
-                </div>
-            </a>
+            <!-- Console Admin retiré de la page publique : accès via /admin/auth.html uniquement -->
         </div>
 
         <hr class="divider">

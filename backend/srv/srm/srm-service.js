@@ -438,11 +438,14 @@ module.exports = class SRMService extends cds.ApplicationService {
               Cordialement,<br/>
               L'équipe administrative de Bridgify Cloud.
             `;
-            await sendWorkflowNotification(supplier.email, subject, message);
-            console.log(`[Notification] Alert email sent to supplier: ${supplier.email} for PO ${po.poNumber}`);
+            sendWorkflowNotification(supplier.email, subject, message).then(() => {
+              console.log(`[Notification] Alert email sent to supplier: ${supplier.email} for PO ${po.poNumber}`);
+            }).catch((err) => {
+              console.error('Failed to send supplier notification email:', err);
+            });
           }
         } catch (err) {
-          console.error('Failed to send supplier notification email:', err);
+          console.error('Failed to prepare supplier notification email:', err);
         }
       }
 

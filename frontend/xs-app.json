@@ -1,41 +1,34 @@
 {
-  "welcomeFile": "/index.html",
-  "authenticationMethod": "route",
+  "welcomeFile": "/auth.html",
+  "authenticationMethod": "none",
   "routes": [
     {
-      "source": "^/odata/v4/registration/(.*)$",
-      "target": "/odata/v4/registration/$1",
+      "source": "^/odata/(.*)$",
+      "target": "/odata/$1",
       "destination": "srv-api",
       "authenticationType": "none",
       "csrfProtection": false
     },
     {
-      "source": "^/registration/(.*)$",
-      "target": "/registration/$1",
-      "localDir": ".",
-      "authenticationType": "none"
-    },
-    {
-      "source": "^/auth.html$",
-      "localDir": ".",
-      "authenticationType": "none"
-    },
-    {
-      "source": "^/index.html$",
-      "localDir": ".",
-      "authenticationType": "none"
-    },
-    {
-      "source": "^/odata/v4/(.*)$",
-      "target": "/odata/v4/$1",
+      "source": "^/api/(.*)$",
+      "target": "/api/$1",
       "destination": "srv-api",
       "authenticationType": "none",
       "csrfProtection": false
     },
     {
-      "source": "^/(.*)$",
+      "source": "^/admin(.*)$",
+      "target": "/admin$1",
       "localDir": ".",
-      "authenticationType": "none"
+      "authenticationType": "none",
+      "csrfProtection": false
+    },
+    {
+      "source": "^(.*)$",
+      "target": "$1",
+      "localDir": ".",
+      "authenticationType": "none",
+      "csrfProtection": false
     }
   ]
 }

@@ -6,12 +6,10 @@ module.exports = cds.service.impl(async function () {
 
   // --- Envoi d'email automatique après soumission d'une inscription ---
   this.after("CREATE", SubmitRegistration, async (data) => {
-    try {
-      console.log(`[Registration] Envoi de l'email de bienvenue (PENDING) à : ${data.email}`);
-      await sendWelcomeRegistration(data.email, data.companyName, data.companyName, data.type);
-    } catch (e) {
+    console.log(`[Registration] Envoi de l'email de bienvenue (PENDING) à : ${data.email}`);
+    sendWelcomeRegistration(data.email, data.companyName, data.companyName, data.type).catch((e) => {
       console.warn("[Registration] Échec de l'envoi de l'email de bienvenue :", e.message);
-    }
+    });
   });
 
   // --- LOGIQUE DE RÉ-INSCRIPTION ---
@@ -130,7 +128,7 @@ module.exports = cds.service.impl(async function () {
     const { id } = req.data;
     const { BusinessPartner } = cds.entities("sap.pme");
 
-    // Correction : On sélectionne explicitement tous les champs, y compris les LargeBinary
+    // Optimisation : Exclure les LargeBinary de la sélection initiale pour éviter de surcharger Node.js
     const reg = await SELECT.one
       .from(RegistrationRequests)
       .columns(
@@ -141,14 +139,10 @@ module.exports = cds.service.impl(async function () {
         "password",
         "rcNumber",
         "nif",
-        "nifDoc",
         "nifType",
         "ai",
-        "rc",
-        "rcType",
-        "aiDoc",
         "aiType",
-        "rib",
+        "rcType",
         "ribType",
         "ribNumber",
         "sector",
@@ -188,7 +182,7 @@ module.exports = cds.service.impl(async function () {
     const bpId = cds.utils.uuid();
 
     try {
-      // 1. Créer le BusinessPartner principal
+      // 1. Créer le BusinessPartner principal sans les LargeBinary
       await INSERT.into(BusinessPartner).entries({
         ID: bpId,
         bpNumber: nextBP,
@@ -203,17 +197,23 @@ module.exports = cds.service.impl(async function () {
         ribNumber: reg.ribNumber,
         sector: reg.sector,
         wilaya: reg.address,
-        // Transfert des médias
-        rcDoc: reg.rc,
         rcType: reg.rcType,
-        nifDoc: reg.nifDoc,
         nifType: reg.nifType,
-        aiDoc: reg.aiDoc,
         aiType: reg.aiType,
-        ribDoc: reg.rib,
         ribType: reg.ribType,
         status: "ACTIVE",
       });
+
+      // 2. Copier les documents LargeBinary directement au sein de la base de données (sans passer par Node.js)
+      // Cela résout le Gateway Timeout 504 en éliminant le transfert réseau de mégaoctets de fichiers
+      await cds.run(`
+        UPDATE sap_pme_BusinessPartner
+        SET rcDoc = (SELECT rc FROM pme_registration_RegistrationRequest WHERE ID = ?),
+            nifDoc = (SELECT nifDoc FROM pme_registration_RegistrationRequest WHERE ID = ?),
+            aiDoc = (SELECT aiDoc FROM pme_registration_RegistrationRequest WHERE ID = ?),
+            ribDoc = (SELECT rib FROM pme_registration_RegistrationRequest WHERE ID = ?)
+        WHERE ID = ?
+      `, [id, id, id, id, bpId]);
 
       // 2. Créer l'entité spécifique correspondante (ClientB2B, ClientB2C, ou Fournisseur)
       if (reg.type === "CLIENT_B2B") {
@@ -235,7 +235,7 @@ module.exports = cds.service.impl(async function () {
         });
 
         // Transférer les documents légaux
-        if (reg.rc) {
+        if (reg.rcType) {
           await INSERT.into(ClientDocument).entries({
             ID: cds.utils.uuid(),
             client_ID: clientB2bId,
@@ -245,7 +245,7 @@ module.exports = cds.service.impl(async function () {
             verified: true,
           });
         }
-        if (reg.nifDoc) {
+        if (reg.nifType) {
           await INSERT.into(ClientDocument).entries({
             ID: cds.utils.uuid(),
             client_ID: clientB2bId,
@@ -255,7 +255,7 @@ module.exports = cds.service.impl(async function () {
             verified: true,
           });
         }
-        if (reg.aiDoc) {
+        if (reg.aiType) {
           await INSERT.into(ClientDocument).entries({
             ID: cds.utils.uuid(),
             client_ID: clientB2bId,
@@ -265,7 +265,7 @@ module.exports = cds.service.impl(async function () {
             verified: true,
           });
         }
-        if (reg.rib) {
+        if (reg.ribType) {
           await INSERT.into(ClientDocument).entries({
             ID: cds.utils.uuid(),
             client_ID: clientB2bId,
@@ -297,7 +297,7 @@ module.exports = cds.service.impl(async function () {
           kycStatus: "VALIDATED"
         });
 
-        if (reg.rc) {
+        if (reg.rcType) {
           await INSERT.into(FournisseurDocument).entries({
             ID: cds.utils.uuid(),
             fournisseur_ID: fournisseurId,
@@ -307,7 +307,7 @@ module.exports = cds.service.impl(async function () {
             verified: true,
           });
         }
-        if (reg.nifDoc) {
+        if (reg.nifType) {
           await INSERT.into(FournisseurDocument).entries({
             ID: cds.utils.uuid(),
             fournisseur_ID: fournisseurId,
@@ -317,7 +317,7 @@ module.exports = cds.service.impl(async function () {
             verified: true,
           });
         }
-        if (reg.aiDoc) {
+        if (reg.aiType) {
           await INSERT.into(FournisseurDocument).entries({
             ID: cds.utils.uuid(),
             fournisseur_ID: fournisseurId,
@@ -327,7 +327,7 @@ module.exports = cds.service.impl(async function () {
             verified: true,
           });
         }
-        if (reg.rib) {
+        if (reg.ribType) {
           await INSERT.into(FournisseurDocument).entries({
             ID: cds.utils.uuid(),
             fournisseur_ID: fournisseurId,
@@ -358,13 +358,11 @@ module.exports = cds.service.impl(async function () {
         .set({ status: "APPROVED" })
         .where({ ID: id });
 
-      // Envoi de l'email d'approbation réel
-      try {
-        console.log(`[Registration] Envoi de l'email d'approbation (APPROVED) à : ${reg.email}`);
-        await sendAccountStatus(reg.email, reg.companyName, true);
-      } catch (mailErr) {
+      // Envoi de l'email d'approbation réel (asynchrone, non bloquant)
+      console.log(`[Registration] Envoi de l'email d'approbation (APPROVED) à : ${reg.email}`);
+      sendAccountStatus(reg.email, reg.companyName, true).catch((mailErr) => {
         console.warn("[Registration] Échec de l'envoi de l'email d'approbation :", mailErr.message);
-      }
+      });
 
       return `Succès : Business Partner ${nextBP} créé pour ${reg.companyName}`;
     } catch (err) {
@@ -391,13 +389,11 @@ module.exports = cds.service.impl(async function () {
       .where({ ID: id });
 
     if (reg) {
-      // Envoi de l'email de rejet réel
-      try {
-        console.log(`[Registration] Envoi de l'email de rejet (REJECTED) à : ${reg.email}`);
-        await sendAccountStatus(reg.email, reg.companyName, false, reason);
-      } catch (mailErr) {
+      // Envoi de l'email de rejet réel (asynchrone, non bloquant)
+      console.log(`[Registration] Envoi de l'email de rejet (REJECTED) à : ${reg.email}`);
+      sendAccountStatus(reg.email, reg.companyName, false, reason).catch((mailErr) => {
         console.warn("[Registration] Échec de l'envoi de l'email de rejet :", mailErr.message);
-      }
+      });
     }
 
     return "Demande rejetée";

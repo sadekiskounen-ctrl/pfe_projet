@@ -424,6 +424,26 @@
         }
     </script>
 
+    <!-- ═══════════════════════════════════════════════════════════
+         SCRIPT DE DÉTECTION D'URL — À exécuter en tout premier
+         Affiche form-admin si l'URL est sous /admin/, sinon form-user
+    ════════════════════════════════════════════════════════════════ -->
+    <script>
+        (function() {
+            var path     = window.location.pathname;
+            var hostname = window.location.hostname;
+            var params   = new URLSearchParams(window.location.search);
+            // Mode admin si :
+            // - URL commence par /admin  (BTP approuter route)
+            // - hostname contient "admin" (sous-domaine BTP)
+            // - paramètre ?__admin=1 présent (redirect depuis /admin/auth.html)
+            var isAdminRoute = /^\/admin(\/|$|\?)/i.test(path)
+                            || /admin/i.test(hostname)
+                            || params.get('__admin') === '1';
+            window.__AUTH_MODE = isAdminRoute ? 'admin' : 'user';
+        })();
+    </script>
+
     <!-- FLOATING THEME TOGGLE -->
     <button id="theme-toggle-btn" class="theme-toggle" onclick="toggleTheme()" title="Changer de thème">
         <span id="theme-icon">☀️</span>
@@ -446,44 +466,185 @@
             <p>Gestion Client et Fournisseurs</p>
         </div>
 
-        <div class="auth-body">
-            <div id="successMsg" style="color: #155724; background: #d4edda; border: 1px solid #c3e6cb; padding: 12px 16px; border-radius: 12px; font-size: 0.85rem; margin-bottom: 1.5rem; display: none; text-align: center; font-weight: 550; line-height: 1.4;"></div>
-            <div id="errorMsg">Identifiants incorrects. Veuillez vérifier vos informations.</div>
-            
-            <div class="role-selector">
-                <div class="role-option active" data-role="client" onclick="selectRole('client')">Client</div>
-                <div class="role-option" data-role="fournisseur" onclick="selectRole('fournisseur')">Fournisseur</div>
-                <div class="role-option" data-role="admin" onclick="selectRole('admin')">Admin</div>
+        <!-- ══════════════════════════════════════════
+             FORM-USER — Portail Client / Fournisseur
+        ═══════════════════════════════════════════════ -->
+        <div id="form-user" style="display:none">
+            <div class="auth-body">
+                <div id="successMsg" style="color: #155724; background: #d4edda; border: 1px solid #c3e6cb; padding: 12px 16px; border-radius: 12px; font-size: 0.85rem; margin-bottom: 1.5rem; display: none; text-align: center; font-weight: 550; line-height: 1.4;"></div>
+                <div id="errorMsg">Identifiants incorrects. Veuillez vérifier vos informations.</div>
+
+                <div class="role-selector">
+                    <div class="role-option active" data-role="client" onclick="selectRole('client')">Client</div>
+                    <div class="role-option" data-role="fournisseur" onclick="selectRole('fournisseur')">Fournisseur</div>
+                </div>
+                <!-- Onglet Admin retiré : l'admin accède via /admin/auth.html -->
+
+                <form id="loginForm">
+                    <input type="hidden" id="selectedRole" value="client">
+
+                    <div class="form-group">
+                        <label for="username">Email ou Identifiant</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="username" placeholder="votre@email.com" required oninput="this.value = this.value.toLowerCase()">
+                            <i class="fas fa-envelope input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Mot de passe</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" placeholder="••••••••" required>
+                            <i class="fas fa-lock input-icon"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Connexion sécurisée</button>
+                </form>
             </div>
 
-            <form id="loginForm">
-                <input type="hidden" id="selectedRole" value="client">
-
-                <div class="form-group">
-                    <label for="username">Email ou Identifiant</label>
-                    <div class="input-wrapper">
-                        <input type="text" id="username" placeholder="votre@email.com" required oninput="this.value = this.value.toLowerCase()">
-                        <i class="fas fa-envelope input-icon"></i>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Mot de passe</label>
-                    <div class="input-wrapper">
-                        <input type="password" id="password" placeholder="••••••••" required>
-                        <i class="fas fa-lock input-icon"></i>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn-primary">Connexion sécurisée</button>
-            </form>
+            <div class="auth-footer">
+                Nouveau sur la plateforme ? <br/>
+                <a href="/registration/index.html">Créer un compte entreprise</a>
+            </div>
         </div>
 
-        <div class="auth-footer">
-            Nouveau sur la plateforme ? <br/>
-            <a href="/registration/index.html">Créer un compte entreprise</a>
+        <!-- ══════════════════════════════════════════
+             FORM-ADMIN — Portail Administration
+        ═══════════════════════════════════════════════ -->
+        <div id="form-admin" style="display:none">
+            <div class="auth-body">
+                <div id="errorMsg-admin" style="color: #b91c1c; background: #fef2f2; border: 1px solid #fca5a5; padding: 12px 16px; border-radius: 12px; font-size: 0.85rem; margin-bottom: 1.5rem; display: none; text-align: center; font-weight: 550; line-height: 1.4;">Identifiants administrateur incorrects.</div>
+
+                <div style="text-align:center; margin-bottom: 1.75rem;">
+                    <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 700; color: var(--text-main); margin: 0 0 6px;">Administration</h2>
+                    <p style="font-size: 0.78rem; color: var(--text-muted); font-weight: 500; letter-spacing: 0.02em;">
+                        🔒 Accès réservé — ne pas partager ce lien
+                    </p>
+                </div>
+
+                <form id="loginForm-admin">
+                    <div class="form-group">
+                        <label for="username-admin">Identifiant administrateur</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="username-admin" placeholder="Identifiant administrateur" required>
+                            <i class="fas fa-user-shield input-icon"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password-admin">Mot de passe</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password-admin" placeholder="••••••••" required>
+                            <i class="fas fa-lock input-icon"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btn-login-admin" class="btn-primary" style="background: linear-gradient(135deg, #1e3a5f, #0d2137); box-shadow: 0 4px 12px rgba(15,40,80,0.3);">
+                        🛡️ Accès administration
+                    </button>
+                </form>
+            </div>
+
+            <div class="auth-footer" style="font-size: 0.78rem; color: var(--text-muted);">
+                Accès réservé au personnel autorisé.<br/>
+                <span style="opacity:0.6;">Bridgify Cloud — Back-Office</span>
+            </div>
         </div>
+
     </div>
+
+<script>
+    /* ══════════════════════════════════════════════════
+       AFFICHAGE DU BON FORMULAIRE selon __AUTH_MODE
+    ═══════════════════════════════════════════════════ */
+    (function() {
+        var mode = window.__AUTH_MODE || 'user';
+        var formUser  = document.getElementById('form-user');
+        var formAdmin = document.getElementById('form-admin');
+        if (mode === 'admin') {
+            if (formAdmin) formAdmin.style.display = 'block';
+            // Pré-remplissage demo admin
+            var uAdm = document.getElementById('username-admin');
+            var pAdm = document.getElementById('password-admin');
+            if (uAdm) uAdm.value = 'admin';
+            if (pAdm) pAdm.value = 'admin';
+        } else {
+            if (formUser) formUser.style.display = 'block';
+        }
+    })();
+
+    /* ══════════════════════════════════════════════════
+       LOGIN ADMIN — formulaire #loginForm-admin
+    ═══════════════════════════════════════════════════ */
+    var adminForm = document.getElementById('loginForm-admin');
+    if (adminForm) {
+        adminForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var errorDiv = document.getElementById('errorMsg-admin');
+            errorDiv.style.display = 'none';
+
+            var user = document.getElementById('username-admin').value.trim();
+            var pass = document.getElementById('password-admin').value;
+
+            var success = false;
+
+            // 1. Emergency admin credentials
+            if ((user === 'admin' && pass === 'admin')) {
+                success = true;
+            }
+
+            // 2. Custom admin profile stored in localStorage
+            if (!success) {
+                var customAdmin = JSON.parse(localStorage.getItem('admin_profile') || 'null');
+                if (customAdmin && user === customAdmin.email && pass === customAdmin.password) {
+                    success = true;
+                }
+            }
+
+            // 3. DB-based login fallback (same endpoint as user form)
+            if (!success) {
+                try {
+                    var loginRes = await fetch('/odata/v4/registration/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: user, password: pass })
+                    });
+                    var rawData = await loginRes.json();
+                    var loginData = rawData.value || rawData;
+                    if (loginData && loginData.status === 'SUCCESS') {
+                        success = true;
+                    }
+                } catch (err) {
+                    console.error('[Admin Login] DB check failed:', err);
+                }
+            }
+
+            if (success) {
+                sessionStorage.setItem('isLoggedIn', 'true');
+                sessionStorage.setItem('userRole',   'admin');
+                sessionStorage.setItem('currentUser', user);
+                // Compte système ou profil local → identifiants CAP reconnus ; sinon identifiants DB réels
+                var customAdmin = JSON.parse(localStorage.getItem('admin_profile') || 'null');
+                var useSystemAuth = (user === 'admin' && pass === 'admin')
+                    || (customAdmin && user === customAdmin.email && pass === customAdmin.password);
+                sessionStorage.setItem('authHeader', useSystemAuth
+                    ? 'Basic ' + btoa('admin:admin')
+                    : 'Basic ' + btoa(user + ':' + pass));
+                window.location.href = '/admin/dashboard.html';
+            } else {
+                errorDiv.style.display = 'block';
+                var container = document.querySelector('.auth-container');
+                if (container) {
+                    container.style.animation = 'none';
+                    container.offsetHeight;
+                    container.style.animation = 'shake 0.4s';
+                }
+            }
+        });
+    }
+
+</script>
 
 <script>
     function selectRole(role) {
@@ -616,21 +777,8 @@
             sessionStorage.setItem('isLoggedIn', 'true');
             sessionStorage.setItem('userRole', finalRole);
             sessionStorage.setItem('currentUser', user);
-            
-            // Map actual logged in role to the mock user for local CAP Basic Auth role validation
-            let mockUser = user;
-            let mockPass = pass;
-            if (finalRole === 'client_b2b' || finalRole === 'client_b2c') {
-                mockUser = 'client';
-                mockPass = 'client';
-            } else if (finalRole === 'fournisseur') {
-                mockUser = 'fournisseur';
-                mockPass = 'fournisseur';
-            } else if (finalRole === 'admin') {
-                mockUser = 'admin';
-                mockPass = 'admin';
-            }
-            sessionStorage.setItem('authHeader', 'Basic ' + btoa(mockUser + ':' + mockPass));
+            // Conserver les identifiants réels pour l'authentification Basic en production BTP
+            sessionStorage.setItem('authHeader', 'Basic ' + btoa(user + ':' + pass));
             
             const urlParams = new URLSearchParams(window.location.search);
             const targetApp = urlParams.get('app');

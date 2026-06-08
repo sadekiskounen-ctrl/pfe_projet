@@ -7,6 +7,7 @@ export default function Factures({
   onViewInvoice,
   onResolveDispute,
   onPaySupplier,
+  onOpenAIExtractor,
 }) {
   const viewedInvoices = JSON.parse(localStorage.getItem('viewedConfirmedInvoices') || '[]');
 
@@ -25,7 +26,7 @@ export default function Factures({
           border: '1px solid var(--border)',
         }}
       >
-        <div style={{ display: 'flex', gap: '6px', width: '100%' }}>
+        <div style={{ display: 'flex', gap: '6px', width: '100%', justifyContent: 'space-between', alignItems: 'center' }}>
           <select 
             id="filter-fac-type" 
             value={filterType} 
@@ -36,8 +37,18 @@ export default function Factures({
             <option value="CLIENT">Factures Clients (Sortantes)</option>
             <option value="FOURNISSEUR">Factures Fournisseurs (Entrantes)</option>
           </select>
+
+          <button 
+            type="button"
+            className="btn-action"
+            onClick={onOpenAIExtractor}
+            style={{ marginLeft: 'auto' }}
+          >
+            📎 Importer une facture fournisseur
+          </button>
         </div>
       </div>
+
 
       {/* Factures Table */}
       <div className="table-container">

@@ -13,11 +13,8 @@ import RFQs from './components/RFQs.jsx';
 import Settings from './components/Settings.jsx';
 import ToastContainer from './components/ToastContainer.jsx';
 import DialogSystem from './components/DialogSystem.jsx';
-
-const adminHeaders = {
-  'Content-Type': 'application/json',
-  'Authorization': 'Basic ' + btoa('admin:admin')
-};
+import InvoiceAIExtractorModal from './components/InvoiceAIExtractorModal.jsx';
+import { getAuthHeaders, safeResponseJson } from './utils/auth.js';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -136,6 +133,9 @@ export default function App() {
   const [approveItems, setApproveItems] = useState([]);
   const [submittingApprove, setSubmittingApprove] = useState(false);
 
+  // AI Invoice Extractor Modal
+  const [aiExtractorOpen, setAiExtractorOpen] = useState(false);
+
   // ----------------------------------------------------
   // TOAST SYSTEM IMPLEMENTATION
   // ----------------------------------------------------
@@ -228,7 +228,7 @@ export default function App() {
     try {
       const [statsRes, supRes, clientTopRes, supTopRes, prodTopRes] = await Promise.all([
         fetch(`/odata/v4/analytics/getGlobalStats(month='${revenueMonth}',year='${revenueYear}')`),
-        fetch('/odata/v4/admin/Fournisseurs?$select=ID', { headers: adminHeaders }),
+        fetch('/odata/v4/admin/Fournisseurs?$select=ID', { headers: getAuthHeaders() }),
         fetch('/odata/v4/analytics/getTopClients()'),
         fetch('/odata/v4/analytics/getTopSuppliers()'),
         fetch('/odata/v4/analytics/getTopProducts()')
@@ -253,7 +253,7 @@ export default function App() {
       
       // A. KYC Pending alerts
       try {
-        const regRes = await fetch("/odata/v4/registration/RegistrationRequests?$filter=status eq 'PENDING'&$select=ID,companyName,address", { headers: adminHeaders });
+        const regRes = await fetch("/odata/v4/registration/RegistrationRequests?$filter=status eq 'PENDING'&$select=ID,companyName,address", { headers: getAuthHeaders() });
         const regData = await regRes.json();
         (regData.value || []).forEach(r => {
           activeAlerts.push({
@@ -269,7 +269,7 @@ export default function App() {
 
       // B. Dispute factures alerts
       try {
-        const res = await fetch("/odata/v4/admin/AllFacturesFournisseur?$filter=matchStatus eq 'DISCREPANCY'&$expand=fournisseur($select=companyName)&$select=ID,invoiceNumber", { headers: adminHeaders });
+        const res = await fetch("/odata/v4/admin/AllFacturesFournisseur?$filter=matchStatus eq 'DISCREPANCY'&$expand=fournisseur($select=companyName)&$select=ID,invoiceNumber", { headers: getAuthHeaders() });
         const data = await res.json();
         (data.value || []).forEach(d => {
           const supName = d.fournisseur ? d.fournisseur.companyName : 'Fournisseur';
@@ -286,7 +286,7 @@ export default function App() {
 
       // C. Stock critique alerts
       try {
-        const prodRes = await fetch("/odata/v4/admin/Produits?$filter=stock lt minStock&$select=ID,code,name,stock,minStock", { headers: adminHeaders });
+        const prodRes = await fetch("/odata/v4/admin/Produits?$filter=stock lt minStock&$select=ID,code,name,stock,minStock", { headers: getAuthHeaders() });
         const prodData = await prodRes.json();
         (prodData.value || []).forEach(p => {
           activeAlerts.push({
@@ -420,7 +420,7 @@ export default function App() {
         if (cmdFilterType === 'B2B') url += '&$filter=clientB2B_ID ne null';
         if (cmdFilterType === 'B2C') url += '&$filter=clientB2C_ID ne null';
         try {
-          const res = await fetch(url, { headers: adminHeaders });
+          const res = await fetch(url, { headers: getAuthHeaders() });
           const data = await res.json();
           crmList = (data.value || []).map(cmd => ({ ...cmd, _type: 'CRM' }));
         } catch (e) { console.error(e); }
@@ -428,7 +428,7 @@ export default function App() {
 
       if (cmdFilterType === '' || cmdFilterType === 'SRM') {
         try {
-          const res = await fetch('/odata/v4/admin/AllBonsCommande?$orderby=createdAt desc&$expand=fournisseur', { headers: adminHeaders });
+          const res = await fetch('/odata/v4/admin/AllBonsCommande?$orderby=createdAt desc&$expand=fournisseur', { headers: getAuthHeaders() });
           const data = await res.json();
           srmList = (data.value || []).map(po => ({ ...po, _type: 'SRM' }));
         } catch (e) { console.error(e); }
@@ -453,14 +453,14 @@ export default function App() {
       let fournisseurFactures = [];
 
       if (facFilterType !== 'FOURNISSEUR') {
-        const res = await fetch('/odata/v4/crm/Factures?$orderby=createdAt desc&$top=200', { headers: adminHeaders });
+        const res = await fetch('/odata/v4/crm/Factures?$orderby=createdAt desc&$top=200', { headers: getAuthHeaders() });
         const data = await res.json();
         clientFactures = (data.value || []).map(f => ({ ...f, _type: 'CLIENT' }));
       }
 
       if (facFilterType !== 'CLIENT') {
         try {
-          const res = await fetch('/odata/v4/srm/FacturesFournisseur?$orderby=createdAt desc&$top=200', { headers: adminHeaders });
+          const res = await fetch('/odata/v4/srm/FacturesFournisseur?$orderby=createdAt desc&$top=200', { headers: getAuthHeaders() });
           const data = await res.json();
           fournisseurFactures = (data.value || []).map(f => ({ ...f, _type: 'FOURNISSEUR' }));
         } catch(e) { console.error(e); }
@@ -486,7 +486,7 @@ export default function App() {
       let url = '/odata/v4/admin/Produits?$orderby=name';
       if (filters.length) url += '&$filter=' + filters.join(' and ');
 
-      const res = await fetch(url, { headers: adminHeaders });
+      const res = await fetch(url, { headers: getAuthHeaders() });
       const data = await res.json();
       setProducts(data.value || []);
     } catch (e) {
@@ -512,7 +512,7 @@ export default function App() {
   const fetchRfqs = useCallback(async () => {
     try {
       const res = await fetch('/odata/v4/srm/RFQs?$expand=fournisseur,items,responses', {
-        headers: adminHeaders
+        headers: getAuthHeaders()
       });
       const data = await res.json();
       setRfqs(data.value || []);
@@ -525,12 +525,12 @@ export default function App() {
   const fetchNotifications = useCallback(async () => {
     try {
       // General notifications
-      const notiRes = await fetch('/odata/v4/admin/Notifications?$filter=isRead eq false&$orderby=createdAt desc&$top=20', { headers: adminHeaders });
+      const notiRes = await fetch('/odata/v4/admin/Notifications?$filter=isRead eq false&$orderby=createdAt desc&$top=20', { headers: getAuthHeaders() });
       const notiData = await notiRes.json();
       const generalNotifs = notiData.value || [];
 
       // Pending registrations requests
-      const regRes = await fetch('/odata/v4/registration/RegistrationRequests?$filter=status eq \'PENDING\'', { headers: adminHeaders });
+      const regRes = await fetch('/odata/v4/registration/RegistrationRequests?$filter=status eq \'PENDING\'', { headers: getAuthHeaders() });
       const regData = await regRes.json();
       const pendingRegs = regData.value || [];
 
@@ -538,7 +538,7 @@ export default function App() {
       setUnreadCount(generalNotifs.length + pendingRegs.length);
 
       // Check for incoming RFQ responses quietly to trigger toast alert
-      const respRes = await fetch('/odata/v4/srm/RFQResponses?$filter=selected eq false&$select=ID', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
+      const respRes = await fetch('/odata/v4/srm/RFQResponses?$filter=selected eq false&$select=ID', { headers: getAuthHeaders() }).catch(() => ({ json: async () => ({ value: [] }) }));
       const respData = await respRes.json().catch(() => ({ value: [] }));
       const newResponsesCount = (respData.value || []).length;
       if (newResponsesCount > lastRFQResponseCount && lastRFQResponseCount >= 0) {
@@ -547,12 +547,12 @@ export default function App() {
       setLastRFQResponseCount(newResponsesCount);
 
       // Extract alert counts for sidebar badges
-      const rfqRes = await fetch('/odata/v4/srm/RFQs?$filter=status eq \'OPEN\'&$select=ID', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
+      const rfqRes = await fetch('/odata/v4/srm/RFQs?$filter=status eq \'OPEN\'&$select=ID', { headers: getAuthHeaders() }).catch(() => ({ json: async () => ({ value: [] }) }));
       const rfqData = await rfqRes.json().catch(() => ({ value: [] }));
 
-      const crmCmdRes = await fetch('/odata/v4/crm/Commandes?$filter=status eq \'PENDING\' or status eq \'CONFIRMED\'&$select=ID,status', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
+      const crmCmdRes = await fetch('/odata/v4/crm/Commandes?$filter=status eq \'PENDING\' or status eq \'CONFIRMED\'&$select=ID,status', { headers: getAuthHeaders() }).catch(() => ({ json: async () => ({ value: [] }) }));
       const crmCmds = (await crmCmdRes.json().catch(() => ({ value: [] }))).value || [];
-      const srmCmdRes = await fetch('/odata/v4/admin/AllBonsCommande?$filter=status eq \'CONFIRMED\'&$select=ID,status', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
+      const srmCmdRes = await fetch('/odata/v4/admin/AllBonsCommande?$filter=status eq \'CONFIRMED\'&$select=ID,status', { headers: getAuthHeaders() }).catch(() => ({ json: async () => ({ value: [] }) }));
       const srmCmds = (await srmCmdRes.json().catch(() => ({ value: [] }))).value || [];
 
       const viewed = JSON.parse(localStorage.getItem('viewedConfirmedOrders') || '[]');
@@ -560,19 +560,19 @@ export default function App() {
       const unviewedCrmConfirmed = crmCmds.filter(c => c.status === 'CONFIRMED' && !viewed.includes(c.ID)).length;
       const unviewedSrmConfirmed = srmCmds.filter(c => c.status === 'CONFIRMED' && !viewed.includes(c.ID)).length;
 
-      const crmFacRes = await fetch('/odata/v4/crm/Factures?$filter=status ne \'PAID\'&$select=ID,status', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
+      const crmFacRes = await fetch('/odata/v4/crm/Factures?$filter=status ne \'PAID\'&$select=ID,status', { headers: getAuthHeaders() }).catch(() => ({ json: async () => ({ value: [] }) }));
       const crmFacs = (await crmFacRes.json().catch(() => ({ value: [] }))).value || [];
-      const srmFacRes = await fetch('/odata/v4/srm/FacturesFournisseur?$filter=status ne \'PAID\'&$select=ID,status', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
+      const srmFacRes = await fetch('/odata/v4/srm/FacturesFournisseur?$filter=status ne \'PAID\'&$select=ID,status', { headers: getAuthHeaders() }).catch(() => ({ json: async () => ({ value: [] }) }));
       const srmFacs = (await srmFacRes.json().catch(() => ({ value: [] }))).value || [];
 
       const viewedF = JSON.parse(localStorage.getItem('viewedConfirmedInvoices') || '[]');
       const unpaidCrmCount = crmFacs.filter(f => !viewedF.includes(f.ID)).length;
       const unpaidSrmCount = srmFacs.filter(f => !viewedF.includes(f.ID)).length;
 
-      const devisRes = await fetch('/odata/v4/admin/AllDevis?$filter=status eq \'PENDING\'&$select=ID', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
+      const devisRes = await fetch('/odata/v4/admin/AllDevis?$filter=status eq \'PENDING\'&$select=ID', { headers: getAuthHeaders() }).catch(() => ({ json: async () => ({ value: [] }) }));
       const devisData = await devisRes.json().catch(() => ({ value: [] }));
 
-      const prodRes = await fetch('/odata/v4/admin/Produits?$select=stock,minStock', { headers: adminHeaders }).catch(() => ({ json: async () => ({ value: [] }) }));
+      const prodRes = await fetch('/odata/v4/admin/Produits?$select=stock,minStock', { headers: getAuthHeaders() }).catch(() => ({ json: async () => ({ value: [] }) }));
       const prodData = await prodRes.json().catch(() => ({ value: [] }));
       const lowStockCount = (prodData.value || []).filter(p => p.stock !== null && p.minStock !== null && p.stock < p.minStock).length;
 
@@ -647,7 +647,7 @@ export default function App() {
       try {
         const res = await fetch(`/odata/v4/admin/Notifications(${notif.ID})`, {
           method: 'PATCH',
-          headers: adminHeaders,
+          headers: getAuthHeaders(),
           body: JSON.stringify({ isRead: true })
         });
         if (res.ok) {
@@ -673,7 +673,7 @@ export default function App() {
         generalNotifs.map(n =>
           fetch(`/odata/v4/admin/Notifications(${n.ID})`, {
             method: 'PATCH',
-            headers: adminHeaders,
+            headers: getAuthHeaders(),
             body: JSON.stringify({ isRead: true })
           })
         )
@@ -710,7 +710,7 @@ export default function App() {
         try {
           const res = await fetch('/odata/v4/admin/activateBusinessPartner', {
             method: 'POST',
-            headers: adminHeaders,
+            headers: getAuthHeaders(),
             body: JSON.stringify({ bpId: id })
           });
           if (res.ok) {
@@ -727,7 +727,7 @@ export default function App() {
       try {
         const res = await fetch('/odata/v4/admin/blockBusinessPartner', {
           method: 'POST',
-          headers: adminHeaders,
+          headers: getAuthHeaders(),
           body: JSON.stringify({ bpId: id, reason: reason })
         });
         if (res.ok) {
@@ -760,7 +760,7 @@ export default function App() {
     try {
       const res = await fetch(`/odata/v4/admin/BusinessPartners(${id})`, {
         method: 'PATCH',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ rating })
       });
       if (res.ok) {
@@ -778,7 +778,7 @@ export default function App() {
     try {
       const res = await fetch(`/odata/v4/registration/${action}`, {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify(status === 'APPROVED' ? { id: activeExamItem.ID } : { id: activeExamItem.ID, reason })
       });
       if (res.ok) {
@@ -788,11 +788,12 @@ export default function App() {
         fetchStats();
         callback();
       } else {
-        const err = await res.json();
-        showToast('error', 'Erreur', err?.error?.message || 'Une erreur est survenue.');
+        const err = await safeResponseJson(res);
+        showToast('error', 'Erreur', err?.error?.message || `Erreur serveur (HTTP ${res.status})`);
       }
     } catch (e) {
-      showToast('error', 'Erreur', 'Impossible de contacter le serveur.');
+      console.error('[KYC Decision] Network error:', e);
+      showToast('error', 'Erreur réseau', `Impossible de contacter le serveur: ${e.message || 'Vérifiez votre connexion.'}`);
     } finally {
       setSubmittingDecision(false);
     }
@@ -811,7 +812,7 @@ export default function App() {
         showToast('info', 'Chargement...', 'Génération du PDF du devis...');
         const res = await fetch('/odata/v4/admin/downloadDevisPDF', {
           method: 'POST',
-          headers: { ...adminHeaders, 'Content-Type': 'application/json' },
+          headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
           body: JSON.stringify({ devisId })
         });
         const data = await res.json();
@@ -824,7 +825,7 @@ export default function App() {
         showToast('info', 'Chargement...', 'Génération du PDF du bon de commande...');
         const res = await fetch('/odata/v4/admin/downloadCommandePDF', {
           method: 'POST',
-          headers: { ...adminHeaders, 'Content-Type': 'application/json' },
+          headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
           body: JSON.stringify({ commandeId })
         });
         const data = await res.json();
@@ -833,13 +834,13 @@ export default function App() {
         blobUrl = `data:application/pdf;base64,${pdf}`;
       } else if (typeof url === 'string' && url.includes('downloadGRPDF')) {
         showToast('info', 'Chargement...', 'Génération du PDF du bon de réception...');
-        const res = await fetch(url, { headers: adminHeaders });
+        const res = await fetch(url, { headers: getAuthHeaders() });
         const data = await res.json();
         const pdf = data.value || data.pdf;
         if (!res.ok || !pdf) throw new Error();
         blobUrl = `data:application/pdf;base64,${pdf}`;
       } else {
-        const res = await fetch(url, { headers: adminHeaders });
+        const res = await fetch(url, { headers: getAuthHeaders() });
         if (!res.ok) {
           showToast('error', 'Erreur de document', 'Impossible de charger le document PDF (' + res.status + ')');
           setPdfModalOpen(false);
@@ -925,7 +926,7 @@ export default function App() {
     try {
       const res = await fetch(`/odata/v4/crm/approveDevis`, {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ devisId })
       });
       if (res.ok) {
@@ -952,7 +953,7 @@ export default function App() {
       } else {
         // Fetch full PO details with items and show details modal
         try {
-          const res = await fetch(`/odata/v4/srm/BonsCommande(ID=${order.ID})?$expand=items,fournisseur,receptions($expand=items($expand=product,poItem))`, { headers: adminHeaders });
+          const res = await fetch(`/odata/v4/srm/BonsCommande(ID=${order.ID})?$expand=items,fournisseur,receptions($expand=items($expand=product,poItem))`, { headers: getAuthHeaders() });
           const data = await res.json();
           setActiveOrderDetails({ ...order, ...data, _type: 'SRM' });
           setCommandeDetailModalOpen(true);
@@ -963,7 +964,7 @@ export default function App() {
     } else {
       // Fetch full CRM details with items
       try {
-        const res = await fetch(`/odata/v4/crm/Commandes(ID=${order.ID})?$expand=items,clientB2B,clientB2C`, { headers: adminHeaders });
+        const res = await fetch(`/odata/v4/crm/Commandes(ID=${order.ID})?$expand=items,clientB2B,clientB2C`, { headers: getAuthHeaders() });
         const data = await res.json();
         setActiveOrderDetails({ ...order, ...data, _type: 'CRM' });
         setCommandeDetailModalOpen(true);
@@ -978,7 +979,7 @@ export default function App() {
     try {
       const res = await fetch(`/odata/v4/crm/sendOrderToClient`, {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ commandeId })
       });
       if (res.ok) {
@@ -987,7 +988,7 @@ export default function App() {
         if (activePartnerDetails) handleOpenPartnerDetails(activePartnerDetails);
         fetchCommandes();
       } else {
-        const err = await res.json();
+        const err = await safeResponseJson(res);
         showToast('error', 'Erreur', err?.error?.message || 'Erreur lors de l\'envoi.');
       }
     } catch (e) {
@@ -1003,7 +1004,7 @@ export default function App() {
     try {
       const res = await fetch('/odata/v4/admin/validateCashOrder', {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ commandeId })
       });
       if (res.ok) {
@@ -1012,7 +1013,7 @@ export default function App() {
         fetchFactures();
         fetchStats();
       } else {
-        const err = await res.json();
+        const err = await safeResponseJson(res);
         showToast('error', 'Erreur', err?.error?.message || 'Erreur serveur.');
       }
     } catch (e) {
@@ -1023,7 +1024,7 @@ export default function App() {
   // Goods Receipt validation submit
   const handleOpenGRModal = async (po) => {
     try {
-      const res = await fetch(`/odata/v4/srm/BonsCommande(ID=${po.ID})?$expand=items`, { headers: adminHeaders });
+      const res = await fetch(`/odata/v4/srm/BonsCommande(ID=${po.ID})?$expand=items`, { headers: getAuthHeaders() });
       const data = await res.json();
       setActiveGrDetails({ ...po, items: data.items || [] });
       setGrModalOpen(true);
@@ -1037,7 +1038,7 @@ export default function App() {
     try {
       const res = await fetch('/odata/v4/srm/createGoodsReceipt', {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ poId, items: itemsList, notes })
       });
       if (res.ok) {
@@ -1047,7 +1048,7 @@ export default function App() {
         fetchStats();
         if (activePartnerDetails) handleOpenPartnerDetails(activePartnerDetails);
       } else {
-        const err = await res.json();
+        const err = await safeResponseJson(res);
         showToast('error', 'Erreur', err?.error?.message || 'Erreur serveur.');
       }
     } catch (e) {
@@ -1061,7 +1062,7 @@ export default function App() {
     showToast('info', 'Chargement...', "Chargement des détails de la commande...");
     try {
       const res = await fetch(`/odata/v4/srm/BonsCommande(ID=${poId})?$expand=receptions($expand=items($expand=product,poItem))`, {
-        headers: adminHeaders
+        headers: getAuthHeaders()
       });
       if (!res.ok) throw new Error("Impossible de charger les réceptions.");
       const data = await res.json();
@@ -1143,7 +1144,7 @@ export default function App() {
 
       const res = await fetch('/odata/v4/srm/approveDiscrepancyResolution', {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ 
           poId: activeApproveDetails.ID, 
           items: payloadItems 
@@ -1158,7 +1159,7 @@ export default function App() {
         fetchNotifications();
         if (activePartnerDetails) handleOpenPartnerDetails(activePartnerDetails);
       } else {
-        const err = await res.json();
+        const err = await safeResponseJson(res);
         showToast('error', 'Erreur', err?.error?.message || 'Erreur serveur.');
       }
     } catch (e) {
@@ -1183,7 +1184,7 @@ export default function App() {
       showToast('info', 'Chargement...', 'Génération du PDF de la facture...');
       const res = await fetch(`/odata/v4/admin/downloadFacturePDF`, {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ factId: facId })
       });
       const data = await res.json();
@@ -1203,7 +1204,7 @@ export default function App() {
     try {
       const res = await fetch('/odata/v4/admin/resolveDispute', {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ invoiceId })
       });
       if (res.ok) {
@@ -1212,7 +1213,7 @@ export default function App() {
         fetchNotifications();
         fetchStats();
       } else {
-        const err = await res.json();
+        const err = await safeResponseJson(res);
         showToast('error', 'Erreur', err?.error?.message || 'Erreur serveur.');
       }
     } catch (e) { showToast('error', 'Erreur', 'Erreur lors de la résolution.'); }
@@ -1228,7 +1229,7 @@ export default function App() {
     try {
       const res = await fetch('/odata/v4/admin/paySupplierInvoice', {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ invoiceId, paymentMethod: method })
       });
       if (res.ok) {
@@ -1236,7 +1237,7 @@ export default function App() {
         fetchFactures();
         fetchStats();
       } else {
-        const err = await res.json();
+        const err = await safeResponseJson(res);
         showToast('error', 'Erreur', err?.error?.message || 'Erreur serveur.');
       }
     } catch (e) { showToast('error', 'Erreur', 'Règlement impossible.'); }
@@ -1250,13 +1251,13 @@ export default function App() {
       if (id) {
         res = await fetch(`/odata/v4/admin/Produits(${id})`, {
           method: 'PATCH',
-          headers: adminHeaders,
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         });
       } else {
         res = await fetch('/odata/v4/admin/Produits', {
           method: 'POST',
-          headers: adminHeaders,
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         });
       }
@@ -1267,7 +1268,7 @@ export default function App() {
         fetchStats();
         callback();
       } else {
-        const err = await res.json();
+        const err = await safeResponseJson(res);
         showToast('error', 'Erreur', err?.error?.message || 'Erreur lors de l\'enregistrement.');
       }
     } catch (e) {
@@ -1284,7 +1285,7 @@ export default function App() {
     try {
       const res = await fetch(`/odata/v4/admin/Produits(${id})`, {
         method: 'PATCH',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ isActive: !currentStatus })
       });
       if (res.ok) {
@@ -1298,7 +1299,7 @@ export default function App() {
     const confirm = await window.Dialog.confirm(`Supprimer définitivement "${name}" ?\nCette action est irréversible.`);
     if (!confirm) return;
     try {
-      const res = await fetch(`/odata/v4/admin/Produits(${id})`, { method: 'DELETE', headers: adminHeaders });
+      const res = await fetch(`/odata/v4/admin/Produits(${id})`, { method: 'DELETE', headers: getAuthHeaders() });
       if (res.ok) {
         showToast('success', 'Produit supprimé', `"${name}" a été supprimé.`);
         fetchCatalogue();
@@ -1314,18 +1315,18 @@ export default function App() {
       // 1. Save modified prices & discounts
       const resRevise = await fetch('/odata/v4/admin/reviseDevis', {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ devisId: id, discountGlobal, items: itemsList })
       });
       if (!resRevise.ok) {
-        const err = await resRevise.json();
+        const err = await safeResponseJson(resRevise);
         throw new Error(err.error?.message || 'Erreur lors de la révision.');
       }
 
       // 2. Approve devis OData converting to sales order
       const resApprove = await fetch(`/odata/v4/crm/approveDevis`, {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ devisId: id })
       });
       if (!resApprove.ok) throw new Error("Impossible d'approuver le devis.");
@@ -1349,13 +1350,13 @@ export default function App() {
       if (id) {
         res = await fetch(`/odata/v4/srm/RFQs(${id})`, {
           method: 'PATCH',
-          headers: adminHeaders,
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         });
       } else {
         res = await fetch('/odata/v4/srm/RFQs', {
           method: 'POST',
-          headers: adminHeaders,
+          headers: getAuthHeaders(),
           body: JSON.stringify(payload)
         });
       }
@@ -1364,7 +1365,7 @@ export default function App() {
         fetchRfqs();
         callback();
       } else {
-        const err = await res.json();
+        const err = await safeResponseJson(res);
         showToast('error', 'Erreur', err?.error?.message || 'Erreur lors de la publication.');
       }
     } catch (e) {
@@ -1378,7 +1379,7 @@ export default function App() {
     const confirm = await window.Dialog.confirm(`Supprimer définitivement l'appel d'offres "${number}" ?`);
     if (!confirm) return;
     try {
-      const res = await fetch(`/odata/v4/srm/RFQs(${id})`, { method: 'DELETE', headers: adminHeaders });
+      const res = await fetch(`/odata/v4/srm/RFQs(${id})`, { method: 'DELETE', headers: getAuthHeaders() });
       if (res.ok) {
         showToast('success', 'Appel d\'offres supprimé', `"${number}" a été supprimé.`);
         fetchRfqs();
@@ -1394,7 +1395,7 @@ export default function App() {
     try {
       const res = await fetch('/odata/v4/srm/selectRFQResponse', {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ rfqId, responseId })
       });
       if (res.ok) {
@@ -1417,7 +1418,7 @@ export default function App() {
     try {
       const res = await fetch('/odata/v4/srm/convertRFQToPO', {
         method: 'POST',
-        headers: adminHeaders,
+        headers: getAuthHeaders(),
         body: JSON.stringify({ rfqId })
       });
       if (res.ok) {
@@ -1447,7 +1448,8 @@ export default function App() {
     const confirm = await window.Dialog.confirm('Voulez-vous vous déconnecter ?');
     if (confirm) {
       sessionStorage.clear();
-      window.location.href = '/index.html';
+      // Redirige vers la page de connexion admin dédiée
+      window.location.href = '/admin/auth.html';
     }
   };
 
@@ -1602,6 +1604,7 @@ export default function App() {
               onViewInvoice={handleViewInvoiceDetails}
               onResolveDispute={handleResolveDispute}
               onPaySupplier={handlePaySupplierInvoice}
+              onOpenAIExtractor={() => setAiExtractorOpen(true)}
             />
           )}
 
@@ -2127,6 +2130,14 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* Google Gemini AI Invoice Extractor Modal */}
+      <InvoiceAIExtractorModal 
+        isOpen={aiExtractorOpen}
+        onClose={() => setAiExtractorOpen(false)}
+        onRefreshData={fetchFactures}
+        showToast={showToast}
+      />
 
       {/* Toast popup alerts container */}
       <ToastContainer toasts={toasts} removeToast={removeToast} />

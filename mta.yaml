@@ -12,6 +12,8 @@ build-parameters:
     - builder: custom
       commands:
         - npm ci
+        - npm run frontend:install
+        - npm run frontend:build
         - npx cds build --production
         - node scripts/build-cloud.js
 
@@ -23,7 +25,7 @@ modules:
     parameters:
       buildpack: nodejs_buildpack
       memory: 256M
-      disk-quota: 512M
+      disk-quota: 768M
     requires:
       - name: gestion-pme-db
       - name: gestion-pme-auth
@@ -49,9 +51,12 @@ modules:
     type: approuter.nodejs
     path: frontend
     parameters:
-      memory: 128M
-      disk-quota: 256M
+      memory: 256M
+      disk-quota: 1024M
       keep-existing-routes: true
+      routes:
+        - route: "client-pme-ffbe6148trial.${default-domain}"
+        - route: "admin-pme-ffbe6148trial.${default-domain}"
     properties:
       TENANT_HOST_PATTERN: "^(.*).cfapps.us10-001.hana.ondemand.com"
     requires:
