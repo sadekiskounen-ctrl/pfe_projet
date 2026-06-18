@@ -152,11 +152,11 @@ export default function Devis({
                 const dDate = d.createdAt ? new Date(d.createdAt).toLocaleDateString('fr-FR') : '-';
                 
                 const statusHtml = d.status === 'PENDING' ? (
-                  <span style={{ background: 'rgba(251,146,60,0.2)', color: '#fb923c', padding: '4px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700 }}>EN ATTENTE</span>
+                  <span style={{ background: 'rgba(251,146,60,0.2)', color: '#fb923c', padding: '4px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700 }}>En attente</span>
                 ) : d.status === 'APPROVED' ? (
-                  <span style={{ background: 'rgba(74,222,128,0.2)', color: '#4ade80', padding: '4px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700 }}>APPROUVÉ</span>
+                  <span style={{ background: 'rgba(74,222,128,0.2)', color: '#4ade80', padding: '4px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700 }}>Approuvé</span>
                 ) : d.status === 'REJECTED' ? (
-                  <span style={{ background: 'rgba(248,113,113,0.2)', color: '#f87171', padding: '4px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700 }}>REFUSÉ</span>
+                  <span style={{ background: 'rgba(248,113,113,0.2)', color: '#f87171', padding: '4px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700 }}>Refusé</span>
                 ) : (
                   <span style={{ background: 'rgba(156,163,175,0.2)', color: '#9ca3af', padding: '4px 8px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 700 }}>{d.status}</span>
                 );
@@ -209,8 +209,27 @@ export default function Devis({
                 </div>
                 <div className="info-group">
                   <label>Statut Actuel</label>
-                  <p id="rev-devis-status" style={{ fontWeight: 700, color: 'var(--accent-orange)' }}>
-                    {activeItem.status}
+                  <p id="rev-devis-status">
+                    {(() => {
+                      const devisLabels = {
+                        PENDING: 'En attente',
+                        APPROVED: 'Approuvé',
+                        REJECTED: 'Refusé',
+                        CONVERTED: 'Converti en commande',
+                      };
+                      const devisColors = {
+                        PENDING: '#fb923c',
+                        APPROVED: '#4ade80',
+                        REJECTED: '#f87171',
+                        CONVERTED: '#38bdf8',
+                      };
+                      const raw = activeItem.status || '-';
+                      return (
+                        <span style={{ fontWeight: 700, color: devisColors[raw] || '#94a3b8' }}>
+                          {devisLabels[raw] || raw}
+                        </span>
+                      );
+                    })()}
                   </p>
                 </div>
               </div>

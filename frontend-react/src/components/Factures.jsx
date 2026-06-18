@@ -8,6 +8,7 @@ export default function Factures({
   onResolveDispute,
   onPaySupplier,
   onOpenAIExtractor,
+  lang = 'FR',
 }) {
   const viewedInvoices = JSON.parse(localStorage.getItem('viewedConfirmedInvoices') || '[]');
 
@@ -79,21 +80,43 @@ export default function Factures({
                   <span style={{ color: '#38bdf8', fontWeight: 600 }}>Client</span>
                 );
 
-                const statusColors = { PAID: '#4ade80', UNPAID: '#f87171', PARTIAL: '#fb923c', MATCHED: '#4ade80', LITIGE: '#f87171' };
-                
+                const factureLabels = {
+                  // Client/Supplier general invoice statuses
+                  PAID:           'Payée',
+                  UNPAID:         'Non payée',
+                  PARTIAL:        'Paiement partiel',
+                  PARTIALLY_PAID: 'Paiement partiel',
+                  PENDING:        'En attente',
+                  DRAFT:          'Brouillon',
+                  OVERDUE:        'En retard',
+                  CANCELLED:      'Annulée',
+                  SENT:           'Envoyée',
+                  APPROVED:       'Approuvée',
+                  MATCHED:        'Rapprochée',
+                  DISCREPANCY:    'Litige',
+                  PENDING_CASH:   'En attente (espèces)',
+                };
+                const factureColors = {
+                  PAID: '#4ade80', UNPAID: '#f87171', PARTIAL: '#fb923c', PARTIALLY_PAID: '#fb923c',
+                  PENDING: '#fb923c', SENT: '#fb923c', APPROVED: '#38bdf8',
+                  MATCHED: '#4ade80', DISCREPANCY: '#f87171', PENDING_CASH: '#a78bfa',
+                  DRAFT: '#94a3b8', OVERDUE: '#f87171', CANCELLED: '#f87171',
+                };
+
                 let sLabel = f.status || '-';
                 if (isSupplier && f.matchStatus === 'DISCREPANCY') {
-                  sLabel = 'LITIGE';
+                  sLabel = 'DISCREPANCY';
                 }
-                const sColor = statusColors[sLabel] || '#94a3b8';
-                let statusHtml = <span style={{ color: sColor, fontWeight: 700 }}>{sLabel}</span>;
+                const sColor = factureColors[sLabel] || '#94a3b8';
+                const sDisplayLabel = factureLabels[sLabel] || sLabel;
+                let statusHtml = <span style={{ color: sColor, fontWeight: 700 }}>{sDisplayLabel}</span>;
 
                 const isNew = f.status !== 'PAID' && !viewedInvoices.includes(f.ID);
 
                 const remAmt = f.remainingAmount !== undefined ? f.remainingAmount : (f.status === 'PAID' ? 0 : f.totalTTC);
                 const remHtml = (
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginTop: '2px' }}>
-                    Reste à payer : {new Intl.NumberFormat('fr-FR').format(remAmt)} DA
+                    {lang === 'FR' ? 'Reste à payer' : 'Remaining to pay'} : {new Intl.NumberFormat(lang === 'FR' ? 'fr-FR' : 'en-US').format(remAmt)} DA
                   </div>
                 );
 
@@ -108,7 +131,7 @@ export default function Factures({
                     <td>{typeLabel}</td>
                     <td>{f.date || f.createdAt?.slice(0, 10) || '-'}</td>
                     <td style={{ fontWeight: 700, color: 'var(--accent)' }}>
-                      {new Intl.NumberFormat('fr-FR').format(f.totalTTC || 0)} DA
+                      {new Intl.NumberFormat(lang === 'FR' ? 'fr-FR' : 'en-US').format(f.totalTTC || 0)} DA
                       {remHtml}
                     </td>
                     <td>
@@ -116,8 +139,8 @@ export default function Factures({
                       {isNew && (
                         <span 
                           style={{
-                            background: sLabel === 'LITIGE' ? 'rgba(248,113,113,0.2)' : 'rgba(74,222,128,0.2)',
-                            color: sLabel === 'LITIGE' ? '#f87171' : '#4ade80',
+                            background: sLabel === 'DISCREPANCY' ? 'rgba(248,113,113,0.2)' : 'rgba(74,222,128,0.2)',
+                            color: sLabel === 'DISCREPANCY' ? '#f87171' : '#4ade80',
                             fontSize: '0.65rem',
                             padding: '2px 6px',
                             borderRadius: '8px',

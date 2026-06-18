@@ -6,7 +6,7 @@
 'use strict';
 const cds = require('@sap/cds');
 const { generateDevisPDF, generateFacturePDF, generateCommandePDF } = require('../lib/pdf-generator');
-const { sendDevis, sendFacture, sendWelcomeB2B } = require('../lib/email-service');
+const { sendDevis, sendFacture, sendWelcomeB2B, sendCommande } = require('../lib/email-service');
 const { validateClientB2B } = require('../lib/validators');
 
 module.exports = class CRMService extends cds.ApplicationService {
@@ -558,6 +558,229 @@ module.exports = class CRMService extends cds.ApplicationService {
           });
         return true;
       } catch (e) { console.error('Prepare facture email error:', e.message); return false; }
+    });
+
+    // ── Automatic Email Hooks ──
+    
+    // 1. Auto send Devis on approval
+    this.after('approveDevis', async (devis, req) => {
+      try {
+        const devisId = devis.ID;
+        const fullDevis = await SELECT.one.from(Devis).where({ ID: devisId });
+        const items = await SELECT.from(DevisItems).where({ parent_ID: devisId });
+        const client = fullDevis.clientB2B_ID
+          ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B, fullDevis.clientB2B_ID)
+          : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C, fullDevis.clientB2C_ID);
+        const pdfBuffer = await generateDevisPDF({
+          ...fullDevis,
+          items,
+          clientB2B: fullDevis.clientB2B_ID ? client : null,
+          clientB2C: !fullDevis.clientB2B_ID ? client : null
+        });
+        const clientEmail = client.email;
+        const clientName = fullDevis.clientB2B_ID
+          ? (client.contactName || client.companyName)
+          : (client.firstName || client.lastName);
+        sendDevis(clientEmail, clientName, fullDevis.devisNumber, pdfBuffer).catch((err) => {
+          console.error('Send devis email error in background:', err.message);
+        });
+      } catch (e) {
+        console.error('Auto send devis email error:', e.message);
+      }
+    });
+
+    // 2. Auto send Commande on conversion
+    this.after('convertQuoteToOrder', async (commande, req) => {
+      try {
+        const commandeId = commande.ID;
+        const fullCommande = await SELECT.one.from(Commandes).where({ ID: commandeId });
+        const items = await SELECT.from(CommandeItems).columns(i => { i('*'), i.product(p => p('*')) }).where({ parent_ID: commandeId });
+        const client = fullCommande.clientB2B_ID
+          ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B, fullCommande.clientB2B_ID)
+          : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C, fullCommande.clientB2C_ID);
+        const pdfBuffer = await generateCommandePDF({
+          ...fullCommande,
+          items,
+          clientB2B: fullCommande.clientB2B_ID ? client : null,
+          clientB2C: !fullCommande.clientB2B_ID ? client : null
+        });
+        const clientEmail = client.email;
+        const clientName = fullCommande.clientB2B_ID
+          ? (client.contactName || client.companyName)
+          : (client.firstName || client.lastName);
+        sendCommande(clientEmail, clientName, fullCommande.orderNumber, fullCommande.totalTTC, fullCommande.currency_code, pdfBuffer).catch((err) => {
+          console.error('Send commande email error in background:', err.message);
+        });
+      } catch (e) {
+        console.error('Auto send convertQuoteToOrder email error:', e.message);
+      }
+    });
+
+    // 3. Auto send Commande and Facture (if not cash) on submitCartAsOrder (B2C)
+    this.after('submitCartAsOrder', async (commande, req) => {
+      try {
+        const commandeId = commande.ID;
+        const fullCommande = await SELECT.one.from(Commandes).where({ ID: commandeId });
+        const items = await SELECT.from(CommandeItems).columns(i => { i('*'), i.product(p => p('*')) }).where({ parent_ID: commandeId });
+        const client = fullCommande.clientB2B_ID
+          ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B, fullCommande.clientB2B_ID)
+          : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C, fullCommande.clientB2C_ID);
+        
+        const clientEmail = client.email;
+        const clientName = fullCommande.clientB2B_ID
+          ? (client.contactName || client.companyName)
+          : (client.firstName || client.lastName);
+
+        // Send Commande PDF
+        const pdfBufferCmd = await generateCommandePDF({
+          ...fullCommande,
+          items,
+          clientB2B: fullCommande.clientB2B_ID ? client : null,
+          clientB2C: !fullCommande.clientB2B_ID ? client : null
+        });
+        sendCommande(clientEmail, clientName, fullCommande.orderNumber, fullCommande.totalTTC, fullCommande.currency_code, pdfBufferCmd).catch((err) => {
+          console.error('Send submitCartAsOrder commande email error in background:', err.message);
+        });
+
+        // Send Facture PDF if generated
+        if (fullCommande.facture_ID) {
+          const facture = await SELECT.one.from(Factures).where({ ID: fullCommande.facture_ID });
+          if (facture) {
+            const factItems = await SELECT.from(FactureItems).where({ parent_ID: facture.ID });
+            const { Produit } = cds.entities('sap.pme');
+            for (let item of factItems) {
+              if (!item.description && item.product_ID) {
+                const prod = await SELECT.one.from(Produit).where({ ID: item.product_ID });
+                item.description = prod?.name || `Produit ${item.product_ID}`;
+              }
+            }
+            const pdfBufferFact = await generateFacturePDF({
+              ...facture,
+              items: factItems,
+              clientB2B: fullCommande.clientB2B_ID ? client : null,
+              clientB2C: !fullCommande.clientB2B_ID ? client : null
+            });
+            sendFacture(clientEmail, clientName, facture.invoiceNumber, facture.dueDate, facture.totalTTC, facture.currency_code, pdfBufferFact).catch((err) => {
+              console.error('Send submitCartAsOrder facture email error in background:', err.message);
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Auto send submitCartAsOrder emails error:', e.message);
+      }
+    });
+
+    // 4. Auto send Facture on payOrder
+    this.after('payOrder', async (commande, req) => {
+      try {
+        const commandeId = commande.ID;
+        const fullCommande = await SELECT.one.from(Commandes).where({ ID: commandeId });
+        if (fullCommande.facture_ID) {
+          const client = fullCommande.clientB2B_ID
+            ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B, fullCommande.clientB2B_ID)
+            : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C, fullCommande.clientB2C_ID);
+          const clientEmail = client.email;
+          const clientName = fullCommande.clientB2B_ID
+            ? (client.contactName || client.companyName)
+            : (client.firstName || client.lastName);
+          
+          const facture = await SELECT.one.from(Factures).where({ ID: fullCommande.facture_ID });
+          if (facture) {
+            const factItems = await SELECT.from(FactureItems).where({ parent_ID: facture.ID });
+            const { Produit } = cds.entities('sap.pme');
+            for (let item of factItems) {
+              if (!item.description && item.product_ID) {
+                const prod = await SELECT.one.from(Produit).where({ ID: item.product_ID });
+                item.description = prod?.name || `Produit ${item.product_ID}`;
+              }
+            }
+            const pdfBufferFact = await generateFacturePDF({
+              ...facture,
+              items: factItems,
+              clientB2B: fullCommande.clientB2B_ID ? client : null,
+              clientB2C: !fullCommande.clientB2B_ID ? client : null
+            });
+            sendFacture(clientEmail, clientName, facture.invoiceNumber, facture.dueDate, facture.totalTTC, facture.currency_code, pdfBufferFact).catch((err) => {
+              console.error('Send payOrder facture email error in background:', err.message);
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Auto send payOrder email error:', e.message);
+      }
+    });
+
+    // 5. Auto send Facture on acceptOrder
+    this.after('acceptOrder', async (commande, req) => {
+      try {
+        const commandeId = commande.ID;
+        const fullCommande = await SELECT.one.from(Commandes).where({ ID: commandeId });
+        if (fullCommande.facture_ID) {
+          const client = fullCommande.clientB2B_ID
+            ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B, fullCommande.clientB2B_ID)
+            : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C, fullCommande.clientB2C_ID);
+          const clientEmail = client.email;
+          const clientName = fullCommande.clientB2B_ID
+            ? (client.contactName || client.companyName)
+            : (client.firstName || client.lastName);
+          
+          const facture = await SELECT.one.from(Factures).where({ ID: fullCommande.facture_ID });
+          if (facture) {
+            const factItems = await SELECT.from(FactureItems).where({ parent_ID: facture.ID });
+            const { Produit } = cds.entities('sap.pme');
+            for (let item of factItems) {
+              if (!item.description && item.product_ID) {
+                const prod = await SELECT.one.from(Produit).where({ ID: item.product_ID });
+                item.description = prod?.name || `Produit ${item.product_ID}`;
+              }
+            }
+            const pdfBufferFact = await generateFacturePDF({
+              ...facture,
+              items: factItems,
+              clientB2B: fullCommande.clientB2B_ID ? client : null,
+              clientB2C: !fullCommande.clientB2B_ID ? client : null
+            });
+            sendFacture(clientEmail, clientName, facture.invoiceNumber, facture.dueDate, facture.totalTTC, facture.currency_code, pdfBufferFact).catch((err) => {
+              console.error('Send acceptOrder facture email error in background:', err.message);
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Auto send acceptOrder email error:', e.message);
+      }
+    });
+
+    // 6. Auto send Facture on convertCommandeToFacture
+    this.after('convertCommandeToFacture', async (facture, req) => {
+      try {
+        const client = facture.clientB2B_ID
+          ? await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2B, facture.clientB2B_ID)
+          : await SELECT.one.from(cds.entities('sap.pme.crm').ClientB2C, facture.clientB2C_ID);
+        const clientEmail = client.email;
+        const clientName = facture.clientB2B_ID
+          ? (client.contactName || client.companyName)
+          : (client.firstName || client.lastName);
+        
+        const factItems = await SELECT.from(FactureItems).where({ parent_ID: facture.ID });
+        const { Produit } = cds.entities('sap.pme');
+        for (let item of factItems) {
+          if (!item.description && item.product_ID) {
+            const prod = await SELECT.one.from(Produit).where({ ID: item.product_ID });
+            item.description = prod?.name || `Produit ${item.product_ID}`;
+          }
+        }
+        const pdfBufferFact = await generateFacturePDF({
+          ...facture,
+          items: factItems,
+          clientB2B: facture.clientB2B_ID ? client : null,
+          clientB2C: !facture.clientB2B_ID ? client : null
+        });
+        sendFacture(clientEmail, clientName, facture.invoiceNumber, facture.dueDate, facture.totalTTC, facture.currency_code, pdfBufferFact).catch((err) => {
+          console.error('Send convertCommandeToFacture email error in background:', err.message);
+        });
+      } catch (e) {
+        console.error('Auto send convertCommandeToFacture email error:', e.message);
+      }
     });
 
     await super.init();

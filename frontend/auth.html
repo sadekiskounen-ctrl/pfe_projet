@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bridgify Cloud | Connexion Authentifiée</title>
+    <link rel="icon" type="image/png" href="/images/logo_round.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -706,8 +707,21 @@
                 console.log("Status check result:", data);
 
                 if (data && data.status === 'BLOCKED') {
-                    errorDiv.innerText = `Accès refusé : Compte désactivé. Motif : ${data.blockReason || 'N/A'}`;
+                    errorDiv.innerHTML = `
+                        <div style="display:flex;align-items:flex-start;gap:10px">
+                            <span style="font-size:20px">🔒</span>
+                            <div>
+                                <strong>Compte suspendu par l'administrateur</strong><br>
+                                <span style="font-size:13px;opacity:0.9">${data.blockReason || 'Votre compte a été bloqué.'}</span><br><br>
+                                <span style="font-size:12px">Pour contester, contactez : <a href="mailto:bridgifycloud@gmail.com" style="color:inherit;font-weight:bold">bridgifycloud@gmail.com</a></span>
+                            </div>
+                        </div>`;
                     errorDiv.style.display = 'block';
+                    errorDiv.style.background = '#fef2f2';
+                    errorDiv.style.color = '#991b1b';
+                    errorDiv.style.border = '1px solid #fecaca';
+                    errorDiv.style.borderRadius = '10px';
+                    errorDiv.style.padding = '16px';
                     return;
                 }
                 
@@ -739,6 +753,26 @@
                 const rawLoginData = await loginRes.json();
                 const loginData = rawLoginData.value || rawLoginData;
                 
+                // Compte bloqué détecté au moment du login
+                if (loginData && loginData.status === 'BLOCKED') {
+                    errorDiv.innerHTML = `
+                        <div style="display:flex;align-items:flex-start;gap:10px">
+                            <span style="font-size:20px">🔒</span>
+                            <div>
+                                <strong>Ce compte a été bloqué par l'administrateur</strong><br>
+                                <span style="font-size:13px;opacity:0.9">${loginData.blockReason || 'Accès suspendu.'}</span><br><br>
+                                <span style="font-size:12px">Contactez-nous : <a href="mailto:bridgifycloud@gmail.com" style="color:inherit;font-weight:bold">bridgifycloud@gmail.com</a></span>
+                            </div>
+                        </div>`;
+                    errorDiv.style.display = 'block';
+                    errorDiv.style.background = '#fef2f2';
+                    errorDiv.style.color = '#991b1b';
+                    errorDiv.style.border = '1px solid #fecaca';
+                    errorDiv.style.borderRadius = '10px';
+                    errorDiv.style.padding = '16px';
+                    return;
+                }
+
                 if (loginData && loginData.status === 'SUCCESS') {
                     const dbType = loginData.blockReason; // 'CLIENT_B2B', 'CLIENT_B2C', or 'FOURNISSEUR'
                     
@@ -815,6 +849,29 @@
         const successDiv = document.getElementById('successMsg');
         successDiv.innerHTML = `<strong>Inscription réussie !</strong><br>Votre dossier a été transmis avec succès. Notre équipe va examiner vos documents. Vous recevrez un e-mail dès validation de votre compte.`;
         successDiv.style.display = 'block';
+    }
+    // Déconnexion automatique suite à un blocage par l'admin
+    if (urlParams.get('blocked') === 'true') {
+        const reason = decodeURIComponent(urlParams.get('reason') || "Votre compte a été suspendu par l'administrateur.");
+        const errorDiv = document.getElementById('errorMsg');
+        if (errorDiv) {
+            errorDiv.innerHTML = `
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                    <span style="font-size:20px">🔒</span>
+                    <div>
+                        <strong>Vous avez été déconnecté automatiquement</strong><br>
+                        <span style="font-size:13px;opacity:0.9">Ce compte a été bloqué par l'administrateur.</span><br>
+                        <span style="font-size:13px;opacity:0.8">${reason}</span><br><br>
+                        <span style="font-size:12px">Contactez-nous : <a href="mailto:bridgifycloud@gmail.com" style="color:inherit;font-weight:bold">bridgifycloud@gmail.com</a></span>
+                    </div>
+                </div>`;
+            errorDiv.style.display = 'block';
+            errorDiv.style.background = '#fef2f2';
+            errorDiv.style.color = '#991b1b';
+            errorDiv.style.border = '1px solid #fecaca';
+            errorDiv.style.borderRadius = '10px';
+            errorDiv.style.padding = '16px';
+        }
     }
     const targetApp = urlParams.get('app');
     if (targetApp === 'crm') selectRole('client');

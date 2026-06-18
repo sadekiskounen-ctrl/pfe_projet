@@ -1,10 +1,43 @@
 import React from 'react';
 
-export default function Sidebar({ activeTab, setActiveTab, counts, onLogout }) {
+export default function Sidebar({ activeTab, setActiveTab, counts, onLogout, lang = 'FR' }) {
+  const translations = {
+    FR: {
+      overview: "Vue d'ensemble",
+      partners: "Clients",
+      suppliers: "Fournisseurs",
+      registrations: "Inscriptions",
+      commandes: "Bons de Commande",
+      factures: "Factures",
+      catalogue: "Catalogue Produits",
+      devis: "Demandes de Devis",
+      rfqs: "Appels d'offres (RFQ)",
+      settings: "Paramètres",
+      logout: "Déconnexion",
+      admin: "ADMINISTRATEUR"
+    },
+    EN: {
+      overview: "Overview",
+      partners: "Clients",
+      suppliers: "Suppliers",
+      registrations: "Registrations",
+      commandes: "Purchase Orders",
+      factures: "Invoices",
+      catalogue: "Product Catalog",
+      devis: "RFQs / Quotes",
+      rfqs: "Tenders (RFQs)",
+      settings: "Settings",
+      logout: "Logout",
+      admin: "ADMIN"
+    }
+  };
+
+  const t = (key) => (translations[lang] || translations['FR'])[key] || key;
+
   const menuItems = [
     {
       id: 'overview',
-      label: "Vue d'ensemble",
+      label: t('overview'),
       dotId: 'overviewDot',
       badgeId: 'overview-badge',
       badgeCount: 0,
@@ -16,7 +49,7 @@ export default function Sidebar({ activeTab, setActiveTab, counts, onLogout }) {
     },
     {
       id: 'partners',
-      label: 'Clients',
+      label: t('partners'),
       dotId: 'partnersDot',
       badgeId: 'partners-badge',
       badgeCount: 0,
@@ -30,7 +63,7 @@ export default function Sidebar({ activeTab, setActiveTab, counts, onLogout }) {
     },
     {
       id: 'suppliers',
-      label: 'Fournisseurs',
+      label: t('suppliers'),
       dotId: 'suppliersDot',
       badgeId: 'suppliers-badge',
       badgeCount: 0,
@@ -45,7 +78,7 @@ export default function Sidebar({ activeTab, setActiveTab, counts, onLogout }) {
     },
     {
       id: 'registrations',
-      label: 'Inscriptions',
+      label: t('registrations'),
       dotId: 'regDot',
       badgeId: 'reg-alert-badge',
       badgeCount: counts.registrations || 0,
@@ -62,7 +95,7 @@ export default function Sidebar({ activeTab, setActiveTab, counts, onLogout }) {
     },
     {
       id: 'commandes',
-      label: 'Bons de Commande',
+      label: t('commandes'),
       dotId: 'cmdDot',
       badgeId: 'cmd-alert-badge',
       badgeCount: counts.commandes || 0,
@@ -77,7 +110,7 @@ export default function Sidebar({ activeTab, setActiveTab, counts, onLogout }) {
     },
     {
       id: 'factures',
-      label: 'Factures',
+      label: t('factures'),
       dotId: 'facDot',
       badgeId: 'fac-alert-badge',
       badgeCount: counts.factures || 0,
@@ -94,7 +127,7 @@ export default function Sidebar({ activeTab, setActiveTab, counts, onLogout }) {
     },
     {
       id: 'catalogue',
-      label: 'Catalogue Produits',
+      label: t('catalogue'),
       dotId: 'catDot',
       badgeId: 'cat-alert-badge',
       badgeCount: counts.catalogue || 0,
@@ -112,7 +145,7 @@ export default function Sidebar({ activeTab, setActiveTab, counts, onLogout }) {
     },
     {
       id: 'devis',
-      label: 'Demandes de Devis',
+      label: t('devis'),
       dotId: 'devisDot',
       badgeId: 'devis-alert-badge',
       badgeCount: counts.devis || 0,
@@ -129,7 +162,7 @@ export default function Sidebar({ activeTab, setActiveTab, counts, onLogout }) {
     },
     {
       id: 'rfqs',
-      label: "Appels d'offres (RFQ)",
+      label: t('rfqs'),
       dotId: 'rfqDot',
       badgeId: 'rfq-alert-badge',
       badgeCount: counts.rfqs || 0,
@@ -142,7 +175,7 @@ export default function Sidebar({ activeTab, setActiveTab, counts, onLogout }) {
     },
     {
       id: 'settings',
-      label: 'Paramètres',
+      label: t('settings'),
       dotId: 'settingsDot',
       badgeId: 'settings-badge',
       badgeCount: 0,
@@ -161,7 +194,7 @@ export default function Sidebar({ activeTab, setActiveTab, counts, onLogout }) {
         <img src="/images/logo_round.png" alt="Bridgify Cloud Logo" onError={(e) => { e.target.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%232563EB"><circle cx="12" cy="12" r="10"/></svg>' }} />
         <div className="brand-meta">
           <span className="brand-name">Bridgify Cloud</span>
-          <span className="admin-badge">ADMINISTRATEUR</span>
+          <span className="admin-badge">{t('admin')}</span>
         </div>
       </div>
 
@@ -217,7 +250,7 @@ export default function Sidebar({ activeTab, setActiveTab, counts, onLogout }) {
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
           </svg>
         </span>
-        <span className="nav-text" style={{ fontWeight: 600 }}>Déconnexion</span>
+        <span className="nav-text" style={{ fontWeight: 600 }}>{t('logout')}</span>
       </div>
 
       <div className="sidebar-footer">

@@ -18,6 +18,8 @@ export default function Header({
   darkMode,
   setDarkMode,
   onMarkAllAsRead,
+  lang = 'FR',
+  setLang,
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -96,9 +98,12 @@ export default function Header({
     yearOptions.push(currentYear - i);
   }
 
-  const monthNames = [
+  const monthNames = lang === 'FR' ? [
     'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
     'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+  ] : [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
   // Restrict months for current year
@@ -109,17 +114,62 @@ export default function Header({
   const themeIcon = darkMode ? '🌙' : '☀️';
   const themeText = darkMode ? 'Evening Horizon' : 'Morning Horizon';
 
+  const translations = {
+    FR: {
+      overview: "Centre de Contrôle — Vue d'ensemble",
+      partners: 'Portail Client B2B & B2C',
+      suppliers: 'Gestion des Fournisseurs (SRM)',
+      registrations: 'Validation KYC Inscriptions',
+      commandes: 'Commandes CRM & SRM',
+      factures: 'Facturation & Règlements',
+      catalogue: 'Catalogue des Articles',
+      devis: 'Traitement des Demandes Devis',
+      rfqs: "Appels d'offres (SRM RFQs)",
+      settings: 'Paramètres du Profil',
+      live: "LIVE",
+      searchPlaceholder: "Rechercher...",
+      allRead: "Tout marquer comme lu",
+      noNotif: "Aucune notification",
+      demoRequest: "Demande : ",
+      type: "Type : ",
+      generalNotif: "Notification générale",
+      unnamedTab: "Tableau de bord"
+    },
+    EN: {
+      overview: "Control Center — Overview",
+      partners: 'B2B & B2C Customer Portal',
+      suppliers: 'Supplier Management (SRM)',
+      registrations: 'KYC Registration Validation',
+      commandes: 'CRM & SRM Orders',
+      factures: 'Invoicing & Payments',
+      catalogue: 'Product Catalog',
+      devis: 'Quote Requests Processing',
+      rfqs: "Tenders (SRM RFQs)",
+      settings: 'Profile Settings',
+      live: "LIVE",
+      searchPlaceholder: "Search...",
+      allRead: "Mark all as read",
+      noNotif: "No notifications",
+      demoRequest: "Request: ",
+      type: "Type: ",
+      generalNotif: "General notification",
+      unnamedTab: "Dashboard"
+    }
+  };
+
+  const t = (key) => (translations[lang] || translations['FR'])[key] || key;
+
   const viewTitles = {
-    overview: "Centre de Contrôle — Vue d'ensemble",
-    partners: 'Portail Client B2B & B2C',
-    suppliers: 'Gestion des Fournisseurs (SRM)',
-    registrations: 'Validation KYC Inscriptions',
-    commandes: 'Commandes CRM & SRM',
-    factures: 'Facturation & Règlements',
-    catalogue: 'Catalogue des Articles',
-    devis: 'Traitement des Demandes Devis',
-    rfqs: "Appels d'offres (SRM RFQs)",
-    settings: 'Paramètres du Profil',
+    overview: t('overview'),
+    partners: t('partners'),
+    suppliers: t('suppliers'),
+    registrations: t('registrations'),
+    commandes: t('commandes'),
+    factures: t('factures'),
+    catalogue: t('catalogue'),
+    devis: t('devis'),
+    rfqs: t('rfqs'),
+    settings: t('settings')
   };
 
   return (
@@ -133,6 +183,20 @@ export default function Header({
           </svg>
         </span>
         <span id="header-view-title">{viewTitles[activeTab] || 'Tableau de bord'}</span>
+        <span 
+          id="header-date" 
+          style={{ 
+            marginLeft: '12px', 
+            fontSize: '0.85rem', 
+            color: 'var(--text-dim)', 
+            verticalAlign: 'middle', 
+            borderLeft: '1px solid var(--border)', 
+            paddingLeft: '12px',
+            fontWeight: '500'
+          }}
+        >
+          {new Date().toLocaleDateString('fr-FR')}
+        </span>
       </div>
 
       <div className="header-actions">
@@ -182,7 +246,7 @@ export default function Header({
               type="text"
               id="main-search"
               className="search-input"
-              placeholder="Rechercher..."
+              placeholder={t('searchPlaceholder')}
               value={searchVal}
               onChange={handleSearchChange}
               onFocus={() => suggestions.length > 0 && setSuggestionsOpen(true)}
@@ -200,7 +264,7 @@ export default function Header({
                   >
                     <span style={{ fontWeight: 500 }}>{p.displayName}</span>
                     <span className={`search-suggestion-type ${p.bpType === 'FOURNISSEUR' ? 'supplier' : 'client'}`}>
-                      {p.bpType === 'FOURNISSEUR' ? 'Fournisseur' : 'Client'}
+                      {p.bpType === 'FOURNISSEUR' ? (lang === 'FR' ? 'Fournisseur' : 'Supplier') : (lang === 'FR' ? 'Client' : 'Customer')}
                     </span>
                   </div>
                 ))}
@@ -272,20 +336,19 @@ export default function Header({
                     onMouseEnter={(e) => e.target.style.backgroundColor = 'var(--nav-item-active-bg)'}
                     onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                   >
-                    Tout marquer comme lu
+                    {t('allRead')}
                   </button>
                 )}
               </div>
               <div className="noti-list" id="noti-list">
                 {notifications.length === 0 ? (
                   <div style={{ padding: '15px', fontSize: '0.8rem', color: 'var(--text-dim)', textAlign: 'center' }}>
-                    Aucune notification
+                    {t('noNotif')}
                   </div>
                 ) : (
                   notifications.map(n => {
                     // Check if it is a registration request
                     if (n.type && n.companyName) {
-                      const typeLabel = n.type === 'FOURNISSEUR' ? 'Fournisseur' : (n.type === 'CLIENT_B2B' ? 'Client B2B' : 'Client B2C');
                       return (
                         <div
                           key={`reg-${n.ID}`}
@@ -304,10 +367,10 @@ export default function Header({
                           }}
                         >
                           <div className="noti-item-title" style={{ fontWeight: 700, fontSize: '0.82rem', color: 'var(--text-main)' }}>
-                            🚀 Demande : {n.companyName}
+                            🚀 {t('demoRequest')}{n.companyName}
                           </div>
                           <div className="noti-item-time" style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginTop: '3px' }}>
-                            Type : {typeLabel}
+                            {t('type')}{n.type === 'FOURNISSEUR' ? (lang === 'FR' ? 'Fournisseur' : 'Supplier') : (n.type === 'CLIENT_B2B' ? (lang === 'FR' ? 'Client B2B' : 'Customer B2B') : (lang === 'FR' ? 'Client B2C' : 'Customer B2C'))}
                           </div>
                         </div>
                       );
@@ -346,6 +409,8 @@ export default function Header({
             </div>
           )}
         </div>
+
+
 
         {/* Fiori horizon theme indicator toggler */}
         <button

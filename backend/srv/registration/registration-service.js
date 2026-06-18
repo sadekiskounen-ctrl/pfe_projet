@@ -496,12 +496,16 @@ module.exports = cds.service.impl(async function () {
     const { email, password } = req.data;
     console.log(`[AUTH] Tentative de connexion pour: ${email}`);
     const { BusinessPartner } = cds.entities("sap.pme");
-    const { RegistrationRequests } = cds.entities("pme.registration");
     const bp = await SELECT.one
       .from(BusinessPartner)
       .where("lower(email) =", email.toLowerCase(), "and password =", password);
 
     if (bp) {
+      // Vérifier si le compte est bloqué
+      if (bp.status === 'BLOCKED') {
+        console.warn(`[AUTH] Compte bloqué pour: ${email}`);
+        return { status: "BLOCKED", blockReason: bp.blockReason || "Votre compte a été suspendu par l'administrateur." };
+      }
       console.log(`[AUTH] Succès pour: ${email} (Type: ${bp.bpType})`);
       return { status: "SUCCESS", blockReason: bp.bpType };
     }

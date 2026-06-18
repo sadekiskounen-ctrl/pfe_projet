@@ -19,8 +19,12 @@
     <!-- auth-interceptor.js est externe — actif pour injecter les headers de sécurité -->
     <script src="/auth-interceptor.js"></script>
     <style>
-      body, input, select, textarea, button {
-        font-family: 'Inter', sans-serif !important;
+      body,
+      input,
+      select,
+      textarea,
+      button {
+        font-family: "Inter", sans-serif !important;
       }
 
       /* Custom scrollbars like admin */
@@ -42,16 +46,16 @@
       /* ☀️ SAP Morning Horizon & Evening Horizon variables */
       :root {
         /* ☀️ SAP Morning Horizon (Light Fiori Theme) */
-        --bg: #F0F4F8;
+        --bg: #f0f4f8;
         --bg-card: #ffffff;
-        --bg-card2: #F8FAFC;
-        --accent: #2563EB; /* Sapphire brand accent replaced with electric blue BTP */
-        --accent2: #D97706; /* Warning Orange / Secondary brand accent */
+        --bg-card2: #f8fafc;
+        --accent: #2563eb; /* Sapphire brand accent replaced with electric blue BTP */
+        --accent2: #d97706; /* Warning Orange / Secondary brand accent */
         --accent-green: #059669; /* Success Green */
-        --accent-gold: #D97706;
+        --accent-gold: #d97706;
         --text: #000000;
-        --text-dim: #4B5563;
-        --border: #E2E8F0;
+        --text-dim: #4b5563;
+        --border: #e2e8f0;
         --border-light: rgba(0, 0, 0, 0.05);
         --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         --shadow-accent: 0 4px 12px rgba(37, 99, 235, 0.15);
@@ -63,15 +67,15 @@
 
       body.dark-mode {
         /* 🌙 SAP Evening Horizon (Dark Fiori Theme) */
-        --bg: #0D1117;
-        --bg-card: #161B22;
-        --bg-card2: #21262D;
-        --accent: #3B82F6; /* Luminous Brand Accent */
-        --accent2: #F59E0B;
-        --accent-green: #10B981;
-        --accent-gold: #F59E0B;
+        --bg: #0d1117;
+        --bg-card: #161b22;
+        --bg-card2: #21262d;
+        --accent: #3b82f6; /* Luminous Brand Accent */
+        --accent2: #f59e0b;
+        --accent-green: #10b981;
+        --accent-gold: #f59e0b;
         --text: #ffffff;
-        --text-dim: #9CA3AF;
+        --text-dim: #9ca3af;
         --border: rgba(255, 255, 255, 0.08);
         --border-light: rgba(255, 255, 255, 0.06);
         --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
@@ -99,7 +103,7 @@
         right: 0;
         bottom: 0;
         background-color: var(--border);
-        transition: .3s ease;
+        transition: 0.3s ease;
         border-radius: 24px;
         border: 1px solid var(--border);
       }
@@ -111,7 +115,7 @@
         left: 3px;
         bottom: 3px;
         background-color: var(--text-dim);
-        transition: .3s ease;
+        transition: 0.3s ease;
         border-radius: 50%;
       }
       input:checked + .slider-toggle {
@@ -157,7 +161,9 @@
         left: 0;
         top: 0;
         z-index: 100;
-        transition: width var(--transition), padding var(--transition);
+        transition:
+          width var(--transition),
+          padding var(--transition);
         overflow: hidden;
         white-space: nowrap;
         padding: 24px 8px;
@@ -166,7 +172,7 @@
         width: 260px;
         padding: 24px 16px;
       }
-      
+
       .brand {
         display: flex;
         align-items: center;
@@ -178,7 +184,7 @@
       .sidebar:hover .brand {
         padding: 0 16px;
       }
-      
+
       .brand-logo-img {
         width: 46px !important;
         height: 46px !important;
@@ -193,7 +199,7 @@
       .sidebar:hover .brand-logo-img {
         margin-right: 4px !important;
       }
-      
+
       .brand-meta {
         display: flex;
         flex-direction: column;
@@ -202,7 +208,10 @@
         visibility: hidden;
         position: absolute;
         transform: translateX(-10px);
-        transition: opacity var(--transition), transform var(--transition), visibility var(--transition);
+        transition:
+          opacity var(--transition),
+          transform var(--transition),
+          visibility var(--transition);
       }
       .sidebar:hover .brand-meta {
         opacity: 1;
@@ -211,9 +220,9 @@
         transform: translateX(0);
         transition-delay: 0.1s;
       }
-      
+
       .brand-name {
-        font-family: 'Outfit', sans-serif;
+        font-family: "Outfit", sans-serif;
         font-weight: 800;
         font-size: 1.25rem;
         letter-spacing: -0.5px;
@@ -221,7 +230,7 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
       }
-      
+
       .client-badge {
         display: inline-block;
         padding: 2px 10px;
@@ -241,7 +250,7 @@
       }
 
       .portal-badge-top {
-        font-family: 'Outfit', sans-serif;
+        font-family: "Outfit", sans-serif;
         font-size: 0.72rem;
         font-weight: 800;
         letter-spacing: 0.5px;
@@ -299,7 +308,8 @@
         white-space: nowrap;
         position: relative;
       }
-      .nav-item:hover, .nav-item.active {
+      .nav-item:hover,
+      .nav-item.active {
         background: var(--nav-item-active-bg);
         color: var(--accent);
       }
@@ -307,7 +317,7 @@
         font-weight: 600;
         box-shadow: inset 0 0 0 1px var(--accent);
       }
-      
+
       .nav-icon {
         display: inline-flex;
         align-items: center;
@@ -320,7 +330,7 @@
       .sidebar:hover .nav-icon {
         margin-right: 10px;
       }
-      
+
       .nav-badge {
         position: absolute;
         right: 15px;
@@ -334,7 +344,7 @@
         font-weight: 700;
         box-shadow: 0 0 0 0 rgba(233, 115, 12, 0.5);
       }
-      
+
       .sidebar-footer {
         padding: 16px 14px;
         border-top: 1px solid var(--border-light);
@@ -415,14 +425,16 @@
       .nav-text {
         opacity: 0;
         transform: translateX(-10px);
-        transition: opacity var(--transition), transform var(--transition);
+        transition:
+          opacity var(--transition),
+          transform var(--transition);
         display: inline-block;
       }
       .sidebar:hover .nav-text {
         opacity: 1;
         transform: translateX(0);
       }
-      
+
       .nav-section-label,
       .user-info .user-name,
       .user-info .user-email,
@@ -818,7 +830,7 @@
       }
       .btn-danger {
         background: rgba(220, 38, 38, 0.1);
-        color: var(--accent-red, #DC2626);
+        color: var(--accent-red, #dc2626);
         border: 1px solid rgba(220, 38, 38, 0.2);
       }
       .btn-danger:hover {
@@ -1414,72 +1426,181 @@
       }
 
       /* PULSING BADGE — Enhanced with glow */
-      .noti-badge-pulse { animation: badgePulse 1.2s ease-in-out infinite; }
+      .noti-badge-pulse {
+        animation: badgePulse 1.2s ease-in-out infinite;
+      }
       @keyframes badgePulse {
-        0%,100% { transform:translateY(-50%) scale(1); opacity:1; box-shadow: 0 0 0 0 rgba(233,115,12,0.4); }
-        50% { transform:translateY(-50%) scale(1.18); opacity:0.9; box-shadow: 0 0 8px 2px rgba(233,115,12,0.35); }
+        0%,
+        100% {
+          transform: translateY(-50%) scale(1);
+          opacity: 1;
+          box-shadow: 0 0 0 0 rgba(233, 115, 12, 0.4);
+        }
+        50% {
+          transform: translateY(-50%) scale(1.18);
+          opacity: 0.9;
+          box-shadow: 0 0 8px 2px rgba(233, 115, 12, 0.35);
+        }
       }
 
       /* NOTIFICATION DOT — Glowing indicator */
       .noti-dot {
-        width: 8px; height: 8px; border-radius: 50%;
-        display: none; flex-shrink: 0;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: none;
+        flex-shrink: 0;
         animation: dotBlink 1.4s ease-in-out infinite;
-        position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
+        position: absolute;
+        left: 6px;
+        top: 50%;
+        transform: translateY(-50%);
       }
-      .noti-dot.dot-purple { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-      .noti-dot.dot-green  { background: var(--accent-green); box-shadow: 0 0 6px var(--accent-green); }
-      .noti-dot.dot-gold   { background: var(--accent-gold); box-shadow: 0 0 6px var(--accent-gold); }
-      .noti-dot.dot-red    { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+      .noti-dot.dot-purple {
+        background: var(--accent);
+        box-shadow: 0 0 6px var(--accent);
+      }
+      .noti-dot.dot-green {
+        background: var(--accent-green);
+        box-shadow: 0 0 6px var(--accent-green);
+      }
+      .noti-dot.dot-gold {
+        background: var(--accent-gold);
+        box-shadow: 0 0 6px var(--accent-gold);
+      }
+      .noti-dot.dot-red {
+        background: var(--accent2);
+        box-shadow: 0 0 6px var(--accent2);
+      }
       @keyframes dotBlink {
-        0%,100% { opacity:1; transform:translateY(-50%) scale(1); }
-        50% { opacity:0.35; transform:translateY(-50%) scale(0.7); }
+        0%,
+        100% {
+          opacity: 1;
+          transform: translateY(-50%) scale(1);
+        }
+        50% {
+          opacity: 0.35;
+          transform: translateY(-50%) scale(0.7);
+        }
       }
 
       /* NAV ITEM with notification highlight */
-      .nav-item.has-notif { background: var(--nav-item-active-bg); }
-      .nav-item.has-notif .nav-icon { color: var(--accent); }
+      .nav-item.has-notif {
+        background: var(--nav-item-active-bg);
+      }
+      .nav-item.has-notif .nav-icon {
+        color: var(--accent);
+      }
 
       /* LIVE INDICATOR */
       .live-indicator {
-        display: flex; align-items: center; gap: 6px;
-        font-size: 0.7rem; font-weight: 600; color: #00c9a7;
-        padding: 4px 12px; border-radius: 20px;
-        background: rgba(0, 201, 167, 0.1); border: 1px solid rgba(0, 201, 167, 0.2);
-        letter-spacing: 0.3px; text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #00c9a7;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: rgba(0, 201, 167, 0.1);
+        border: 1px solid rgba(0, 201, 167, 0.2);
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
       }
       .live-dot {
-        width: 6px; height: 6px; border-radius: 50%;
-        background: #00c9a7; animation: livePulse 2s ease-in-out infinite;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #00c9a7;
+        animation: livePulse 2s ease-in-out infinite;
       }
       @keyframes livePulse {
-        0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(0, 201, 167, 0.5); }
-        50% { opacity:0.6; box-shadow: 0 0 6px 2px rgba(0, 201, 167, 0.3); }
+        0%,
+        100% {
+          opacity: 1;
+          box-shadow: 0 0 0 0 rgba(0, 201, 167, 0.5);
+        }
+        50% {
+          opacity: 0.6;
+          box-shadow: 0 0 6px 2px rgba(0, 201, 167, 0.3);
+        }
       }
 
       /* STAT CARD notification flash */
-      .stat-card.has-update { border-color: rgba(108,99,255,0.3); animation: statFlash 0.6s ease; }
+      .stat-card.has-update {
+        border-color: rgba(108, 99, 255, 0.3);
+        animation: statFlash 0.6s ease;
+      }
       @keyframes statFlash {
-        0% { border-color: rgba(108,99,255,0.6); box-shadow: 0 0 12px rgba(108,99,255,0.2); }
-        100% { border-color: rgba(108,99,255,0.3); box-shadow: none; }
+        0% {
+          border-color: rgba(108, 99, 255, 0.6);
+          box-shadow: 0 0 12px rgba(108, 99, 255, 0.2);
+        }
+        100% {
+          border-color: rgba(108, 99, 255, 0.3);
+          box-shadow: none;
+        }
       }
 
       /* CUSTOM DIALOG SYSTEM */
       .dialog-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px);
-        z-index: 9999; display: none; align-items: center; justify-content: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(8px);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
       }
       .dialog-box {
-        background: var(--bg-card); border: 1px solid var(--border-light);
-        border-radius: 20px; padding: 2rem; width: 100%; max-width: 400px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-light);
+        border-radius: 20px;
+        padding: 2rem;
+        width: 100%;
+        max-width: 400px;
         box-shadow: var(--shadow);
       }
-      .dialog-box h3 { margin-top: 0; font-size: 1.25rem; color: var(--text); margin-bottom: 1rem; }
-      .dialog-box p { color: var(--text-dim); font-size: 0.95rem; line-height: 1.5; margin-bottom: 1.5rem; }
-      .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; }
-      .btn-dialog-primary { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 600; font-family: inherit; }
-      .btn-dialog-secondary { background: var(--border-light); color: var(--text-dim); border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-family: inherit; }
+      .dialog-box h3 {
+        margin-top: 0;
+        font-size: 1.25rem;
+        color: var(--text);
+        margin-bottom: 1rem;
+      }
+      .dialog-box p {
+        color: var(--text-dim);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+      }
+      .dialog-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+      .btn-dialog-primary {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        font-family: inherit;
+      }
+      .btn-dialog-secondary {
+        background: var(--border-light);
+        color: var(--text-dim);
+        border: none;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-family: inherit;
+      }
 
       /* Collapsed Sidebar Badges */
       .sidebar:not(:hover) .nav-badge {
@@ -1501,9 +1622,15 @@
       }
 
       @keyframes badgePulseClosed {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.25); }
-        100% { transform: scale(1); }
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.25);
+        }
+        100% {
+          transform: scale(1);
+        }
       }
 
       .sidebar:not(:hover) .nav-badge.noti-badge-pulse {
@@ -1530,21 +1657,54 @@
 
     <!-- CUSTOM DIALOG HTML -->
     <div id="custom-dialog-overlay" class="dialog-overlay">
-        <div class="dialog-box">
-            <h3 id="dialog-title">Notification</h3>
-            <p id="dialog-message"></p>
-            <div class="dialog-actions">
-                <button id="dialog-cancel" class="btn-dialog-secondary">Annuler</button>
-                <button id="dialog-confirm" class="btn-dialog-primary">Continuer</button>
-            </div>
+      <div class="dialog-box">
+        <h3 id="dialog-title" data-i18n="notification">Notification</h3>
+        <p id="dialog-message"></p>
+        <div class="dialog-actions">
+          <button
+            id="dialog-cancel"
+            class="btn-dialog-secondary"
+            data-i18n="annuler"
+          >
+            Annuler
+          </button>
+          <button
+            id="dialog-confirm"
+            class="btn-dialog-primary"
+            data-i18n="continuer"
+          >
+            Continuer
+          </button>
         </div>
+      </div>
     </div>
 
     <!-- ══════ SIDEBAR ══════ -->
     <aside class="sidebar" id="sidebar">
-      <div class="brand" style="flex-direction: column; align-items: center; text-align: center; gap: 8px;">
-        <div class="brand-logo-wrapper" style="display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center;">
-          <img src="/images/logo_round.png" alt="Bridgify Cloud Logo" class="brand-logo-img">
+      <div
+        class="brand"
+        style="
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 8px;
+        "
+      >
+        <div
+          class="brand-logo-wrapper"
+          style="
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            justify-content: center;
+          "
+        >
+          <img
+            src="/images/logo_round.png"
+            alt="Bridgify Cloud Logo"
+            class="brand-logo-img"
+          />
           <div class="brand-meta">
             <span class="brand-name">Bridgify Cloud</span>
             <span class="client-badge" id="clientBadge">B2B</span>
@@ -1553,19 +1713,30 @@
         <span class="portal-badge-top" id="portalBadgeTop">B2B</span>
       </div>
       <nav class="sidebar-nav">
-        <div class="nav-section-label">Principal</div>
+        <div class="nav-section-label" data-i18n="principal">Principal</div>
         <div
           class="nav-item active"
           id="nav-catalogue"
           onclick="showView('catalogue', this)"
         >
-          <span class="nav-icon"><i class="fas fa-store"></i></span> <span class="nav-text">Catalogue</span>
+          <span class="nav-icon"><i class="fas fa-store"></i></span>
+          <span class="nav-text" data-i18n="catalogue">Catalogue</span>
         </div>
-        <div class="nav-section-label">Mes Documents</div>
+        <div class="nav-section-label" data-i18n="mesDocuments">
+          Mes Documents
+        </div>
         <div class="nav-item" id="nav-devis" onclick="showView('devis', this)">
-          <span class="noti-dot dot-gold" id="devisDot" style="display: none"></span>
-          <span class="nav-icon"><i class="fas fa-file-invoice"></i></span> <span class="nav-text">Mes Devis</span>
-          <span class="nav-badge noti-badge-pulse" id="devis-badge" style="display: none"
+          <span
+            class="noti-dot dot-gold"
+            id="devisDot"
+            style="display: none"
+          ></span>
+          <span class="nav-icon"><i class="fas fa-file-invoice"></i></span>
+          <span class="nav-text" data-i18n="devis">Mes Devis</span>
+          <span
+            class="nav-badge noti-badge-pulse"
+            id="devis-badge"
+            style="display: none"
             >0</span
           >
         </div>
@@ -1574,26 +1745,49 @@
           id="nav-commandes"
           onclick="showView('commandes', this)"
         >
-          <span class="noti-dot dot-green" id="commandesDot" style="display: none"></span>
-          <span class="nav-icon"><i class="fas fa-box"></i></span> <span class="nav-text">Mes Commandes</span>
-          <span class="nav-badge noti-badge-pulse" id="commandes-badge" style="display: none">0</span>
+          <span
+            class="noti-dot dot-green"
+            id="commandesDot"
+            style="display: none"
+          ></span>
+          <span class="nav-icon"><i class="fas fa-box"></i></span>
+          <span class="nav-text" data-i18n="commandes">Mes Commandes</span>
+          <span
+            class="nav-badge noti-badge-pulse"
+            id="commandes-badge"
+            style="display: none"
+            >0</span
+          >
         </div>
         <div
           class="nav-item"
           id="nav-factures"
           onclick="showView('factures', this)"
-          style="display: none;"
+          style="display: none"
         >
-          <span class="noti-dot dot-purple" id="facturesDot" style="display: none"></span>
-          <span class="nav-icon"><i class="fas fa-file-invoice-dollar"></i></span> <span class="nav-text">Mes Factures</span>
-          <span class="nav-badge noti-badge-pulse" id="factures-badge" style="display: none">0</span>
+          <span
+            class="noti-dot dot-purple"
+            id="facturesDot"
+            style="display: none"
+          ></span>
+          <span class="nav-icon"
+            ><i class="fas fa-file-invoice-dollar"></i
+          ></span>
+          <span class="nav-text" data-i18n="factures">Mes Factures</span>
+          <span
+            class="nav-badge noti-badge-pulse"
+            id="factures-badge"
+            style="display: none"
+            >0</span
+          >
         </div>
         <div
           class="nav-item"
           id="nav-profil"
           onclick="showView('profil', this)"
         >
-          <span class="nav-icon"><i class="fas fa-user-circle"></i></span> <span class="nav-text">Mon Profil</span>
+          <span class="nav-icon"><i class="fas fa-user-circle"></i></span>
+          <span class="nav-text" data-i18n="profil">Mon Profil</span>
         </div>
       </nav>
       <div class="sidebar-footer">
@@ -1608,7 +1802,8 @@
           </div>
         </div>
         <button class="btn-logout" onclick="logout()">
-          <i class="fas fa-sign-out-alt"></i> Déconnexion
+          <i class="fas fa-sign-out-alt"></i>
+          <span data-i18n="deconnexion">Déconnexion</span>
         </button>
       </div>
     </aside>
@@ -1616,11 +1811,52 @@
     <!-- ══════ MAIN ══════ -->
     <main class="main">
       <div class="topbar">
-        <h1 class="page-title" id="pageTitle">Catalogue Produits</h1>
-        <button class="theme-toggle-btn" onclick="toggleFioriTheme()" style="background: var(--bg-card2); border: 1px solid var(--border-light); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; vertical-align: middle; margin-right: 10px;" title="Changer de thème Fiori">
-          <span id="theme-icon-crm">☀️</span> <span id="theme-text-crm">Morning Horizon</span>
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1">
+          <h1
+            class="page-title"
+            id="pageTitle"
+            style="flex: none; margin-right: 0"
+          >
+            Catalogue Produits
+          </h1>
+          <span
+            id="pageDate"
+            style="
+              font-size: 0.85rem;
+              color: var(--text-dim);
+              border-left: 1px solid var(--border);
+              padding-left: 12px;
+              font-weight: 500;
+            "
+          ></span>
+        </div>
+        <button
+          class="theme-toggle-btn"
+          onclick="toggleFioriTheme()"
+          style="
+            background: var(--bg-card2);
+            border: 1px solid var(--border-light);
+            color: var(--text);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            vertical-align: middle;
+            margin-right: 10px;
+          "
+          title="Changer de thème Fiori"
+        >
+          <span id="theme-icon-crm">☀️</span>
+          <span id="theme-text-crm">Morning Horizon</span>
         </button>
-        <div class="live-indicator" id="liveIndicator"><span class="live-dot"></span> Live · 5s</div>
+        <div class="live-indicator" id="liveIndicator">
+          <span class="live-dot"></span> Live · 5s
+        </div>
         <div class="cart-btn" onclick="toggleCart()">
           <i class="fas fa-shopping-cart"></i>
           <span>Panier</span>
@@ -1641,7 +1877,9 @@
               </div>
               <div>
                 <div class="stat-val" id="kpi-devis">0</div>
-                <div class="stat-lbl">Devis en cours</div>
+                <div class="stat-lbl" data-i18n="devisEnCours">
+                  Devis en cours
+                </div>
               </div>
             </div>
             <div class="stat-card">
@@ -1653,7 +1891,9 @@
               </div>
               <div>
                 <div class="stat-val" id="kpi-commandes">0</div>
-                <div class="stat-lbl">Commandes actives</div>
+                <div class="stat-lbl" data-i18n="commandesActives">
+                  Commandes actives
+                </div>
               </div>
             </div>
             <div class="stat-card">
@@ -1665,7 +1905,9 @@
               </div>
               <div>
                 <div class="stat-val" id="kpi-pending">0</div>
-                <div class="stat-lbl">En attente révision</div>
+                <div class="stat-lbl" data-i18n="enAttenteRevision">
+                  En attente révision
+                </div>
               </div>
             </div>
             <div class="stat-card">
@@ -1677,7 +1919,9 @@
               </div>
               <div>
                 <div class="stat-val" id="kpi-montant">0</div>
-                <div class="stat-lbl">Total TTC (DA)</div>
+                <div class="stat-lbl" data-i18n="totalTtcDa">
+                  Total TTC (DA)
+                </div>
               </div>
             </div>
           </div>
@@ -1723,12 +1967,12 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>N° Devis</th>
-                  <th>Date</th>
-                  <th>Valide jusqu'au</th>
-                  <th>Total TTC</th>
-                  <th>Statut</th>
-                  <th>Actions</th>
+                  <th data-i18n="nDevis">N° Devis</th>
+                  <th data-i18n="date">Date</th>
+                  <th data-i18n="valideJusqua">Valide jusqu'au</th>
+                  <th data-i18n="totalTtc">Total TTC</th>
+                  <th data-i18n="statut">Statut</th>
+                  <th data-i18n="actions">Actions</th>
                 </tr>
               </thead>
               <tbody id="devisTableBody">
@@ -1757,11 +2001,11 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>N° Commande</th>
-                  <th>Date</th>
-                  <th>Total TTC</th>
-                  <th>Statut</th>
-                  <th>Actions</th>
+                  <th data-i18n="nCommande">N° Commande</th>
+                  <th data-i18n="date">Date</th>
+                  <th data-i18n="totalTtc">Total TTC</th>
+                  <th data-i18n="statut">Statut</th>
+                  <th data-i18n="actions">Actions</th>
                 </tr>
               </thead>
               <tbody id="commandesTableBody">
@@ -1779,22 +2023,28 @@
         <div class="view" id="view-factures">
           <div class="section-header">
             <span class="section-title">
-              <i class="fas fa-file-invoice-dollar" style="color: var(--accent); margin-right: 8px"></i>Mes Factures
+              <i
+                class="fas fa-file-invoice-dollar"
+                style="color: var(--accent); margin-right: 8px"
+              ></i
+              >Mes Factures
             </span>
           </div>
           <div class="table-wrap">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>N° Facture</th>
-                  <th>Date paiement</th>
-                  <th>Montant</th>
-                  <th>Action</th>
+                  <th data-i18n="nFacture">N° Facture</th>
+                  <th data-i18n="datePaiement">Date paiement</th>
+                  <th data-i18n="montant">Montant</th>
+                  <th data-i18n="action">Action</th>
                 </tr>
               </thead>
               <tbody id="facturesTableBody">
                 <tr class="empty-row">
-                  <td colspan="4"><i class="fas fa-spinner fa-spin"></i> Chargement...</td>
+                  <td colspan="4">
+                    <i class="fas fa-spinner fa-spin"></i> Chargement...
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -1803,15 +2053,28 @@
 
         <!-- VIEW: PROFIL -->
         <div class="view" id="view-profil">
-          <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div
+            class="section-header"
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
             <span class="section-title">
               <i
                 class="fas fa-user-circle"
                 style="color: var(--accent); margin-right: 8px"
-              ></i>Mon Profil
+              ></i
+              ><span data-i18n="profil">Mon Profil</span>
             </span>
-            <button class="btn btn-primary" onclick="openProfileEditModal()" style="padding: 8px 16px; font-size: 0.85rem;">
-              <i class="fas fa-edit"></i> Modifier
+            <button
+              class="btn btn-primary"
+              onclick="openProfileEditModal()"
+              style="padding: 8px 16px; font-size: 0.85rem"
+            >
+              <i class="fas fa-edit"></i>
+              <span data-i18n="modifier">Modifier</span>
             </button>
           </div>
           <div
@@ -1837,14 +2100,44 @@
               margin-top: 24px;
             "
           >
-            <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px; color: var(--accent);"><i class="fas fa-palette"></i> Thème & Personnalisation</h3>
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
+            <h3
+              style="
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: var(--accent);
+              "
+            >
+              <i class="fas fa-palette"></i>
+              <span data-i18n="themePerso">Thème & Personnalisation</span>
+            </h3>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 0;
+              "
+            >
               <div>
-                <span style="font-weight: 600; display: block; color: var(--text);">Mode Sombre (Dark Mode)</span>
-                <span style="font-size: 0.85rem; color: var(--text-dim);">Activer le thème sombre pour votre portail client.</span>
+                <span
+                  style="font-weight: 600; display: block; color: var(--text)"
+                  data-i18n="modeSombre"
+                  >Mode Sombre (Dark Mode)</span
+                >
+                <span
+                  style="font-size: 0.85rem; color: var(--text-dim)"
+                  data-i18n="activerSombre"
+                  >Activer le thème sombre pour votre portail client.</span
+                >
               </div>
               <label class="switch-toggle">
-                <input type="checkbox" id="darkmode-toggle-crm" onchange="toggleFioriTheme()">
+                <input
+                  type="checkbox"
+                  id="darkmode-toggle-crm"
+                  onchange="toggleFioriTheme()"
+                />
                 <span class="slider-toggle"></span>
               </label>
             </div>
@@ -1863,7 +2156,7 @@
             class="fas fa-shopping-cart"
             style="color: var(--accent); margin-right: 8px"
           ></i
-          >Votre Panier
+          ><span data-i18n="votrePanier">Votre Panier</span>
         </h3>
         <button class="close-btn" onclick="closeCart()">
           <i class="fas fa-times"></i>
@@ -1877,7 +2170,7 @@
             class="fas fa-shopping-basket"
             style="font-size: 2.2rem; opacity: 0.25"
           ></i>
-          <span>Votre panier est vide</span>
+          <span data-i18n="noItems">Votre panier est vide</span>
         </div>
       </div>
 
@@ -1885,16 +2178,16 @@
       <div class="cart-footer">
         <div class="cart-totals">
           <div class="cart-total-row">
-            <span>Total HT</span>
+            <span data-i18n="totalHt">Total HT</span>
             <span id="cartHT">0,00 DA</span>
           </div>
           <div class="cart-total-row">
-            <span>TVA (moy.)</span>
+            <span data-i18n="tvaMoy">TVA (moy.)</span>
             <span id="cartTVA">0,00 DA</span>
           </div>
           <!-- CORRECTION : classe grand-total au lieu de "main" -->
           <div class="cart-total-row grand-total">
-            <span>Total TTC</span>
+            <span data-i18n="totalTtc">Total TTC</span>
             <span id="cartTTC">0,00 DA</span>
           </div>
         </div>
@@ -1912,45 +2205,102 @@
     </div>
 
     <!-- ══════ MODAL: PDF VIEWER (Inline) ══════ -->
-    <div class="modal-overlay" id="pdfViewerModal" onclick="if(event.target===this) closePDFViewer()">
-      <div class="modal-box" style="max-width: 850px; height: 85vh; display: flex; flex-direction: column; padding: 16px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-          <div class="modal-title" style="margin-bottom:0"><i class="fas fa-file-pdf" style="color:var(--accent2)"></i> <span id="pdfViewerTitle">Document PDF</span></div>
-          <button class="btn btn-ghost btn-sm" onclick="closePDFViewer()"><i class="fas fa-times"></i></button>
+    <div
+      class="modal-overlay"
+      id="pdfViewerModal"
+      onclick="if (event.target === this) closePDFViewer();"
+    >
+      <div
+        class="modal-box"
+        style="
+          max-width: 850px;
+          height: 85vh;
+          display: flex;
+          flex-direction: column;
+          padding: 16px;
+        "
+      >
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+          "
+        >
+          <div class="modal-title" style="margin-bottom: 0">
+            <i class="fas fa-file-pdf" style="color: var(--accent2)"></i>
+            <span id="pdfViewerTitle" data-i18n="documentPdf"
+              >Document PDF</span
+            >
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="closePDFViewer()">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
-        <iframe id="pdfViewerFrame" style="flex:1;width:100%;border:none;border-radius:10px;background:#fff;" src="about:blank"></iframe>
+        <iframe
+          id="pdfViewerFrame"
+          style="
+            flex: 1;
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            background: #fff;
+          "
+          src="about:blank"
+        ></iframe>
       </div>
     </div>
 
     <!-- ══════ MODAL: PAYMENT (B2C) ══════ -->
     <div class="modal-overlay" id="paymentModal">
       <div class="modal-box" style="max-width: 480px">
-        <div class="modal-title">
+        <div class="modal-title" data-i18n="finalisationCommande">
           <i class="fas fa-shopping-cart" style="color: var(--accent2)"></i>
           Finalisation de Commande
         </div>
-        
+
         <!-- STEP 0: Address & Payment Method -->
         <div id="payStep0">
           <div class="form-group" id="addressGroup">
-            <label>Adresse de livraison complète</label>
-            <textarea class="form-input" id="checkoutAddress" rows="3" placeholder="Ex: 123 Rue de la Paix, Alger..."></textarea>
+            <label data-i18n="adresseLivraison"
+              >Adresse de livraison complète</label
+            >
+            <textarea
+              class="form-input"
+              id="checkoutAddress"
+              rows="3"
+              placeholder="Ex: 123 Rue de la Paix, Alger..."
+              data-i18n-placeholder="exAdresse"
+            ></textarea>
           </div>
           <div class="form-group">
-            <label>Mode de paiement</label>
+            <label data-i18n="modePaiement">Mode de paiement</label>
             <select class="form-input" id="checkoutMethod">
-              <option value="CIB">💳 Paiement en ligne (CIB / Dahabia)</option>
-              <option value="ESPECES">💵 Paiement en espèces à la livraison</option>
+              <option value="CIB" data-i18n="payLigne">
+                💳 Paiement en ligne (CIB / Dahabia)
+              </option>
+              <option value="ESPECES" data-i18n="payEspeces">
+                💵 Paiement en espèces à la livraison
+              </option>
             </select>
           </div>
           <div class="modal-actions">
-            <button class="btn btn-ghost" onclick="closePayment()">Annuler</button>
-            <button class="btn btn-primary" onclick="proceedCheckout()">Continuer →</button>
+            <button
+              class="btn btn-ghost"
+              onclick="closePayment()"
+              data-i18n="annuler"
+            >
+              Annuler
+            </button>
+            <button class="btn btn-primary" onclick="proceedCheckout()">
+              <span data-i18n="continuer">Continuer</span> →
+            </button>
           </div>
         </div>
 
         <!-- STEP 1: CIB Form -->
-        <div id="payStep1" style="display:none;">
+        <div id="payStep1" style="display: none">
           <div class="payment-card-visual">
             <div class="card-chip"></div>
             <div class="card-number-display" id="cardNumDisplay">
@@ -1999,7 +2349,7 @@
             </div>
           </div>
           <div class="form-group">
-            <label>Numéro de carte</label>
+            <label data-i18n="numCard">Numéro de carte</label>
             <input
               type="text"
               class="form-input"
@@ -2011,7 +2361,7 @@
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px">
             <div class="form-group">
-              <label>Nom du titulaire</label>
+              <label data-i18n="nomTitulaireLabel">Nom du titulaire</label>
               <input
                 type="text"
                 class="form-input"
@@ -2019,15 +2369,21 @@
                 placeholder="PRÉNOM NOM"
                 oninput="
                   document.getElementById('cardNameDisplay').textContent =
-                    this.value || 'Nom du titulaire'
+                    this.value || translateCRMText('nomTitulaire')
                 "
               />
             </div>
             <div class="form-group">
-              <label>Date d'expiration</label>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <select class="form-input" id="cardExpMonth" onchange="updateCardExpFromDropdowns()">
-                  <option value="">Mois</option>
+              <label data-i18n="dateExpiration">Date d'expiration</label>
+              <div
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px"
+              >
+                <select
+                  class="form-input"
+                  id="cardExpMonth"
+                  onchange="updateCardExpFromDropdowns()"
+                >
+                  <option value="" data-i18n="mois">Mois</option>
                   <option value="01">01</option>
                   <option value="02">02</option>
                   <option value="03">03</option>
@@ -2041,8 +2397,12 @@
                   <option value="11">11</option>
                   <option value="12">12</option>
                 </select>
-                <select class="form-input" id="cardExpYear" onchange="updateCardExpFromDropdowns()">
-                  <option value="">Année</option>
+                <select
+                  class="form-input"
+                  id="cardExpYear"
+                  onchange="updateCardExpFromDropdowns()"
+                >
+                  <option value="" data-i18n="annee">Année</option>
                 </select>
               </div>
               <input type="hidden" id="cardExp" value="" />
@@ -2069,6 +2429,7 @@
               font-size: 0.82rem;
               color: var(--text-dim);
             "
+            data-i18n="simulatedPaymentInfo"
           >
             <i
               class="fas fa-lock"
@@ -2077,11 +2438,16 @@
             Paiement simulé. Utilisez n'importe quel numéro de carte valide.
           </div>
           <div class="modal-actions">
-            <button class="btn btn-ghost" onclick="closePayment()">
+            <button
+              class="btn btn-ghost"
+              onclick="closePayment()"
+              data-i18n="annuler"
+            >
               Annuler
             </button>
             <button class="btn btn-primary" onclick="goToOTP()">
-              <i class="fas fa-arrow-right"></i> Valider → OTP
+              <i class="fas fa-arrow-right"></i>
+              <span data-i18n="validerOtp">Valider → OTP</span>
             </button>
           </div>
         </div>
@@ -2103,11 +2469,15 @@
             >
               <i class="fas fa-mobile-alt"></i>
             </div>
-            <p style="color: var(--text-dim); font-size: 0.85rem">
+            <p
+              style="color: var(--text-dim); font-size: 0.85rem"
+              data-i18n="otpSentInfo"
+            >
               Un code OTP a été envoyé. Entrez-le ci-dessous.
             </p>
             <div
               style="font-size: 0.75rem; color: var(--accent); margin-top: 4px"
+              data-i18n="otpTestCode"
             >
               Code de test : <strong>123456</strong>
             </div>
@@ -2165,6 +2535,7 @@
               margin-bottom: 12px;
               display: none;
             "
+            data-i18n="otpIncorrect"
           >
             Code incorrect. Utilisez 123456.
           </div>
@@ -2175,11 +2546,13 @@
                 document.getElementById('payStep1').style.display = '';
                 document.getElementById('payStep2').style.display = 'none';
               "
+              data-i18n="retour"
             >
               ← Retour
             </button>
             <button class="btn btn-primary" onclick="finalizePayment()">
-              <i class="fas fa-check"></i> Confirmer le paiement
+              <i class="fas fa-check"></i>
+              <span data-i18n="confirmerPaiement">Confirmer le paiement</span>
             </button>
           </div>
         </div>
@@ -2189,17 +2562,20 @@
     <!-- ══════ MODAL: NOTES DEVIS (B2B) ══════ -->
     <div class="modal-overlay" id="notesModal">
       <div class="modal-box" style="max-width: 420px">
-        <div class="modal-title">
+        <div class="modal-title" data-i18n="envoyerDemandeDevis">
           <i class="fas fa-paper-plane" style="color: var(--accent)"></i>
           Envoyer ma demande de devis
         </div>
         <div class="form-group">
-          <label>Notes pour l'administrateur (optionnel)</label>
+          <label data-i18n="notesAdmin"
+            >Notes pour l'administrateur (optionnel)</label
+          >
           <textarea
             class="form-input"
             id="devisNotes"
             rows="4"
             placeholder="Ex : Livraison urgente, remise demandée..."
+            data-i18n-placeholder="exNotes"
             style="resize: vertical"
           ></textarea>
         </div>
@@ -2213,6 +2589,7 @@
             color: var(--text-dim);
             margin-bottom: 16px;
           "
+          data-i18n="transmisValidation"
         >
           <i
             class="fas fa-info-circle"
@@ -2221,7 +2598,11 @@
           Votre demande sera transmise pour validation des prix.
         </div>
         <div class="modal-actions">
-          <button class="btn btn-ghost" onclick="closeNotesModal()">
+          <button
+            class="btn btn-ghost"
+            onclick="closeNotesModal()"
+            data-i18n="annuler"
+          >
             Annuler
           </button>
           <button
@@ -2229,7 +2610,8 @@
             id="confirmDevisBtn"
             onclick="confirmSubmitDevis()"
           >
-            <i class="fas fa-check"></i> Envoyer le devis
+            <i class="fas fa-check"></i>
+            <span data-i18n="envoyerLeDevis">Envoyer le devis</span>
           </button>
         </div>
       </div>
@@ -2238,29 +2620,43 @@
     <!-- ══════ MODAL: MODIFIER PROFIL (B2C/B2B) ══════ -->
     <div class="modal-overlay" id="profileEditModal">
       <div class="modal-box" style="max-width: 420px">
-        <div class="modal-title">
+        <div class="modal-title" data-i18n="modifierProfil">
           <i class="fas fa-user-edit" style="color: var(--accent)"></i>
           Modifier mon profil
         </div>
         <div class="form-group">
-          <label>Téléphone</label>
+          <label data-i18n="telephone">Téléphone</label>
           <input
             type="text"
             class="form-input"
             id="edit-profile-phone"
             placeholder="Ex : 0555 12 34 56"
+            data-i18n-placeholder="exPhone"
           />
         </div>
         <div class="form-group">
-          <label>Wilaya</label>
+          <label data-i18n="wilaya">Wilaya</label>
           <select class="form-input" id="edit-profile-wilaya">
-            <option value="">Sélectionnez une wilaya</option>
+            <option value="" data-i18n="selectWilaya">
+              Sélectionnez une wilaya
+            </option>
           </select>
         </div>
         <div class="modal-actions">
-          <button class="btn btn-ghost" onclick="closeProfileEditModal()">Annuler</button>
-          <button class="btn btn-primary" id="btn-save-profile" onclick="saveProfileEdit()">
-            <i class="fas fa-save"></i> Enregistrer
+          <button
+            class="btn btn-ghost"
+            onclick="closeProfileEditModal()"
+            data-i18n="annuler"
+          >
+            Annuler
+          </button>
+          <button
+            class="btn btn-primary"
+            id="btn-save-profile"
+            onclick="saveProfileEdit()"
+          >
+            <i class="fas fa-save"></i>
+            <span data-i18n="enregistrer">Enregistrer</span>
           </button>
         </div>
       </div>
@@ -2286,71 +2682,230 @@
       let devisList = [];
       let ordersList = [];
 
-      /* ─── UI INITIALISATION ─── */
-      (function initUI() {
-        const badge = document.getElementById("clientBadge");
-        badge.textContent = IS_B2B ? "B2B" : "B2C";
-        badge.className =
-          "client-badge " + (IS_B2B ? "badge-b2b" : "badge-b2c");
+      /* ─── LANGUAGE I18N SYSTEM ─── */
+      const translations = {
+        FR: {
+          catalogue: "Catalogue Produits",
+          devis: "Mes Devis",
+          commandes: "Mes Commandes",
+          factures: "Mes Factures",
+          profil: "Mon Profil",
+          espaceClient: "Espace Client",
+          panier: "Panier",
+          deconnexion: "Déconnexion",
+          devisEnCours: "Devis en cours",
+          commandesActives: "Commandes actives",
+          facturesImpayees: "Factures impayées",
+          soldeAvoir: "Solde / Avoir",
+          rechercherPlaceholder: "Rechercher un produit...",
+          monPanier: "Mon Panier",
+          total: "Total",
+          creerDevis: "Demander un Devis",
+          passerCommande: "Passer la commande",
+          noItems: "Votre panier est vide",
+          article: "Article",
+          prixU: "P.U",
+          qte: "Qté",
+          action: "Action",
+          toutes: "Toutes",
+          brouillon: "Brouillon",
+          envoye: "Envoyé",
+          confirme: "Confirmé",
+          annule: "Annulé",
+          livre: "Livré",
+          payee: "Payée",
+          impayee: "Impayée",
+          partiel: "Partiel",
+          nDevis: "N° Devis",
+          date: "Date",
+          montant: "Montant",
+          statut: "Statut",
+          nCommande: "N° Commande",
+          nFacture: "N° Facture",
+          tva: "TVA",
+          restant: "Restant",
+          validerPaiement: "Valider Paiement",
+          paiementVisual: "Paiement Sécurisé",
+          entrezCode:
+            "Entrez le code OTP reçu par SMS/Email pour valider le règlement.",
+          payerFacture: "Payer la facture",
+          profilKyc: "Profil & KYC",
+          infosLegales: "Informations Légales",
+          wilaya: "Wilaya",
+          secteur: "Secteur",
+          carteFiscale: "Carte Fiscale",
+          regCommerce: "Registre du Commerce",
+          RIB: "RIB",
+          documentsSoumis: "Documents Légaux Soumis",
+          kycStatus: "Statut KYC",
+          enAttente: "En attente",
+          valide: "Validé",
+          rejete: "Rejeté",
+          loading: "Chargement...",
+          nif: "NIF (Fiscal)",
+          rc: "RC (Reg. Commerce)",
+          ai: "AI (Imposition)",
+          ribBank: "RIB (Banque)",
+          rating: "Note / Confiance",
+          enAttenteRevision: "En attente révision",
+          totalTtcDa: "Total TTC (DA)",
+          toutesCategories: "Toutes catégories",
+          aucunProduitTrouve: "Aucun produit trouvé.",
+          stockLimite: "Stock limité",
+          enStock: "En stock",
+          ruptureStock: "Rupture de stock",
+          aucuneDescription: "Aucune description.",
+          ajoute: "Ajouté",
+          ajouter: "Ajouter",
+          ruptureStockToast: "Produit en rupture de stock.",
+          ajoutePanier: "ajouté au panier",
+          stockInsuffisant: "Stock insuffisant. Maximum disponible :",
+          panierVideToast: "Panier vide",
+          profilNonCharge: "Profil non chargé",
+          devisEnvoyeToast: "Devis {num} envoyé !",
+          adresseRequired: "Veuillez saisir votre adresse de livraison.",
+          fieldsRequired: "Veuillez remplir tous les champs.",
+          invalidMonth: "Mois d'expiration invalide (01 à 12).",
+          cardExpired: "Carte expirée. Veuillez utiliser une carte valide.",
+          commandeEnregistreeToast:
+            "Commande {num} enregistrée ! En attente de validation.",
+          commandeConfirmeeToast:
+            "Commande {num} confirmée ! Paiement effectué ✓",
+          commandeCreeeToast: "✓ Commande {num} créée avec succès !",
+          confirmDeconnexion: "Voulez-vous vraiment vous déconnecter ?",
+          raisonSociale: "Raison Sociale",
+          telephone: "Téléphone",
+          prenom: "Prénom",
+          nom: "Nom",
+          aucunDevis: "Aucun devis",
+          aucuneCommande: "Aucune commande",
+          aucuneFacture: "Aucune facture",
+          attenteValidation: "En attente de validation par l'admin",
+          accepter: "Accepter",
+          commandeStatus: "Commandé",
+          confirmee: "Confirmée",
+          acceptee: "Acceptée",
+          refusee: "Refusée",
+          payer: "Payer",
+          enAttenteValidation: "En attente validation",
+          remiseAppliquee: "Remise {discount}% appliquée",
+          valideJusqua: "Valide jusqu'au",
+          totalTtc: "Total TTC",
+          actions: "Actions",
+          datePaiement: "Date paiement",
+          modifier: "Modifier",
+          themePerso: "Thème & Personnalisation",
+          modeSombre: "Mode Sombre (Dark Mode)",
+          activerSombre: "Activer le thème sombre pour votre portail client.",
+          votrePanier: "Votre Panier",
+          totalHt: "Total HT",
+          tvaMoy: "TVA (moy.)",
+          documentPdf: "Document PDF",
+          finalisationCommande: "Finalisation de Commande",
+          adresseLivraison: "Adresse de livraison complète",
+          exAdresse: "Ex: 123 Rue de la Paix, Alger...",
+          modePaiement: "Mode de paiement",
+          payLigne: "💳 Paiement en ligne (CIB / Dahabia)",
+          payEspeces: "💵 Paiement en espèces à la livraison",
+          annuler: "Annuler",
+          continuer: "Continuer",
+          titulaireCard: "TITULAIRE",
+          nomTitulaire: "Nom du titulaire",
+          expirationCard: "EXPIRATION",
+          typeCard: "TYPE",
+          numCard: "Numéro de carte",
+          nomTitulaireLabel: "Nom du titulaire",
+          dateExpiration: "Date d'expiration",
+          mois: "Mois",
+          annee: "Année",
+          simulatedPaymentInfo:
+            "Paiement simulé. Utilisez n'importe quel numéro de carte valide.",
+          validerOtp: "Valider → OTP",
+          otpSentInfo: "Un code OTP a été envoyé. Entrez-le ci-dessous.",
+          otpTestCode: "Code de test : <strong>123456</strong>",
+          otpIncorrect: "Code incorrect. Utilisez 123456.",
+          retour: "← Retour",
+          confirmerPaiement: "Confirmer le paiement",
+          envoyerDemandeDevis: "Envoyer ma demande de devis",
+          notesAdmin: "Notes pour l'administrateur (optionnel)",
+          exNotes: "Ex : Livraison urgente, remise demandée...",
+          transmisValidation:
+            "Votre demande sera transmise pour validation des prix.",
+          envoyerLeDevis: "Envoyer le devis",
+          modifierProfil: "Modifier mon profil",
+          exPhone: "Ex : 0555 12 34 56",
+          selectWilaya: "Sélectionnez une wilaya",
+          enregistrer: "Enregistrer",
+          erreurInit: "Erreur d'initialisation : ",
+          phoneRequired: "Le numéro de téléphone est obligatoire.",
+          wilayaRequired: "Veuillez sélectionner une wilaya.",
+          profileUpdated: "Profil mis à jour avec succès.",
+          principal: "Principal",
+          mesDocuments: "Mes Documents",
+          supprimer: "Supprimer",
+          demanderDevis: "Demander un Devis",
+          approuve: "Approuvé",
+          refuse: "Refusé",
+        },
+      };
 
-        const topBadge = document.getElementById("portalBadgeTop");
-        if (topBadge) {
-          topBadge.textContent = IS_B2B ? "B2B" : "B2C";
-          topBadge.style.color = IS_B2B ? "var(--accent)" : "var(--accent2)";
-          topBadge.style.background = IS_B2B ? "rgba(10, 110, 209, 0.15)" : "rgba(233, 115, 12, 0.15)";
-        }
-
-        const submitBtn = document.getElementById("cartSubmitBtn");
-        submitBtn.className =
-          "cart-submit-btn " + (IS_B2B ? "cart-b2b-btn" : "cart-b2c-btn");
-        document.getElementById("cartSubmitText").innerHTML = IS_B2B
-          ? '<i class="fas fa-paper-plane"></i> Demander un Devis'
-          : '<i class="fas fa-check"></i> Passer la commande';
-
-        if (IS_B2C) document.getElementById("nav-devis").style.display = "none";
-        if (IS_B2B) document.getElementById("nav-factures").style.display = "";
-
-        // Restore cart from localStorage
-        try {
-          const saved = localStorage.getItem("pme_cart");
-          if (saved) {
-            cart = JSON.parse(saved);
-            refreshCartUI();
-          }
-        } catch (e) {
-          console.error("Cart restore error", e);
-        }
-      })();
-
-      /* ─── LOADER & TOAST ─── */
-      function showLoader(v) {
-        document.getElementById("loader").classList.toggle("active", v);
+      function getCRMCurrentLang() {
+        return "FR";
       }
 
-      // --- DIALOG SYSTEM ---
+      function translateCRMText(key) {
+        const lang = getCRMCurrentLang();
+        return (translations[lang] || translations["FR"])[key] || key;
+      }
+
+      function toggleLanguage() {
+        // no-op
+      }
+
+      function initLanguage() {
+        const current = getCRMCurrentLang();
+        const btnText = document.getElementById("lang-btn-text");
+        if (btnText) btnText.textContent = current;
+
+        document.querySelectorAll("[data-i18n]").forEach((el) => {
+          const key = el.getAttribute("data-i18n");
+          el.textContent = translateCRMText(key);
+        });
+
+        document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+          const key = el.getAttribute("data-i18n-placeholder");
+          el.placeholder = translateCRMText(key);
+        });
+      }
+
+      function showLoader(v) {
+        const loader = document.getElementById("loader");
+        if (loader) loader.classList.toggle("active", v);
+      }
+
       const Dialog = {
-        overlay: document.getElementById('custom-dialog-overlay'),
-        title: document.getElementById('dialog-title'),
-        message: document.getElementById('dialog-message'),
-        btnCancel: document.getElementById('dialog-cancel'),
-        btnConfirm: document.getElementById('dialog-confirm'),
-        
-        confirm: function(msg, title = 'Confirmation') {
+        overlay: document.getElementById("custom-dialog-overlay"),
+        title: document.getElementById("dialog-title"),
+        message: document.getElementById("dialog-message"),
+        btnCancel: document.getElementById("dialog-cancel"),
+        btnConfirm: document.getElementById("dialog-confirm"),
+
+        confirm: function (msg, title = "Confirmation") {
           return new Promise((resolve) => {
             this.title.innerText = title;
             this.message.innerText = msg;
-            this.overlay.style.display = 'flex';
+            this.overlay.style.display = "flex";
 
             this.btnConfirm.onclick = () => {
-              this.overlay.style.display = 'none';
+              this.overlay.style.display = "none";
               resolve(true);
             };
             this.btnCancel.onclick = () => {
-              this.overlay.style.display = 'none';
+              this.overlay.style.display = "none";
               resolve(false);
             };
           });
-        }
+        },
       };
 
       function toast(type, msg, duration = 4000) {
@@ -2362,11 +2917,11 @@
         const t = document.createElement("div");
         t.className = `toast ${type}`;
         t.innerHTML = `<i class="${icons[type] || icons.info}"></i><span>${msg}</span>`;
-        document.getElementById("toastContainer").appendChild(t);
+        const container = document.getElementById("toastContainer");
+        if (container) container.appendChild(t);
         setTimeout(() => t.remove(), duration);
       }
 
-      /* ─── NAVIGATION ─── */
       function showView(id, navEl) {
         document
           .querySelectorAll(".view")
@@ -2384,8 +2939,8 @@
           factures: "Mes Factures",
           profil: "Mon Profil",
         };
-        document.getElementById("pageTitle").textContent =
-          titles[id] || "Espace Client";
+        const pageTitleEl = document.getElementById("pageTitle");
+        if (pageTitleEl) pageTitleEl.textContent = titles[id] || "Espace Client";
         if (id === "devis") loadDevis();
         if (id === "commandes") loadCommandes();
         if (id === "factures") loadFactures();
@@ -2394,27 +2949,27 @@
 
       /* ─── THEME FIORI ELEMENTS ─── */
       function initTheme() {
-        const isDark = localStorage.getItem('theme-dark') === 'true';
-        const headerIcon = document.getElementById('theme-icon-crm');
-        const headerText = document.getElementById('theme-text-crm');
-        const toggleEl = document.getElementById('darkmode-toggle-crm');
+        const isDark = localStorage.getItem("theme-dark") === "true";
+        const headerIcon = document.getElementById("theme-icon-crm");
+        const headerText = document.getElementById("theme-text-crm");
+        const toggleEl = document.getElementById("darkmode-toggle-crm");
         if (toggleEl) {
           toggleEl.checked = isDark;
         }
         if (isDark) {
-          document.body.classList.add('dark-mode');
-          if (headerIcon) headerIcon.textContent = '🌙';
-          if (headerText) headerText.textContent = 'Evening Horizon';
+          document.body.classList.add("dark-mode");
+          if (headerIcon) headerIcon.textContent = "🌙";
+          if (headerText) headerText.textContent = "Evening Horizon";
         } else {
-          document.body.classList.remove('dark-mode');
-          if (headerIcon) headerIcon.textContent = '☀️';
-          if (headerText) headerText.textContent = 'Morning Horizon';
+          document.body.classList.remove("dark-mode");
+          if (headerIcon) headerIcon.textContent = "☀️";
+          if (headerText) headerText.textContent = "Morning Horizon";
         }
       }
 
       function toggleFioriTheme() {
-        const isDark = !document.body.classList.contains('dark-mode');
-        localStorage.setItem('theme-dark', isDark ? 'true' : 'false');
+        const isDark = !document.body.classList.contains("dark-mode");
+        localStorage.setItem("theme-dark", isDark ? "true" : "false");
         initTheme();
       }
 
@@ -2423,9 +2978,28 @@
         initTheme();
         showLoader(true);
         try {
+          // Si la session est expirée, rediriger vers le login
+          if (!EMAIL) {
+            showLoader(false);
+            document.getElementById("userDisplayName").textContent = "Session expirée";
+            toast("error", "Session expirée. Veuillez vous reconnecter.");
+            setTimeout(() => { window.location.href = "/"; }, 2500);
+            return;
+          }
           await loadProfile();
+          if (!profile) {
+            showLoader(false);
+            document.getElementById("userDisplayName").textContent = "Compte introuvable";
+            toast("error", "Compte introuvable. Veuillez vous reconnecter.");
+            setTimeout(() => { window.location.href = "/"; }, 2500);
+            return;
+          }
           await loadProducts();
-          await loadKPIs();
+          try {
+            await loadKPIs();
+          } catch (e) {
+            console.warn("loadKPIs error (non-blocking):", e.message);
+          }
         } catch (e) {
           toast("error", "Erreur d'initialisation : " + e.message);
         } finally {
@@ -2434,29 +3008,35 @@
       }
 
       async function loadProfile() {
+        if (!EMAIL) return;
         const enc = encodeURIComponent(
           `tolower(email) eq '${EMAIL.toLowerCase()}'`,
         );
         const endpoint = IS_B2B ? "ClientsB2B" : "ClientsB2C";
-        const res = await fetch(
-          `/odata/v4/crm/${endpoint}?$filter=${enc}&$expand=bp`,
-        );
-        const data = await res.json();
-        if (data.value && data.value.length > 0) {
-          profile = data.value[0];
-          const name = IS_B2B
-            ? profile.companyName || EMAIL
-            : (
-                (profile.firstName || "") +
-                " " +
-                (profile.lastName || "")
-              ).trim() || EMAIL;
-          document.getElementById("userDisplayName").textContent = name;
-          document.getElementById("userEmail").textContent = profile.email;
-          document.getElementById("avatarInitial").textContent = name
-            .charAt(0)
-            .toUpperCase();
-          renderProfile();
+        try {
+          const res = await fetch(
+            `/odata/v4/crm/${endpoint}?$filter=${enc}&$expand=bp`,
+          );
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data.value && data.value.length > 0) {
+            profile = data.value[0];
+            const name = IS_B2B
+              ? profile.companyName || EMAIL
+              : (
+                  (profile.firstName || "") +
+                  " " +
+                  (profile.lastName || "")
+                ).trim() || EMAIL;
+            document.getElementById("userDisplayName").textContent = name;
+            document.getElementById("userEmail").textContent = profile.email;
+            document.getElementById("avatarInitial").textContent = name
+              .charAt(0)
+              .toUpperCase();
+            renderProfile();
+          }
+        } catch (e) {
+          console.error("loadProfile error:", e);
         }
       }
 
@@ -2465,40 +3045,92 @@
         if (!profile) return;
         g.innerHTML = IS_B2B
           ? `
-          <div class="profile-field"><label>Raison Sociale</label><p>${profile.companyName || "—"}</p></div>
-          <div class="profile-field"><label>Secteur</label><p>${profile.sector || "—"}</p></div>
+          <div class="profile-field"><label>${translateCRMText("raisonSociale")}</label><p>${profile.companyName || "—"}</p></div>
+          <div class="profile-field"><label>${translateCRMText("secteur")}</label><p>${profile.sector || "—"}</p></div>
           <div class="profile-field"><label>Email</label><p>${profile.email || "—"}</p></div>
-          <div class="profile-field"><label>Téléphone</label><p>${profile.phone || "—"}</p></div>
-          <div class="profile-field"><label>RC</label><p style="font-family:monospace">${profile.rc || "—"}</p></div>
-          <div class="profile-field"><label>NIF</label><p style="font-family:monospace">${profile.nif || "—"}</p></div>
-          <div class="profile-field"><label>AI</label><p style="font-family:monospace">${profile.ai || "—"}</p></div>
-          <div class="profile-field"><label>RIB</label><p style="font-family:monospace">${profile.bp?.ribNumber || "—"}</p></div>
-          <div class="profile-field"><label>Wilaya</label><p>${profile.wilaya || "—"}</p></div>
-          <div class="profile-field"><label>Statut</label><p><span class="badge ${profile.status === "ACTIVE" ? "badge-approved" : "badge-pending"}">${profile.status}</span></p></div>
+          <div class="profile-field"><label>${translateCRMText("telephone")}</label><p>${profile.phone || "—"}</p></div>
+          <div class="profile-field"><label>${translateCRMText("rc")}</label><p style="font-family:monospace">${profile.rc || "—"}</p></div>
+          <div class="profile-field"><label>${translateCRMText("nif")}</label><p style="font-family:monospace">${profile.nif || "—"}</p></div>
+          <div class="profile-field"><label>${translateCRMText("ai")}</label><p style="font-family:monospace">${profile.ai || "—"}</p></div>
+          <div class="profile-field"><label>${translateCRMText("ribBank")}</label><p style="font-family:monospace">${profile.bp?.ribNumber || "—"}</p></div>
+          <div class="profile-field"><label>${translateCRMText("wilaya")}</label><p>${profile.wilaya || "—"}</p></div>
+          <div class="profile-field"><label>${translateCRMText("statut")}</label><p><span class="badge ${profile.status === "ACTIVE" ? "badge-approved" : "badge-pending"}">${translateCRMText(profile.status === "ACTIVE" ? "valide" : "enAttente")}</span></p></div>
         `
           : `
-          <div class="profile-field"><label>Prénom</label><p>${profile.firstName || "—"}</p></div>
-          <div class="profile-field"><label>Nom</label><p>${profile.lastName || "—"}</p></div>
+          <div class="profile-field"><label>${translateCRMText("prenom")}</label><p>${profile.firstName || "—"}</p></div>
+          <div class="profile-field"><label>${translateCRMText("nom")}</label><p>${profile.lastName || "—"}</p></div>
           <div class="profile-field"><label>Email</label><p>${profile.email || "—"}</p></div>
-          <div class="profile-field"><label>Téléphone</label><p>${profile.phone || "—"}</p></div>
-          <div class="profile-field"><label>Wilaya</label><p>${profile.wilaya || "—"}</p></div>
-          <div class="profile-field"><label>Statut</label><p><span class="badge ${profile.status === "ACTIVE" ? "badge-approved" : "badge-pending"}">${profile.status}</span></p></div>
+          <div class="profile-field"><label>${translateCRMText("telephone")}</label><p>${profile.phone || "—"}</p></div>
+          <div class="profile-field"><label>${translateCRMText("wilaya")}</label><p>${profile.wilaya || "—"}</p></div>
+          <div class="profile-field"><label>${translateCRMText("statut")}</label><p><span class="badge ${profile.status === "ACTIVE" ? "badge-approved" : "badge-pending"}">${translateCRMText(profile.status === "ACTIVE" ? "valide" : "enAttente")}</span></p></div>
         `;
       }
 
       function openProfileEditModal() {
         if (!profile) return;
-        
+
         // Populate Wilaya select options dynamically with standard values and numbered labels
         const wSelect = document.getElementById("edit-profile-wilaya");
         if (wSelect && wSelect.options.length <= 1) {
           const wilayas = [
-            "Adrar", "Chlef", "Laghouat", "Oum El Bouaghi", "Batna", "Béjaïa", "Biskra", "Béchar", "Blida", "Bouira",
-            "Tamanrasset", "Tébessa", "Tlemcen", "Tiaret", "Tizi Ouzou", "Alger", "Djelfa", "Jijel", "Sétif", "Saïda",
-            "Skikda", "Sidi Bel Abbès", "Annaba", "Guelma", "Constantine", "Médéa", "Mostaganem", "M'Sila", "Mascara", "Ouargla",
-            "Oran", "El Bayadh", "Illizi", "Bordj Bou Arréridj", "Boumerdès", "El Tarf", "Tindouf", "Tissemsilt", "El Oued", "Khenchela",
-            "Souk Ahras", "Tipaza", "Mila", "Aïn Defla", "Naâma", "Aïn Témouchent", "Ghardaïa", "Relizane", "El M'Ghair", "El Meniaa",
-            "Ouled Djellal", "Bordj Baji Mokhtar", "Béni Abbès", "Timimoun", "Touggourt", "Djanet", "In Salah", "In Guezzam"
+            "Adrar",
+            "Chlef",
+            "Laghouat",
+            "Oum El Bouaghi",
+            "Batna",
+            "Béjaïa",
+            "Biskra",
+            "Béchar",
+            "Blida",
+            "Bouira",
+            "Tamanrasset",
+            "Tébessa",
+            "Tlemcen",
+            "Tiaret",
+            "Tizi Ouzou",
+            "Alger",
+            "Djelfa",
+            "Jijel",
+            "Sétif",
+            "Saïda",
+            "Skikda",
+            "Sidi Bel Abbès",
+            "Annaba",
+            "Guelma",
+            "Constantine",
+            "Médéa",
+            "Mostaganem",
+            "M'Sila",
+            "Mascara",
+            "Ouargla",
+            "Oran",
+            "El Bayadh",
+            "Illizi",
+            "Bordj Bou Arréridj",
+            "Boumerdès",
+            "El Tarf",
+            "Tindouf",
+            "Tissemsilt",
+            "El Oued",
+            "Khenchela",
+            "Souk Ahras",
+            "Tipaza",
+            "Mila",
+            "Aïn Defla",
+            "Naâma",
+            "Aïn Témouchent",
+            "Ghardaïa",
+            "Relizane",
+            "El M'Ghair",
+            "El Meniaa",
+            "Ouled Djellal",
+            "Bordj Baji Mokhtar",
+            "Béni Abbès",
+            "Timimoun",
+            "Touggourt",
+            "Djanet",
+            "In Salah",
+            "In Guezzam",
           ];
           wilayas.forEach((name, index) => {
             const num = String(index + 1).padStart(2, "0");
@@ -2509,8 +3141,10 @@
           });
         }
 
-        document.getElementById("edit-profile-phone").value = profile.phone || "";
-        document.getElementById("edit-profile-wilaya").value = profile.wilaya || "";
+        document.getElementById("edit-profile-phone").value =
+          profile.phone || "";
+        document.getElementById("edit-profile-wilaya").value =
+          profile.wilaya || "";
         document.getElementById("profileEditModal").classList.add("open");
       }
 
@@ -2520,51 +3154,59 @@
 
       async function saveProfileEdit() {
         if (!profile) return;
-        const phone = document.getElementById("edit-profile-phone").value.trim();
+        const phone = document
+          .getElementById("edit-profile-phone")
+          .value.trim();
         const wilaya = document.getElementById("edit-profile-wilaya").value;
-        
+
         if (!phone) {
-          toast("error", "Le numéro de téléphone est obligatoire.");
+          toast("error", translateCRMText("phoneRequired"));
           return;
         }
         if (!wilaya) {
-          toast("error", "Veuillez sélectionner une wilaya.");
+          toast("error", translateCRMText("wilayaRequired"));
           return;
         }
 
         const btn = document.getElementById("btn-save-profile");
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enregistrement...';
+        btn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> ' +
+          translateCRMText("loading");
 
         try {
           const entityPath = IS_B2B ? "ClientsB2B" : "ClientsB2C";
-          const res = await fetch(`/odata/v4/crm/${entityPath}(${profile.ID})`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json"
+          const res = await fetch(
+            `/odata/v4/crm/${entityPath}(${profile.ID})`,
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                phone: phone,
+                wilaya: wilaya,
+              }),
             },
-            body: JSON.stringify({
-              phone: phone,
-              wilaya: wilaya
-            })
-          });
+          );
 
           if (!res.ok) {
             const data = await res.json();
-            throw new Error(data.error?.message || "Erreur lors de la mise à jour");
+            throw new Error(data.error?.message || "Erreur");
           }
 
           profile.phone = phone;
           profile.wilaya = wilaya;
-          
+
           renderProfile();
           closeProfileEditModal();
-          toast("success", "Profil mis à jour avec succès.");
+          toast("success", translateCRMText("profileUpdated"));
         } catch (e) {
           toast("error", e.message);
         } finally {
           btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-save"></i> Enregistrer';
+          btn.innerHTML =
+            '<i class="fas fa-save"></i> ' + translateCRMText("enregistrer");
         }
       }
 
@@ -2573,23 +3215,28 @@
         const idField = IS_B2B
           ? `clientB2B_ID eq ${profile.ID}`
           : `clientB2C_ID eq ${profile.ID}`;
-        const [dRes, cRes] = await Promise.all([
+        const [dRes, cRes, fRes] = await Promise.all([
           fetch(
-            `/odata/v4/crm/Devis?$filter=${encodeURIComponent(idField)}&$select=ID,status,totalTTC`,
+            `/odata/v4/crm/Devis?$filter=${encodeURIComponent(idField)}&$select=ID,status`,
           ),
           fetch(
-            `/odata/v4/crm/Commandes?$filter=${encodeURIComponent(idField)}&$select=ID,status,totalTTC`,
+            `/odata/v4/crm/Commandes?$filter=${encodeURIComponent(idField)}&$select=ID,status`,
+          ),
+          fetch(
+            `/odata/v4/crm/Factures?$filter=${encodeURIComponent(idField)}&$select=ID,totalTTC`,
           ),
         ]);
         devisList = (await dRes.json()).value || [];
         ordersList = (await cRes.json()).value || [];
+        const facturesList = (await fRes.json()).value || [];
         const pending = devisList.filter((d) => d.status === "PENDING").length;
         document.getElementById("kpi-devis").textContent = devisList.length;
         document.getElementById("kpi-commandes").textContent =
           ordersList.length;
         document.getElementById("kpi-pending").textContent = pending;
-        const total = [...devisList, ...ordersList].reduce(
-          (s, d) => s + parseFloat(d.totalTTC || 0),
+        // Total TTC = somme des factures (Mes Factures)
+        const total = facturesList.reduce(
+          (s, f) => s + parseFloat(f.totalTTC || 0),
           0,
         );
         document.getElementById("kpi-montant").textContent = fmt(total);
@@ -2614,7 +3261,9 @@
           ...new Set(products.map((p) => p.category).filter(Boolean)),
         ];
         document.getElementById("catFilter").innerHTML =
-          '<option value="">Toutes catégories</option>' +
+          '<option value="">' +
+          translateCRMText("toutesCategories") +
+          "</option>" +
           cats.map((c) => `<option value="${c}">${c}</option>`).join("");
       }
 
@@ -2639,7 +3288,9 @@
         const grid = document.getElementById("productGrid");
         if (!list.length) {
           grid.innerHTML =
-            '<div class="empty-state"><i class="fas fa-search"></i><p>Aucun produit trouvé.</p></div>';
+            '<div class="empty-state"><i class="fas fa-search"></i><p>' +
+            translateCRMText("aucunProduitTrouve") +
+            "</p></div>";
           return;
         }
         grid.innerHTML = list
@@ -2653,15 +3304,15 @@
               : "stock-out";
             const stockTxt = inStock
               ? p.stock <= 5
-                ? `Stock limité (${p.stock})`
-                : `En stock (${p.stock})`
-              : "Rupture de stock";
+                ? `${translateCRMText("stockLimite")} (${p.stock})`
+                : `${translateCRMText("enStock")} (${p.stock})`
+              : translateCRMText("ruptureStock");
             return `
 <div class="product-card">
   <div class="prod-cat">${p.category || "GÉNÉRAL"}</div>
   <div class="prod-name">${p.name}</div>
   ${p.code ? `<div style="font-size:.7rem;color:var(--text-dim);font-family:monospace">${p.code}</div>` : ""}
-  <div class="prod-desc">${p.description || "Aucune description."}</div>
+  <div class="prod-desc">${p.description || translateCRMText("aucuneDescription")}</div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto">
     <div class="prod-price">${fmt(p.unitPrice)} DA <span style="font-size:.7rem;color:var(--text-dim);font-weight:400">HT</span></div>
     <div class="prod-stock ${stockCls}"><i class="fas fa-circle" style="font-size:.5rem;margin-right:4px"></i>${stockTxt}</div>
@@ -2671,7 +3322,7 @@
     <span class="qty-val" id="qty-${p.ID}">${qty}</span>
     <button class="qty-btn" onclick="updateQty('${p.ID}',1,this)" ${!inStock ? "disabled" : ""}>+</button>
     <button class="add-btn" onclick="addToCart('${p.ID}')" ${!inStock ? 'disabled style="opacity:.4"' : ""}>
-      ${qty > 0 ? '<i class="fas fa-check"></i> Ajouté' : '<i class="fas fa-plus"></i> Ajouter'}
+      ${qty > 0 ? '<i class="fas fa-check"></i> ' + translateCRMText("ajoute") : '<i class="fas fa-plus"></i> ' + translateCRMText("ajouter")}
     </button>
   </div>
 </div>`;
@@ -2683,13 +3334,16 @@
       function addToCart(productId) {
         const p = products.find((p) => p.ID === productId);
         if (!p) return;
-        if (p.stock <= 0) { toast('error', 'Produit en rupture de stock.'); return; }
+        if (p.stock <= 0) {
+          toast("error", translateCRMText("ruptureStockToast"));
+          return;
+        }
         if (!cart[productId]) {
           cart[productId] = { product: p, qty: 1 };
-          toast("info", `${p.name} ajouté au panier`);
+          toast("info", `${p.name} ${translateCRMText("ajoutePanier")}`);
         } else {
           // Si déjà dans le panier via les boutons +/-, on confirme juste
-          if(cart[productId].qty === 0) cart[productId].qty = 1;
+          if (cart[productId].qty === 0) cart[productId].qty = 1;
         }
         refreshCartUI();
         filterProducts();
@@ -2702,7 +3356,10 @@
         // Si produit pas encore dans le panier et on clique +, on l'ajoute
         if (!cart[productId]) {
           if (delta > 0) {
-            if (p.stock <= 0) { toast('error', 'Produit en rupture de stock.'); return; }
+            if (p.stock <= 0) {
+              toast("error", translateCRMText("ruptureStockToast"));
+              return;
+            }
             cart[productId] = { product: p, qty: 0 };
           } else {
             return; // rien à diminuer
@@ -2713,7 +3370,7 @@
         const newQty = Math.max(0, (cart[productId].qty || 0) + delta);
 
         if (delta > 0 && newQty > maxStock) {
-          toast('error', `Stock insuffisant. Maximum disponible : ${maxStock}`);
+          toast("error", `${translateCRMText("stockInsuffisant")} ${maxStock}`);
           return;
         }
 
@@ -2732,7 +3389,6 @@
         filterProducts();
       }
 
-
       function removeFromCart(productId) {
         delete cart[productId];
         refreshCartUI();
@@ -2741,10 +3397,13 @@
 
       function formatDA(value) {
         return (
-          new Intl.NumberFormat("fr-DZ", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          }).format(value) + " DA"
+          new Intl.NumberFormat(
+            getCRMCurrentLang() === "FR" ? "fr-DZ" : "en-US",
+            {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            },
+          ).format(value) + " DA"
         );
       }
 
@@ -2766,7 +3425,7 @@
           list.innerHTML = `
 <div class="cart-empty-msg">
   <i class="fas fa-shopping-basket" style="font-size:2.2rem;opacity:.25"></i>
-  <span>Votre panier est vide</span>
+  <span>${translateCRMText("noItems")}</span>
 </div>`;
         } else {
           list.innerHTML = items
@@ -2784,7 +3443,7 @@
       <span class="qty-val-sm">${qty}</span>
       <button class="qty-btn-sm" onclick="updateQty('${p.ID}',1)">+</button>
     </div>
-    <button class="cart-item-delete" onclick="removeFromCart('${p.ID}')" title="Supprimer">
+    <button class="cart-item-delete" onclick="removeFromCart('${p.ID}')" title="${translateCRMText("supprimer")}">
       <i class="fas fa-trash-alt"></i>
     </button>
   </div>
@@ -2818,7 +3477,7 @@
       /* ─── SUBMIT ─── */
       function submitCart() {
         if (!Object.keys(cart).length) {
-          toast("error", "Panier vide");
+          toast("error", translateCRMText("panierVideToast"));
           return;
         }
         closeCart();
@@ -2836,13 +3495,15 @@
 
       async function confirmSubmitDevis() {
         if (!profile) {
-          toast("error", "Profil non chargé");
+          toast("error", translateCRMText("profilNonCharge"));
           return;
         }
         const notes = document.getElementById("devisNotes").value;
         const btn = document.getElementById("confirmDevisBtn");
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+        btn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> ' +
+          translateCRMText("loading");
         showLoader(true);
         try {
           const cartItems = Object.values(cart).map(({ product: p, qty }) => ({
@@ -2867,7 +3528,13 @@
           refreshCartUI();
           filterProducts();
           closeNotesModal();
-          toast("success", `Devis ${data.devisNumber} envoyé !`);
+          toast(
+            "success",
+            translateCRMText("devisEnvoyeToast").replace(
+              "{num}",
+              data.devisNumber,
+            ),
+          );
           showView("devis", document.getElementById("nav-devis"));
           await loadKPIs();
         } catch (e) {
@@ -2875,7 +3542,9 @@
         } finally {
           showLoader(false);
           btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-check"></i> Envoyer le devis';
+          btn.innerHTML =
+            '<i class="fas fa-check"></i> ' +
+            translateCRMText("envoyerLeDevis");
         }
       }
 
@@ -2885,16 +3554,18 @@
         document.getElementById("payStep0").style.display = "";
         document.getElementById("payStep1").style.display = "none";
         document.getElementById("payStep2").style.display = "none";
-        
+
         // Reset card form fields
         document.getElementById("cardNumber").value = "";
         document.getElementById("cardName").value = "";
         document.getElementById("cardCvv").value = "";
-        document.getElementById("cardNumDisplay").textContent = "•••• •••• •••• ••••";
-        document.getElementById("cardNameDisplay").textContent = "Nom du titulaire";
+        document.getElementById("cardNumDisplay").textContent =
+          "•••• •••• •••• ••••";
+        document.getElementById("cardNameDisplay").textContent =
+          translateCRMText("nomTitulaire");
         document.getElementById("cardExpDisplay").textContent = "MM/AA";
         document.getElementById("cardTypeDisplay").textContent = "CIB";
-        
+
         const mSelect = document.getElementById("cardExpMonth");
         const ySelect = document.getElementById("cardExpYear");
         if (mSelect) mSelect.value = "";
@@ -2904,9 +3575,9 @@
 
         // Hide address for existing orders
         if (currentPaymentOrderId) {
-            document.getElementById("addressGroup").style.display = "none";
+          document.getElementById("addressGroup").style.display = "none";
         } else {
-            document.getElementById("addressGroup").style.display = "block";
+          document.getElementById("addressGroup").style.display = "block";
         }
 
         // Populate Years in dropdown dynamically
@@ -2926,23 +3597,23 @@
           }
         }
       }
-      
+
       function proceedCheckout() {
         const method = document.getElementById("checkoutMethod").value;
         if (!currentPaymentOrderId) {
-            const addr = document.getElementById("checkoutAddress").value;
-            if (!addr.trim()) {
-                toast("error", "Veuillez saisir votre adresse de livraison.");
-                return;
-            }
+          const addr = document.getElementById("checkoutAddress").value;
+          if (!addr.trim()) {
+            toast("error", translateCRMText("adresseRequired"));
+            return;
+          }
         }
-        
+
         if (method === "ESPECES") {
-            // Bypass CIB form, directly finalize
-            finalizePayment("ESPECES");
+          // Bypass CIB form, directly finalize
+          finalizePayment("ESPECES");
         } else {
-            document.getElementById("payStep0").style.display = "none";
-            document.getElementById("payStep1").style.display = "";
+          document.getElementById("payStep0").style.display = "none";
+          document.getElementById("payStep1").style.display = "";
         }
       }
       function closePayment() {
@@ -2961,7 +3632,7 @@
         const year = document.getElementById("cardExpYear").value;
         const cardExpDisplay = document.getElementById("cardExpDisplay");
         const cardExpHidden = document.getElementById("cardExp");
-        
+
         if (month && year) {
           const val = month + "/" + year;
           cardExpHidden.value = val;
@@ -2973,7 +3644,9 @@
       }
 
       function goToOTP() {
-        const num = document.getElementById("cardNumber").value.replace(/\s/g, "");
+        const num = document
+          .getElementById("cardNumber")
+          .value.replace(/\s/g, "");
         const expVal = document.getElementById("cardExp").value;
         if (
           num.length < 16 ||
@@ -2981,22 +3654,22 @@
           expVal.length < 5 ||
           document.getElementById("cardCvv").value.length < 3
         ) {
-          toast("error", "Veuillez remplir tous les champs.");
+          toast("error", translateCRMText("fieldsRequired"));
           return;
         }
         // Valider mois (01-12) et année (>= année courante)
-        const parts = expVal.split('/');
+        const parts = expVal.split("/");
         const month = parseInt(parts[0], 10);
-        const year = parseInt('20' + (parts[1] || '00'), 10);
+        const year = parseInt("20" + (parts[1] || "00"), 10);
         const now = new Date();
         const curYear = now.getFullYear();
         const curMonth = now.getMonth() + 1;
         if (month < 1 || month > 12) {
-          toast('error', 'Mois d\'expiration invalide (01 à 12).');
+          toast("error", translateCRMText("invalidMonth"));
           return;
         }
         if (year < curYear || (year === curYear && month < curMonth)) {
-          toast('error', 'Carte expirée. Veuillez utiliser une carte valide.');
+          toast("error", translateCRMText("cardExpired"));
           return;
         }
         document.getElementById("payStep1").style.display = "none";
@@ -3010,22 +3683,22 @@
 
       async function finalizePayment(forceMethod) {
         const method = forceMethod || "CARTE";
-        
+
         if (method === "CARTE") {
-            const otp = [0, 1, 2, 3, 4, 5]
-              .map((i) => document.getElementById("otp" + i).value)
-              .join("");
-            if (otp !== "123456") {
-              document.getElementById("otpError").style.display = "";
-              return;
-            }
-            document.getElementById("otpError").style.display = "none";
+          const otp = [0, 1, 2, 3, 4, 5]
+            .map((i) => document.getElementById("otp" + i).value)
+            .join("");
+          if (otp !== "123456") {
+            document.getElementById("otpError").style.display = "";
+            return;
+          }
+          document.getElementById("otpError").style.display = "none";
         }
-        
+
         closePayment();
         showLoader(true);
         try {
-          if (!profile) throw new Error("Profil client non chargé");
+          if (!profile) throw new Error(translateCRMText("profilNonCharge"));
           let res, data;
           if (currentPaymentOrderId) {
             res = await fetch("/odata/v4/crm/payOrder", {
@@ -3038,18 +3711,22 @@
               }),
             });
             data = await res.json();
-            if (!res.ok) throw new Error(data.error?.message || "Erreur serveur");
+            if (!res.ok)
+              throw new Error(data.error?.message || "Erreur serveur");
             currentPaymentOrderId = null;
             loadCommandes();
           } else {
-            const cartItems = Object.values(cart).map(({ product: p, qty }) => ({
-              product_ID: p.ID,
-              quantity: qty,
-              unitPrice: p.unitPrice,
-              tvaRate: p.tvaRate || 19,
-              description: p.name,
-            }));
-            const addr = document.getElementById("checkoutAddress")?.value || "";
+            const cartItems = Object.values(cart).map(
+              ({ product: p, qty }) => ({
+                product_ID: p.ID,
+                quantity: qty,
+                unitPrice: p.unitPrice,
+                tvaRate: p.tvaRate || 19,
+                description: p.name,
+              }),
+            );
+            const addr =
+              document.getElementById("checkoutAddress")?.value || "";
             res = await fetch("/odata/v4/crm/submitCartAsOrder", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -3058,31 +3735,44 @@
                 items: cartItems,
                 paymentMethod: method,
                 paymentRef: "SIM-" + Date.now(),
-                deliveryAddress: addr
+                deliveryAddress: addr,
               }),
             });
             data = await res.json();
-            if (!res.ok) throw new Error(data.error?.message || "Erreur serveur");
+            if (!res.ok)
+              throw new Error(data.error?.message || "Erreur serveur");
             cart = {};
             refreshCartUI();
             filterProducts();
           }
-          
+
           [0, 1, 2, 3, 4, 5].forEach((i) => {
             const el = document.getElementById("otp" + i);
             if (el) el.value = "";
           });
-          
+
           document.getElementById("payStep0").style.display = "";
           document.getElementById("payStep1").style.display = "none";
           document.getElementById("payStep2").style.display = "none";
-          
+
           if (method === "ESPECES") {
-              toast("success", `Commande ${data.orderNumber} enregistrée ! En attente de validation.`);
+            toast(
+              "success",
+              translateCRMText("commandeEnregistreeToast").replace(
+                "{num}",
+                data.orderNumber,
+              ),
+            );
           } else {
-              toast("success", `Commande ${data.orderNumber} confirmée ! Paiement effectué ✓`);
+            toast(
+              "success",
+              translateCRMText("commandeConfirmeeToast").replace(
+                "{num}",
+                data.orderNumber,
+              ),
+            );
           }
-          
+
           showView("commandes", document.getElementById("nav-commandes"));
           await loadKPIs();
         } catch (e) {
@@ -3107,8 +3797,7 @@
           );
           devisList = (await res.json()).value || [];
           if (!devisList.length) {
-            tbody.innerHTML =
-              '<tr class="empty-row"><td colspan="6"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:.3"></i>Aucun devis.</td></tr>';
+            tbody.innerHTML = `<tr class="empty-row"><td colspan="6"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:.3"></i>${translateCRMText("aucunDevis")}.</td></tr>`;
             return;
           }
           const statusMap = {
@@ -3117,23 +3806,23 @@
             REJECTED: "badge-rejected",
           };
           const labelMap = {
-            PENDING: "En attente",
-            APPROVED: "Approuvé",
-            REJECTED: "Refusé",
+            PENDING: translateCRMText("enAttente"),
+            APPROVED: translateCRMText("approuve"),
+            REJECTED: translateCRMText("refuse"),
           };
           tbody.innerHTML = devisList
             .map((d) => {
               const action =
                 d.status === "APPROVED" && !d.convertedToOrder
-                  ? `<button class="btn btn-success btn-sm" onclick="acceptDevis('${d.ID}','${d.devisNumber}')"><i class="fas fa-check"></i> Accepter</button>`
+                  ? `<button class="btn btn-success btn-sm" onclick="acceptDevis('${d.ID}','${d.devisNumber}')"><i class="fas fa-check"></i> ${translateCRMText("accepter")}</button>`
                   : d.convertedToOrder
-                    ? `<span style="color:var(--accent-green);font-size:.75rem"><i class="fas fa-check-double"></i> Commandé</span>`
+                    ? `<span style="color:var(--accent-green);font-size:.75rem"><i class="fas fa-check-double"></i> ${translateCRMText("commandeStatus")}</span>`
                     : d.status === "REJECTED"
-                      ? `<span style="color:var(--accent2);font-size:.75rem">${d.notes || "Refusé"}</span>`
+                      ? `<span style="color:var(--accent2);font-size:.75rem">${d.notes || translateCRMText("refuse")}</span>`
                       : "—";
               const dl =
                 d.status === "PENDING"
-                  ? `<button class="btn btn-ghost btn-sm" disabled style="opacity: 0.3; cursor: not-allowed;" title="En attente de validation par l'admin"><i class="fas fa-download"></i></button>`
+                  ? `<button class="btn btn-ghost btn-sm" disabled style="opacity: 0.3; cursor: not-allowed;" title="${translateCRMText("attenteValidation")}"><i class="fas fa-download"></i></button>`
                   : `<button class="btn btn-ghost btn-sm" onclick="downloadDevisPDF('${d.ID}','${d.devisNumber}')" title="PDF"><i class="fas fa-download"></i></button>`;
               return `<tr>
 <td style="font-family:monospace;font-weight:600">${d.devisNumber || "—"}</td>
@@ -3152,14 +3841,18 @@
 
       function acceptDevis(devisId, devisNum) {
         // Notification toast inline au lieu du confirm() natif
-        const notifId = 'devis-confirm-' + devisId;
+        const notifId = "devis-confirm-" + devisId;
         const existing = document.getElementById(notifId);
-        if (existing) { existing.remove(); return; }
-        const c = document.getElementById('toastContainer');
-        const t = document.createElement('div');
+        if (existing) {
+          existing.remove();
+          return;
+        }
+        const c = document.getElementById("toastContainer");
+        const t = document.createElement("div");
         t.id = notifId;
-        t.className = 'toast info';
-        t.style.cssText = 'min-width:340px;flex-direction:column;gap:10px;align-items:flex-start;padding:16px 18px;';
+        t.className = "toast info";
+        t.style.cssText =
+          "min-width:340px;flex-direction:column;gap:10px;align-items:flex-start;padding:16px 18px;";
         t.innerHTML = `
           <div style="display:flex;align-items:center;gap:10px;width:100%">
             <i class="fas fa-file-check" style="color:var(--accent-green);font-size:1.1rem"></i>
@@ -3189,7 +3882,10 @@
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error?.message || "Erreur");
-          toast("success", `✓ Commande ${data.orderNumber} créée avec succès !`);
+          toast(
+            "success",
+            `✓ Commande ${data.orderNumber} créée avec succès !`,
+          );
           loadDevis();
           loadKPIs();
         } catch (e) {
@@ -3232,8 +3928,7 @@
           );
           ordersList = (await res.json()).value || [];
           if (!ordersList.length) {
-            tbody.innerHTML =
-              '<tr class="empty-row"><td colspan="5"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:.3"></i>Aucune commande.</td></tr>';
+            tbody.innerHTML = `<tr class="empty-row"><td colspan="5"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:.3"></i>${translateCRMText("aucuneCommande")}.</td></tr>`;
             return;
           }
           const statusMap = {
@@ -3247,37 +3942,41 @@
             REJECTED_BY_CLIENT: "badge-rejected",
           };
           const labelMap = {
-            PENDING: "En attente",
-            CONFIRMED: "Confirmée",
-            PAID: "Payée",
-            SENT: "Envoyée",
-            DRAFT: "Brouillon",
-            SENT_TO_CLIENT: "Envoyée",
-            ACCEPTED_BY_CLIENT: "Acceptée",
-            REJECTED_BY_CLIENT: "Refusée",
+            PENDING: translateCRMText("enAttente"),
+            CONFIRMED: translateCRMText("confirmee"),
+            PAID: translateCRMText("payee"),
+            SENT: translateCRMText("envoyee"),
+            DRAFT: translateCRMText("brouillon"),
+            SENT_TO_CLIENT: translateCRMText("envoyee"),
+            ACCEPTED_BY_CLIENT: translateCRMText("acceptee"),
+            REJECTED_BY_CLIENT: translateCRMText("refusee"),
           };
           tbody.innerHTML = ordersList
             .map((o) => {
-              const dlCommande = `<button class="btn btn-ghost btn-sm" onclick="downloadCommandePDF('${o.ID}','${o.orderNumber}')" title="Bon de Commande"><i class="fas fa-download"></i></button>`;
-              
+              const dlCommande = `<button class="btn btn-ghost btn-sm" onclick="downloadCommandePDF('${o.ID}','${o.orderNumber}')" title="${getCRMCurrentLang() === "FR" ? "Bon de Commande" : "Purchase Order"}"><i class="fas fa-download"></i></button>`;
+
               let actionBtn = "";
               if (o.status === "CONFIRMED") {
-                actionBtn = `<button class="btn btn-primary btn-sm" onclick="payOrderUI('${o.ID}')"><i class="fas fa-credit-card"></i> Payer</button>`;
+                actionBtn = `<button class="btn btn-primary btn-sm" onclick="payOrderUI('${o.ID}')"><i class="fas fa-credit-card"></i> ${translateCRMText("payer")}</button>`;
               } else if (o.status === "PENDING" && IS_B2B) {
                 // Paiement espèces B2B en attente de validation admin
-                actionBtn = `<span style="color:var(--accent-gold);font-size:0.78rem"><i class="fas fa-clock"></i> En attente validation</span>`;
+                actionBtn = `<span style="color:var(--accent-gold);font-size:0.78rem"><i class="fas fa-clock"></i> ${translateCRMText("enAttenteValidation")}</span>`;
               }
-              
+
               let factureBtn = "";
-              if ((o.status === "PAID" || o.status === "ACCEPTED_BY_CLIENT") && o.facture_ID) {
-                factureBtn = `<button class="btn btn-ghost btn-sm" onclick="downloadFacturePDF('${o.facture_ID}','Facture')" title="Facture"><i class="fas fa-file-invoice-dollar"></i></button>`;
+              if (
+                (o.status === "PAID" || o.status === "ACCEPTED_BY_CLIENT") &&
+                o.facture_ID
+              ) {
+                factureBtn = `<button class="btn btn-ghost btn-sm" onclick="downloadFacturePDF('${o.facture_ID}','Facture')" title="${getCRMCurrentLang() === "FR" ? "Facture" : "Invoice"}"><i class="fas fa-file-invoice-dollar"></i></button>`;
               }
 
               // Affichage remise
-              const discountBadge = o.discount > 0
-                ? `<span style="font-size:0.72rem;color:var(--accent-gold);display:block">Remise ${parseFloat(o.discount).toFixed(0)}% appliquée</span>`
-                : '';
-              
+              const discountBadge =
+                o.discount > 0
+                  ? `<span style="font-size:0.72rem;color:var(--accent-gold);display:block">${translateCRMText("remiseAppliquee").replace("{discount}", parseFloat(o.discount).toFixed(0))}</span>`
+                  : "";
+
               return `<tr>
 <td style="font-family:monospace;font-weight:600">${o.orderNumber || "—"}</td>
 <td>${fmtDate(o.date)}</td>
@@ -3297,25 +3996,32 @@
         if (!profile) return;
         const tbody = document.getElementById("facturesTableBody");
         if (!isSilent) {
-          tbody.innerHTML = '<tr class="empty-row"><td colspan="4"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+          tbody.innerHTML =
+            '<tr class="empty-row"><td colspan="4"><i class="fas fa-spinner fa-spin"></i></td></tr>';
         }
         try {
-          const idField = IS_B2B ? `clientB2B_ID eq ${profile.ID}` : `clientB2C_ID eq ${profile.ID}`;
-          const res = await fetch(`/odata/v4/crm/Factures?$filter=${encodeURIComponent(idField)}&$orderby=createdAt desc`);
+          const idField = IS_B2B
+            ? `clientB2B_ID eq ${profile.ID}`
+            : `clientB2C_ID eq ${profile.ID}`;
+          const res = await fetch(
+            `/odata/v4/crm/Factures?$filter=${encodeURIComponent(idField)}&$orderby=createdAt desc`,
+          );
           const facturesList = (await res.json()).value || [];
           if (!facturesList.length) {
-            tbody.innerHTML = '<tr class="empty-row"><td colspan="4"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:.3"></i>Aucune facture.</td></tr>';
+            tbody.innerHTML = `<tr class="empty-row"><td colspan="4"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:.3"></i>${translateCRMText("aucuneFacture")}.</td></tr>`;
             return;
           }
-          tbody.innerHTML = facturesList.map(f => {
-            const btn = `<button class="btn btn-ghost btn-sm" onclick="downloadFacturePDF('${f.ID}', '${f.invoiceNumber}')" title="Télécharger"><i class="fas fa-download"></i></button>`;
-            return `<tr>
+          tbody.innerHTML = facturesList
+            .map((f) => {
+              const btn = `<button class="btn btn-ghost btn-sm" onclick="downloadFacturePDF('${f.ID}', '${f.invoiceNumber}')" title="${getCRMCurrentLang() === "FR" ? "Télécharger" : "Download"}"><i class="fas fa-download"></i></button>`;
+              return `<tr>
               <td style="font-family:monospace;font-weight:600">${f.invoiceNumber}</td>
               <td>${fmtDate(f.date)}</td>
               <td style="font-weight:700;color:var(--accent)">${fmt(f.totalTTC)} DA</td>
               <td>${btn}</td>
             </tr>`;
-          }).join("");
+            })
+            .join("");
         } catch (e) {
           tbody.innerHTML = `<tr class="empty-row"><td colspan="4" style="color:var(--accent2)">${e.message}</td></tr>`;
         }
@@ -3345,7 +4051,7 @@
           );
           const data = await res.json();
           if (!res.ok) throw new Error(data.error?.message);
-          openPDFViewer(data.value || data, title || 'Facture');
+          openPDFViewer(data.value || data, title || "Facture");
         } catch (e) {
           toast("error", "PDF : " + e.message);
         } finally {
@@ -3354,13 +4060,15 @@
       }
 
       function openPDFViewer(base64, title) {
-        document.getElementById('pdfViewerTitle').textContent = title || 'Document PDF';
-        document.getElementById('pdfViewerFrame').src = 'data:application/pdf;base64,' + base64;
-        document.getElementById('pdfViewerModal').classList.add('open');
+        document.getElementById("pdfViewerTitle").textContent =
+          title || "Document PDF";
+        document.getElementById("pdfViewerFrame").src =
+          "data:application/pdf;base64," + base64;
+        document.getElementById("pdfViewerModal").classList.add("open");
       }
       function closePDFViewer() {
-        document.getElementById('pdfViewerModal').classList.remove('open');
-        document.getElementById('pdfViewerFrame').src = 'about:blank';
+        document.getElementById("pdfViewerModal").classList.remove("open");
+        document.getElementById("pdfViewerFrame").src = "about:blank";
       }
 
       let currentPaymentOrderId = null;
@@ -3370,21 +4078,26 @@
       }
       /* ─── UTILS ─── */
       function fmt(v) {
-        return parseFloat(v || 0).toLocaleString("fr-FR", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        });
+        return parseFloat(v || 0).toLocaleString(
+          getCRMCurrentLang() === "FR" ? "fr-FR" : "en-US",
+          {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          },
+        );
       }
       function fmtDate(d) {
         if (!d) return "—";
         try {
-          return new Date(d).toLocaleDateString("fr-FR");
+          return new Date(d).toLocaleDateString(
+            getCRMCurrentLang() === "FR" ? "fr-FR" : "en-US",
+          );
         } catch {
           return d;
         }
       }
       async function logout() {
-        if (await Dialog.confirm("Déconnexion ?")) {
+        if (await Dialog.confirm(translateCRMText("confirmDeconnexion"))) {
           sessionStorage.clear();
           window.location.href = "/auth.html";
         }
@@ -3396,23 +4109,23 @@
       function updateNavIndicator(dotEl, navEl, badgeEl, count, prevCount) {
         if (!dotEl || !navEl || !badgeEl) return;
         badgeEl.textContent = count;
-        badgeEl.style.display = count > 0 ? '' : 'none';
-        dotEl.style.display = count > 0 ? '' : 'none';
+        badgeEl.style.display = count > 0 ? "" : "none";
+        dotEl.style.display = count > 0 ? "" : "none";
         if (count > 0) {
-          navEl.classList.add('has-notif');
+          navEl.classList.add("has-notif");
         } else {
-          navEl.classList.remove('has-notif');
+          navEl.classList.remove("has-notif");
         }
         if (prevCount >= 0 && count !== prevCount) {
-          badgeEl.classList.remove('noti-badge-pulse');
+          badgeEl.classList.remove("noti-badge-pulse");
           void badgeEl.offsetWidth;
-          badgeEl.classList.add('noti-badge-pulse');
+          badgeEl.classList.add("noti-badge-pulse");
         }
       }
 
       function getActiveViewId() {
-        const active = document.querySelector('.view.active');
-        return active ? active.id.replace('view-', '') : 'catalogue';
+        const active = document.querySelector(".view.active");
+        return active ? active.id.replace("view-", "") : "catalogue";
       }
 
       function startRealtimePolling() {
@@ -3424,42 +4137,88 @@
               : `clientB2C_ID eq ${profile.ID}`;
 
             const fetches = [
-              fetch(`/odata/v4/crm/Devis?$filter=${encodeURIComponent(idField)}&$select=ID,status,totalTTC`),
-              fetch(`/odata/v4/crm/Commandes?$filter=${encodeURIComponent(idField)}&$select=ID,status,totalTTC,facture_ID`)
+              fetch(
+                `/odata/v4/crm/Devis?$filter=${encodeURIComponent(idField)}&$select=ID,status,totalTTC`,
+              ),
+              fetch(
+                `/odata/v4/crm/Commandes?$filter=${encodeURIComponent(idField)}&$select=ID,status,totalTTC,facture_ID`,
+              ),
             ];
             if (IS_B2B) {
-              fetches.push(fetch(`/odata/v4/crm/Factures?$filter=${encodeURIComponent(idField)}&$select=ID`));
+              fetches.push(
+                fetch(
+                  `/odata/v4/crm/Factures?$filter=${encodeURIComponent(idField)}&$select=ID`,
+                ),
+              );
             }
 
             const results = await Promise.all(fetches);
             const newDevis = (await results[0].json()).value || [];
             const newOrders = (await results[1].json()).value || [];
-            const newFactures = IS_B2B ? ((await results[2].json()).value || []) : [];
+            const newFactures = IS_B2B
+              ? (await results[2].json()).value || []
+              : [];
 
             const devisCount = newDevis.length;
-            const pendingCount = newDevis.filter(d => d.status === 'PENDING').length;
+            const pendingCount = newDevis.filter(
+              (d) => d.status === "PENDING",
+            ).length;
             const ordersCount = newOrders.length;
-            const confirmedCount = newOrders.filter(o => o.status === 'CONFIRMED').length;
+            const confirmedCount = newOrders.filter(
+              (o) => o.status === "CONFIRMED",
+            ).length;
             const facturesCount = newFactures.length;
-            const total = [...newDevis, ...newOrders].reduce((s, d) => s + parseFloat(d.totalTTC || 0), 0);
+            // Total TTC = somme des factures (Mes Factures)
+            const fResP = await fetch(
+              `/odata/v4/crm/Factures?$filter=${encodeURIComponent(idField)}&$select=ID,totalTTC`,
+            );
+            const facturesForTTC = (await fResP.json()).value || [];
+            const total = facturesForTTC.reduce(
+              (s, f) => s + parseFloat(f.totalTTC || 0),
+              0,
+            );
 
             // Update KPI stat cards with flash on change
-            const kpiDevis = document.getElementById('kpi-devis');
-            const kpiCommandes = document.getElementById('kpi-commandes');
-            const kpiPending = document.getElementById('kpi-pending');
-            const kpiMontant = document.getElementById('kpi-montant');
+            const kpiDevis = document.getElementById("kpi-devis");
+            const kpiCommandes = document.getElementById("kpi-commandes");
+            const kpiPending = document.getElementById("kpi-pending");
+            const kpiMontant = document.getElementById("kpi-montant");
 
             if (prevCounts.devis >= 0 && devisCount !== prevCounts.devis) {
-              kpiDevis.closest('.stat-card')?.classList.add('has-update');
-              setTimeout(() => kpiDevis.closest('.stat-card')?.classList.remove('has-update'), 1500);
+              kpiDevis.closest(".stat-card")?.classList.add("has-update");
+              setTimeout(
+                () =>
+                  kpiDevis
+                    .closest(".stat-card")
+                    ?.classList.remove("has-update"),
+                1500,
+              );
             }
-            if (prevCounts.commandes >= 0 && ordersCount !== prevCounts.commandes) {
-              kpiCommandes.closest('.stat-card')?.classList.add('has-update');
-              setTimeout(() => kpiCommandes.closest('.stat-card')?.classList.remove('has-update'), 1500);
+            if (
+              prevCounts.commandes >= 0 &&
+              ordersCount !== prevCounts.commandes
+            ) {
+              kpiCommandes.closest(".stat-card")?.classList.add("has-update");
+              setTimeout(
+                () =>
+                  kpiCommandes
+                    .closest(".stat-card")
+                    ?.classList.remove("has-update"),
+                1500,
+              );
             }
-            if (prevCounts.pending >= 0 && pendingCount !== prevCounts.pending) {
-              kpiPending.closest('.stat-card')?.classList.add('has-update');
-              setTimeout(() => kpiPending.closest('.stat-card')?.classList.remove('has-update'), 1500);
+            if (
+              prevCounts.pending >= 0 &&
+              pendingCount !== prevCounts.pending
+            ) {
+              kpiPending.closest(".stat-card")?.classList.add("has-update");
+              setTimeout(
+                () =>
+                  kpiPending
+                    .closest(".stat-card")
+                    ?.classList.remove("has-update"),
+                1500,
+              );
             }
 
             kpiDevis.textContent = devisCount;
@@ -3469,39 +4228,48 @@
 
             // Update devis nav badge + dot
             updateNavIndicator(
-              document.getElementById('devisDot'),
-              document.getElementById('nav-devis'),
-              document.getElementById('devis-badge'),
-              pendingCount, prevCounts.pending
+              document.getElementById("devisDot"),
+              document.getElementById("nav-devis"),
+              document.getElementById("devis-badge"),
+              pendingCount,
+              prevCounts.pending,
             );
 
             // Update commandes nav badge + dot
             updateNavIndicator(
-              document.getElementById('commandesDot'),
-              document.getElementById('nav-commandes'),
-              document.getElementById('commandes-badge'),
-              confirmedCount > 0 ? confirmedCount : ordersCount, prevCounts.commandes
+              document.getElementById("commandesDot"),
+              document.getElementById("nav-commandes"),
+              document.getElementById("commandes-badge"),
+              confirmedCount > 0 ? confirmedCount : ordersCount,
+              prevCounts.commandes,
             );
 
             // Update factures nav badge + dot (B2B only)
             if (IS_B2B) {
               updateNavIndicator(
-                document.getElementById('facturesDot'),
-                document.getElementById('nav-factures'),
-                document.getElementById('factures-badge'),
-                facturesCount, prevCounts.factures
+                document.getElementById("facturesDot"),
+                document.getElementById("nav-factures"),
+                document.getElementById("factures-badge"),
+                facturesCount,
+                prevCounts.factures,
               );
             }
 
-            prevCounts = { devis: devisCount, commandes: ordersCount, pending: pendingCount, factures: facturesCount };
+            prevCounts = {
+              devis: devisCount,
+              commandes: ordersCount,
+              pending: pendingCount,
+              factures: facturesCount,
+            };
 
             // Auto-refresh the currently active view silently in the background
             const activeView = getActiveViewId();
-            if (activeView === 'devis')     loadDevis(true);
-            if (activeView === 'commandes') loadCommandes(true);
-            if (activeView === 'factures')  loadFactures(true);
-
-          } catch(e) { /* silent polling error */ }
+            if (activeView === "devis") loadDevis(true);
+            if (activeView === "commandes") loadCommandes(true);
+            if (activeView === "factures") loadFactures(true);
+          } catch (e) {
+            /* silent polling error */
+          }
         }, 5000);
       }
 

@@ -19,6 +19,7 @@ export default function Commandes({
   onSubmitGR,
   submittingGR,
   onApproveDiscrepancy,
+  lang = 'FR',
 }) {
   // GR state
   const [grNotes, setGrNotes] = useState('');
@@ -142,12 +143,12 @@ export default function Commandes({
                 );
 
                 const statusColors = isSRM 
-                  ? { SENT: '#fb923c', CONFIRMED: '#38bdf8', DELIVERED: '#4ade80', CLOSED: '#94a3b8', CANCELLED: '#f87171', TO_APPROVE: '#a78bfa' }
-                  : { PENDING: '#fb923c', CONFIRMED: '#38bdf8', PAID: '#4ade80', DRAFT: '#94a3b8', SENT_TO_CLIENT: '#38bdf8' };
+                  ? { SENT: '#fb923c', CONFIRMED: '#38bdf8', DELIVERED: '#4ade80', CLOSED: '#94a3b8', CANCELLED: '#f87171', TO_APPROVE: '#a78bfa', PAID: '#4ade80', COMPLETED: '#4ade80', IN_PROGRESS: '#38bdf8' }
+                  : { PENDING: '#fb923c', CONFIRMED: '#38bdf8', PAID: '#4ade80', DRAFT: '#94a3b8', SENT_TO_CLIENT: '#38bdf8', ACCEPTED_BY_CLIENT: '#4ade80', REJECTED_BY_CLIENT: '#f87171', CANCELLED: '#f87171', COMPLETED: '#4ade80', IN_PROGRESS: '#38bdf8' };
                 
                 const statusLabels = isSRM
-                  ? { SENT: 'Envoyé', CONFIRMED: 'Accepté', DELIVERED: 'Livré', CLOSED: 'Clôturé', CANCELLED: 'Annulé', TO_APPROVE: 'Remplacement à valider' }
-                  : { PENDING: 'En attente', CONFIRMED: 'Confirmée', PAID: 'Payée', DRAFT: 'Brouillon', SENT_TO_CLIENT: 'Envoyée' };
+                  ? { SENT: 'Envoyé', CONFIRMED: 'Accepté', DELIVERED: 'Livré', CLOSED: 'Clôturé', CANCELLED: 'Annulé', TO_APPROVE: 'Réception à valider', PAID: 'Payé', COMPLETED: 'Clôturé', IN_PROGRESS: 'En cours' }
+                  : { PENDING: 'En attente', CONFIRMED: 'Confirmée', PAID: 'Payée', DRAFT: 'Brouillon', SENT_TO_CLIENT: 'Envoyée au client', ACCEPTED_BY_CLIENT: 'Acceptée', REJECTED_BY_CLIENT: 'Refusée', CANCELLED: 'Annulée', COMPLETED: 'Terminée', IN_PROGRESS: 'En cours' };
 
                 const sColor = statusColors[item.status] || '#94a3b8';
                 let sLabel = statusLabels[item.status] || item.status;
@@ -165,7 +166,7 @@ export default function Commandes({
                     <td>{typeLabel}</td>
                     <td>{item.date || item.createdAt?.slice(0, 10) || '-'}</td>
                     <td style={{ fontWeight: 700, color: 'var(--accent)' }}>
-                      {new Intl.NumberFormat('fr-FR').format(item.totalTTC || 0)} DA
+                      {new Intl.NumberFormat(lang === 'FR' ? 'fr-FR' : 'en-US').format(item.totalTTC || 0)} DA
                     </td>
                     <td>
                       <span style={{ color: sColor, fontWeight: 700 }}>
@@ -274,9 +275,21 @@ export default function Commandes({
                 <div className="info-group">
                   <label>Statut</label>
                   <p>
-                    <span className={`status-badge status-${activeOrderDetails.status?.toLowerCase()}`}>
-                      {activeOrderDetails.status}
-                    </span>
+                    {(() => {
+                      const isSRM = activeOrderDetails._type === 'SRM';
+                      const rawStatus = activeOrderDetails.status || '-';
+                      const label = isSRM 
+                        ? { SENT: 'Envoyé', CONFIRMED: 'Accepté', DELIVERED: 'Livré', CLOSED: 'Clôturé', CANCELLED: 'Annulé', TO_APPROVE: 'Réception à valider', PAID: 'Payé', COMPLETED: 'Clôturé', IN_PROGRESS: 'En cours' }[rawStatus] || rawStatus
+                        : { PENDING: 'En attente', CONFIRMED: 'Confirmée', PAID: 'Payée', DRAFT: 'Brouillon', SENT_TO_CLIENT: 'Envoyée au client', ACCEPTED_BY_CLIENT: 'Acceptée', REJECTED_BY_CLIENT: 'Refusée', CANCELLED: 'Annulée', COMPLETED: 'Terminée', IN_PROGRESS: 'En cours' }[rawStatus] || rawStatus;
+                      const allColors = isSRM
+                        ? { SENT: '#fb923c', CONFIRMED: '#38bdf8', DELIVERED: '#4ade80', CLOSED: '#94a3b8', CANCELLED: '#f87171', TO_APPROVE: '#a78bfa', PAID: '#4ade80', COMPLETED: '#4ade80', IN_PROGRESS: '#38bdf8' }
+                        : { PENDING: '#fb923c', CONFIRMED: '#38bdf8', PAID: '#4ade80', DRAFT: '#94a3b8', SENT_TO_CLIENT: '#38bdf8', ACCEPTED_BY_CLIENT: '#4ade80', REJECTED_BY_CLIENT: '#f87171', CANCELLED: '#f87171', COMPLETED: '#4ade80', IN_PROGRESS: '#38bdf8' };
+                      return (
+                        <span style={{ color: allColors[rawStatus] || '#94a3b8', fontWeight: 700 }}>
+                          {label}
+                        </span>
+                      );
+                    })()}
                   </p>
                 </div>
               </div>
@@ -298,10 +311,10 @@ export default function Commandes({
                         <td style={{ fontWeight: 600 }}>{item.description || '—'}</td>
                         <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{item.quantity}</td>
                         <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>
-                          {new Intl.NumberFormat('fr-FR').format(item.unitPrice)} DA
+                          {new Intl.NumberFormat(lang === 'FR' ? 'fr-FR' : 'en-US').format(item.unitPrice)} DA
                         </td>
                         <td style={{ textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
-                          {new Intl.NumberFormat('fr-FR').format(item.totalHT)} DA
+                          {new Intl.NumberFormat(lang === 'FR' ? 'fr-FR' : 'en-US').format(item.totalHT)} DA
                         </td>
                       </tr>
                     ))}
@@ -313,16 +326,16 @@ export default function Commandes({
               <div style={{ background: 'var(--input-bg)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border)', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
                   <span style={{ color: 'var(--text-dim)' }}>Total HT :</span>
-                  <strong id="cmd-det-total-ht">{new Intl.NumberFormat('fr-FR').format(activeOrderDetails.totalHT || 0)} DA</strong>
+                  <strong id="cmd-det-total-ht">{new Intl.NumberFormat(lang === 'FR' ? 'fr-FR' : 'en-US').format(activeOrderDetails.totalHT || 0)} DA</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
                   <span style={{ color: 'var(--text-dim)' }}>Total TVA :</span>
-                  <strong id="cmd-det-total-tva">{new Intl.NumberFormat('fr-FR').format(activeOrderDetails.totalTVA || 0)} DA</strong>
+                  <strong id="cmd-det-total-tva">{new Intl.NumberFormat(lang === 'FR' ? 'fr-FR' : 'en-US').format(activeOrderDetails.totalTVA || 0)} DA</strong>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1rem', borderTop: '1px solid var(--border)', paddingTop: '8px', marginTop: '4px' }}>
                   <span>Total TTC :</span>
                   <strong style={{ color: 'var(--accent)' }} id="cmd-det-total-ttc">
-                    {new Intl.NumberFormat('fr-FR').format(activeOrderDetails.totalTTC || 0)} DA
+                    {new Intl.NumberFormat(lang === 'FR' ? 'fr-FR' : 'en-US').format(activeOrderDetails.totalTTC || 0)} DA
                   </strong>
                 </div>
               </div>

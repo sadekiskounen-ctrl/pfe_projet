@@ -99,6 +99,11 @@ cds.on('bootstrap', (app) => {
                             .where("lower(email) =", email.toLowerCase(), "and password =", password));
                         
                         if (bp) {
+                            if (bp.status === 'BLOCKED') {
+                                console.warn(`[Custom Auth] Authentication failed: User account ${email} is BLOCKED. Block reason: ${bp.blockReason || 'None specified'}`);
+                                return res.status(403).json({ error: { message: "Ce compte a été bloqué par l'administrateur." } });
+                            }
+
                             // Map bpType to CAP roles (e.g. CLIENT_B2B -> ClientB2B, FOURNISSEUR -> Fournisseur)
                             let role = bp.bpType;
                             if (role === 'CLIENT_B2B') role = 'ClientB2B';

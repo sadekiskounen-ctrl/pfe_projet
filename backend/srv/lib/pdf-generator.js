@@ -59,8 +59,15 @@ async function generateDevisPDF(devis) {
     doc.font('Helvetica').fontSize(9).fillColor('#475569');
     doc.text(`Date d'émission : ${_formatDate(devis.date)}`);
     doc.text(`Date de validité : ${_formatDate(devis.validUntil)}`);
+    const devisStatusMap = {
+      SENT: 'Envoyé',
+      ACCEPTED: 'Accepté',
+      REJECTED: 'Refusé',
+      EXPIRED: 'Expiré',
+      CONVERTED: 'Converti'
+    };
     doc.text('Statut : ', { continued: true });
-    doc.font('Helvetica-Bold').text(String(devis.status || 'En cours'));
+    doc.font('Helvetica-Bold').text(String(devisStatusMap[devis.status] || devis.status || 'En cours'));
     const rightEndY = doc.y;
 
     // Reset coordinates
@@ -131,7 +138,16 @@ async function generateFacturePDF(facture) {
     doc.font('Helvetica').fontSize(9).fillColor('#475569');
     doc.text(`Date de facture : ${_formatDate(facture.date)}`);
     doc.text(`Date d'échéance : ${_formatDate(facture.dueDate)}`);
-    doc.text(`Statut : ${facture.status || 'N/A'}`);
+    const clientInvoiceStatusMap = {
+      UNPAID: 'Non payée',
+      PAID: 'Payée',
+      PARTIALLY_PAID: 'Partiellement payée',
+      CANCELLED: 'Annulée',
+      DRAFT: 'Brouillon',
+      SENT: 'Envoyée',
+      OVERDUE: 'En retard'
+    };
+    doc.text(`Statut : ${clientInvoiceStatusMap[facture.status] || facture.status || 'N/A'}`);
     doc.text(`Montant payé : ${_formatAmount(facture.paidAmount)} ${facture.currency_code || 'DZD'}`);
     doc.text(`Reste à payer : ${_formatAmount(facture.remainingAmount)} ${facture.currency_code || 'DZD'}`);
     const rightEndY = doc.y;
@@ -205,7 +221,13 @@ async function generateCommandePDF(commande) {
     doc.font('Helvetica').fontSize(9).fillColor('#475569');
     doc.text(`Date de commande : ${_formatDate(commande.date)}`);
     if (commande.deliveryDate) doc.text(`Date de livraison prévue : ${_formatDate(commande.deliveryDate)}`);
-    doc.text(`Statut : ${commande.status}`);
+    const clientCommandeStatusMap = {
+      PENDING: 'En attente',
+      APPROVED: 'Approuvé',
+      DELIVERED: 'Livré',
+      CANCELLED: 'Annulé'
+    };
+    doc.text(`Statut : ${clientCommandeStatusMap[commande.status] || commande.status || 'N/A'}`);
     const rightEndY = doc.y;
 
     // Reset coordinates
@@ -268,7 +290,16 @@ async function generatePOFournisseurPDF(po) {
     doc.font('Helvetica').fontSize(9).fillColor('#475569');
     doc.text(`Date de commande : ${_formatDate(po.date)}`);
     if (po.deliveryDate) doc.text(`Date de livraison prévue : ${_formatDate(po.deliveryDate)}`);
-    doc.text(`Statut : ${po.status}`);
+    const poStatusMap = {
+      SENT: 'Envoyé',
+      CONFIRMED: 'Accepté',
+      DELIVERED: 'Livré',
+      CANCELLED: 'Annulé',
+      TO_APPROVE: "En attente d'approbation",
+      PAID: 'Payé',
+      CLOSED: 'Clôturé'
+    };
+    doc.text(`Statut : ${poStatusMap[po.status] || po.status || 'N/A'}`);
     const rightEndY = doc.y;
 
     // Reset coordinates
@@ -470,8 +501,24 @@ async function generateInvoiceFournisseurPDF(invoice) {
     doc.font('Helvetica').fontSize(9).fillColor('#475569');
     doc.text(`Date de facture : ${_formatDate(invoice.date)}`);
     doc.text(`Date d'échéance : ${_formatDate(invoice.dueDate)}`);
-    doc.text(`Statut : ${invoice.status || 'N/A'}`);
-    doc.text(`Statut appariement : ${invoice.matchStatus || 'N/A'}`);
+    const supplierInvoiceStatusMap = {
+      PENDING: 'En attente',
+      APPROVED: 'Approuvée',
+      REJECTED: 'Rejetée',
+      PAID: 'Payée',
+      PENDING_CASH: "En attente d'encaissement",
+      DRAFT: 'Brouillon',
+      SENT: 'Envoyée',
+      OVERDUE: 'En retard',
+      CANCELLED: 'Annulée'
+    };
+    const matchStatusMap = {
+      PENDING: 'En attente',
+      MATCHED: 'Apparié ✓',
+      DISCREPANCY: 'Écart détecté'
+    };
+    doc.text(`Statut : ${supplierInvoiceStatusMap[invoice.status] || invoice.status || 'N/A'}`);
+    doc.text(`Statut appariement : ${matchStatusMap[invoice.matchStatus] || invoice.matchStatus || 'N/A'}`);
     const rightEndY = doc.y;
 
     // Reset coordinates

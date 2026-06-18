@@ -16,12 +16,15 @@ module.exports = cds.service.impl(async function() {
         
         try {
             // CA et Encours Client
+            // totalRevenue = uniquement les factures entièrement payées (status PAID)
             const factures = await SELECT.from(FactureClient).where(`date >= '${startDate}' AND date <= '${endDate}'`);
             let totalRevenue = 0;
             let encoursClients = 0;
             
             factures.forEach(f => {
-                totalRevenue += (f.totalTTC || 0);
+                if (f.status === 'PAID') {
+                    totalRevenue += (f.totalTTC || 0);
+                }
                 encoursClients += (f.remainingAmount || 0);
             });
             

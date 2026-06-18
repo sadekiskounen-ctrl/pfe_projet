@@ -1,6 +1,7 @@
 /**
  * PME Connect — Intercepteur d'authentification universel (Fetch & XHR)
  * Injecte l'en-tête Basic Auth de session sur les appels OData v4 et /api/*.
+ * Détecte automatiquement si l'utilisateur est bloqué et force la déconnexion.
  */
 (function() {
     function shouldInject(url) {
@@ -43,7 +44,41 @@
         return originalSend.apply(this, arguments);
     };
 
+    // 3. Vérification automatique du statut du compte (toutes les 30 secondes)
+    // Si l'admin bloque l'utilisateur, il sera déconnecté automatiquement
+    function checkAccountStatus() {
+        const currentUser = sessionStorage.getItem('currentUser');
+        const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+        console.log('[Auth Interceptor] checkAccountStatus called. currentUser:', currentUser, 'isLoggedIn:', isLoggedIn);
+        if (!currentUser || !isLoggedIn) return;
+
+        console.log('[Auth Interceptor] Fetching status for:', currentUser);
+        originalFetch(`/odata/v4/registration/checkStatus(email='${encodeURIComponent(currentUser)}',role='client')`)
+            .then(r => {
+                console.log('[Auth Interceptor] Response status:', r.status);
+                return r.json();
+            })
+            .then(raw => {
+                const data = raw.value || raw;
+                console.log('[Auth Interceptor] Status check result:', data);
+                if (data && data.status === 'BLOCKED') {
+                    console.warn('[Auth Interceptor] Compte bloqué détecté — déconnexion automatique.');
+                    // Vider la session
+                    sessionStorage.clear();
+                    // Rediriger vers la page de login avec un message de blocage
+                    const reason = encodeURIComponent(data.blockReason || "Votre compte a été suspendu par l'administrateur.");
+                    window.location.href = '/auth.html?blocked=true&reason=' + reason;
+                }
+            })
+            .catch(err => {
+                console.error('[Auth Interceptor] Erreur lors de la vérification du statut:', err);
+            });
+    }
+
     if (getAuthHeader()) {
-        console.log('[Auth Interceptor] Prêt — en-tête de sécurité disponible en session.');
+        console.log('[Auth Interceptor] Prêt — vérification du statut initial (5s) puis récurrente (30s).');
+        // Premier check après 5 secondes, puis toutes les 30 secondes
+        setTimeout(checkAccountStatus, 5000);
+        setInterval(checkAccountStatus, 30000);
     }
 })();

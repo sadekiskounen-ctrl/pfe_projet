@@ -11,7 +11,7 @@ build-parameters:
   before-all:
     - builder: custom
       commands:
-        - npm ci
+        - npm install
         - npm run frontend:install
         - npm run frontend:build
         - npx cds build --production
@@ -30,7 +30,6 @@ modules:
       - name: gestion-pme-db
       - name: gestion-pme-auth
       - name: gestion-pme-dest
-      - name: gestion-pme-ias
     provides:
       - name: srv-api
         properties:
@@ -55,13 +54,12 @@ modules:
       disk-quota: 1024M
       keep-existing-routes: true
       routes:
-        - route: "client-pme-ffbe6148trial.${default-domain}"
-        - route: "admin-pme-ffbe6148trial.${default-domain}"
+        - route: "client-pme-5ad225cetrial.${default-domain}"
+        - route: "admin-pme-5ad225cetrial.${default-domain}"
     properties:
       TENANT_HOST_PATTERN: "^(.*).cfapps.us10-001.hana.ondemand.com"
     requires:
       - name: gestion-pme-auth
-      - name: gestion-pme-ias
       - name: srv-api
         group: destinations
         properties:
@@ -102,11 +100,12 @@ modules:
       no-source: true
 
 resources:
-  # ── Réutilise l'instance HANA existante ──
+  # ── Instance HANA HDI Container gérée ──
   - name: gestion-pme-db
-    type: org.cloudfoundry.existing-service
+    type: org.cloudfoundry.managed-service
     parameters:
-      service-name: my-hana-db
+      service: hana
+      service-plan: hdi-shared
 
   # ── Nouvelle instance XSUAA dédiée avec nos rôles ──
   - name: gestion-pme-auth
@@ -131,9 +130,4 @@ resources:
     parameters:
       service-name: HTML5-APP
 
-  # ── Cloud Identity Services (IAS) ──
-  - name: gestion-pme-ias
-    type: org.cloudfoundry.managed-service
-    parameters:
-      service: identity
-      service-plan: application
+

@@ -6,6 +6,7 @@
 'use strict';
 const cds = require('@sap/cds');
 const { generatePOFournisseurPDF, generateGRFournisseurPDF, generateInvoiceFournisseurPDF } = require('../lib/pdf-generator');
+const { sendPOFournisseur, sendInvoiceFournisseur, sendGRFournisseur } = require('../lib/email-service');
 
 module.exports = class SRMService extends cds.ApplicationService {
 
@@ -831,6 +832,74 @@ module.exports = class SRMService extends cds.ApplicationService {
       } catch (e) {
         console.error('[SRM Service] Error during RFQ pre-deletion cleanup:', e);
         return req.error(500, `Erreur lors du nettoyage des dépendances de l'appel d'offres : ${e.message}`);
+      }
+    });
+
+    // ── Automatic Email Hooks ──
+    
+    // 1. Auto send PO to Supplier on conversion
+    this.after('convertRFQToPO', async (po, req) => {
+      try {
+        const poId = po.ID;
+        const fullPo = await SELECT.one.from(BonsCommande).where({ ID: poId });
+        const items = await SELECT.from(POItems).columns(i => { i('*'), i.product(p => p('*')) }).where({ parent_ID: poId });
+        const supplier = await SELECT.one.from(Fournisseurs).where({ ID: fullPo.fournisseur_ID });
+        const pdfBuffer = await generatePOFournisseurPDF({
+          ...fullPo,
+          items,
+          fournisseur: supplier
+        });
+        sendPOFournisseur(supplier.email, supplier.companyName, fullPo.poNumber, fullPo.totalTTC, 'DZD', pdfBuffer).catch((err) => {
+          console.error('Send convertRFQToPO email error in background:', err.message);
+        });
+      } catch (e) {
+        console.error('Auto send convertRFQToPO email error:', e.message);
+      }
+    });
+
+    // 2. Auto send GR to Supplier on Goods Receipt creation
+    this.after('createGoodsReceipt', async (gr, req) => {
+      try {
+        const grId = gr.ID;
+        const fullGr = await SELECT.one.from(Receptions).where({ ID: grId });
+        const po = await SELECT.one.from(BonsCommande).where({ ID: fullGr.bonCommande_ID });
+        const supplier = await SELECT.one.from(Fournisseurs).where({ ID: po.fournisseur_ID });
+        const items = await SELECT.from(ReceptionItems).columns(i => {
+          i('*');
+          i.product(p => p('*'));
+          i.poItem(pi => pi('*'));
+        }).where({ parent_ID: grId });
+        
+        const pdfBuffer = await generateGRFournisseurPDF({
+          ...fullGr,
+          items,
+          bonCommande: { ...po, fournisseur: supplier }
+        });
+        sendGRFournisseur(supplier.email, supplier.companyName, fullGr.receiptNumber, po.poNumber, pdfBuffer).catch((err) => {
+          console.error('Send createGoodsReceipt email error in background:', err.message);
+        });
+      } catch (e) {
+        console.error('Auto send createGoodsReceipt email error:', e.message);
+      }
+    });
+
+    // 3. Auto send Supplier Invoice on creation
+    this.after('createSupplierInvoice', async (invoice, req) => {
+      try {
+        const invoiceId = invoice.ID;
+        const fullInvoice = await SELECT.one.from(FacturesFournisseur).where({ ID: invoiceId });
+        const items = await SELECT.from(FactureFournisseurItems).columns(i => { i('*'), i.product(p => p('*')) }).where({ parent_ID: invoiceId });
+        const supplier = await SELECT.one.from(Fournisseurs).where({ ID: fullInvoice.fournisseur_ID });
+        const pdfBuffer = await generateInvoiceFournisseurPDF({
+          ...fullInvoice,
+          items,
+          fournisseur: supplier
+        });
+        sendInvoiceFournisseur(supplier.email, supplier.companyName, fullInvoice.invoiceNumber, fullInvoice.totalTTC, 'DZD', pdfBuffer).catch((err) => {
+          console.error('Send createSupplierInvoice email error in background:', err.message);
+        });
+      } catch (e) {
+        console.error('Auto send createSupplierInvoice email error:', e.message);
       }
     });
 

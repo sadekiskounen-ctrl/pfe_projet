@@ -4,6 +4,8 @@
 
 const cds = require('@sap/cds');
 const { generateRegistrationPDF, generateFacturePDF, generateDevisPDF, generateCommandePDF, generateInvoiceFournisseurPDF } = require('../lib/pdf-generator');
+const { sendAccountBlocked, sendAccountReactivated, sendAccountDeleted, sendFacture } = require('../lib/email-service');
+
 
 module.exports = class AdminService extends cds.ApplicationService {
 
@@ -23,18 +25,139 @@ module.exports = class AdminService extends cds.ApplicationService {
     // ── Action: Activate Business Partner ──
     this.on('activateBusinessPartner', async (req) => {
       const { bpId } = req.data;
-      await UPDATE(BusinessPartners).set({ status: 'ACTIVE' }).where({ ID: bpId });
-      await this._logAudit(req, 'STATUS_CHANGE', 'BusinessPartner', bpId, 'Activated');
-      return SELECT.one.from(BusinessPartners, bpId);
+      console.log(`[Admin Service] activateBusinessPartner received. bpId: ${bpId}`);
+
+      try {
+        // 1. Mettre à jour le Business Partner principal
+        const updatedCount = await UPDATE('sap.pme.BusinessPartner')
+          .set({ status: 'ACTIVE', blockReason: null })
+          .where({ ID: bpId });
+
+        console.log(`[Admin Service] BusinessPartner table activation result: ${updatedCount} row(s) updated.`);
+
+        // 2. Récupérer le partenaire
+        const bp = await SELECT.one.from('sap.pme.BusinessPartner').where({ ID: bpId });
+        console.log(`[Admin Service] Queried BusinessPartner after activation:`, bp);
+
+        if (bp) {
+          // 3. Propager le statut ACTIVE sur les tables spécifiques correspondantes
+          let specificUpdateCount = 0;
+          if (bp.bpType === 'CLIENT_B2B') {
+            specificUpdateCount = await UPDATE('sap.pme.crm.ClientB2B').set({ status: 'ACTIVE' }).where({ bp_ID: bpId });
+            console.log(`[Admin Service] Propagated ACTIVE to ClientB2B: ${specificUpdateCount} row(s) updated.`);
+          } else if (bp.bpType === 'CLIENT_B2C') {
+            specificUpdateCount = await UPDATE('sap.pme.crm.ClientB2C').set({ status: 'ACTIVE' }).where({ bp_ID: bpId });
+            console.log(`[Admin Service] Propagated ACTIVE to ClientB2C: ${specificUpdateCount} row(s) updated.`);
+          } else if (bp.bpType === 'FOURNISSEUR') {
+            specificUpdateCount = await UPDATE('sap.pme.srm.Fournisseur').set({ status: 'ACTIVE' }).where({ bp_ID: bpId });
+            console.log(`[Admin Service] Propagated ACTIVE to Fournisseur: ${specificUpdateCount} row(s) updated.`);
+          }
+
+          // 4. Enregistrer dans les logs d'audit
+          await this._logAudit(req, 'STATUS_CHANGE', 'BusinessPartner', bpId, 'Activated');
+
+          // 5. Envoyer l'email de réactivation
+          if (bp.email) {
+            console.log(`[Admin Service] Invoking sendAccountReactivated for email: ${bp.email}`);
+            sendAccountReactivated(bp.email, bp.displayName)
+              .then(() => {
+                console.log(`[Admin Service] Activation email successfully queued/sent to: ${bp.email}`);
+              })
+              .catch(mailErr => {
+                console.warn('[Admin Service] Échec lors de l\'envoi de l\'email de réactivation:', mailErr.message);
+              });
+          }
+        }
+      } catch (err) {
+        console.error('[Admin Service] Error during activateBusinessPartner action:', err);
+        return req.error(500, `Erreur lors de l'activation: ${err.message}`);
+      }
+
+      return SELECT.one.from('sap.pme.BusinessPartner', bpId);
+    });
+
+    // ── Event: Before Deleting Business Partner (Send deletion email) ──
+    this.before('DELETE', BusinessPartners, async (req) => {
+      const { ID } = req.data;
+      console.log(`[Admin Service] before DELETE BusinessPartners received for ID: ${ID}`);
+      if (ID) {
+        try {
+          const bp = await SELECT.one.from('sap.pme.BusinessPartner').columns('email', 'displayName').where({ ID });
+          console.log(`[Admin Service] Queried BusinessPartner for deletion email:`, bp);
+          if (bp && bp.email) {
+            console.log(`[Admin Service] Invoking sendAccountDeleted for email: ${bp.email}`);
+            sendAccountDeleted(bp.email, bp.displayName)
+              .then(() => {
+                console.log(`[Admin Service] Deletion email successfully queued/sent to: ${bp.email}`);
+              })
+              .catch(mailErr => {
+                console.warn('[Admin Service] Échec lors de l\'envoi de l\'email de suppression:', mailErr.message);
+              });
+          }
+        } catch (err) {
+          console.error('[Admin Service] Error while querying BusinessPartner for deletion email:', err.message);
+        }
+      }
     });
 
     // ── Action: Block Business Partner ──
     this.on('blockBusinessPartner', async (req) => {
       const { bpId, reason } = req.data;
-      await UPDATE(BusinessPartners).set({ status: 'BLOCKED', blockReason: reason }).where({ ID: bpId });
-      await this._logAudit(req, 'STATUS_CHANGE', 'BusinessPartner', bpId, `Blocked: ${reason}`);
-      return SELECT.one.from(BusinessPartners, bpId);
+      console.log(`[Admin Service] blockBusinessPartner received. bpId: ${bpId}, reason: ${reason}`);
+
+      try {
+        // 1. Mettre à jour le Business Partner principal
+        const updatedCount = await UPDATE('sap.pme.BusinessPartner')
+          .set({ status: 'BLOCKED', blockReason: reason })
+          .where({ ID: bpId });
+
+        console.log(`[Admin Service] BusinessPartner table update result: ${updatedCount} row(s) updated.`);
+
+        // 2. Récupérer le partenaire pour connaître son type et ses infos
+        const bp = await SELECT.one.from('sap.pme.BusinessPartner').where({ ID: bpId });
+        console.log(`[Admin Service] Queried BusinessPartner after update:`, bp);
+
+        if (bp) {
+          // 3. Propager le statut BLOCKED sur les tables spécifiques correspondantes
+          let specificUpdateCount = 0;
+          if (bp.bpType === 'CLIENT_B2B') {
+            specificUpdateCount = await UPDATE('sap.pme.crm.ClientB2B').set({ status: 'BLOCKED' }).where({ bp_ID: bpId });
+            console.log(`[Admin Service] Propagated block to ClientB2B: ${specificUpdateCount} row(s) updated.`);
+          } else if (bp.bpType === 'CLIENT_B2C') {
+            specificUpdateCount = await UPDATE('sap.pme.crm.ClientB2C').set({ status: 'BLOCKED' }).where({ bp_ID: bpId });
+            console.log(`[Admin Service] Propagated block to ClientB2C: ${specificUpdateCount} row(s) updated.`);
+          } else if (bp.bpType === 'FOURNISSEUR') {
+            specificUpdateCount = await UPDATE('sap.pme.srm.Fournisseur').set({ status: 'BLOCKED' }).where({ bp_ID: bpId });
+            console.log(`[Admin Service] Propagated block to Fournisseur: ${specificUpdateCount} row(s) updated.`);
+          }
+
+          // 4. Enregistrer dans les logs d'audit
+          await this._logAudit(req, 'STATUS_CHANGE', 'BusinessPartner', bpId, `Blocked: ${reason}`);
+
+          // 5. Envoyer le mail de notification
+          if (bp.email) {
+            console.log(`[Admin Service] Invoking sendAccountBlocked for email: ${bp.email}`);
+            sendAccountBlocked(bp.email, bp.displayName, reason)
+              .then(() => {
+                console.log(`[Admin Service] Notification email successfully queued/sent to: ${bp.email}`);
+              })
+              .catch(mailErr => {
+                console.warn('[Admin Service] Échec lors de l\'envoi de l\'email de blocage:', mailErr.message);
+              });
+          } else {
+            console.warn(`[Admin Service] BusinessPartner ${bpId} has no email configured, skipping email notification.`);
+          }
+        } else {
+          console.warn(`[Admin Service] BusinessPartner with ID ${bpId} was not found after update!`);
+        }
+      } catch (err) {
+        console.error('[Admin Service] Error during blockBusinessPartner action:', err);
+        return req.error(500, `Erreur lors du blocage: ${err.message}`);
+      }
+
+      return SELECT.one.from('sap.pme.BusinessPartner', bpId);
     });
+
 
     // ── Action: Send Notification ──
     this.on('sendNotification', async (req) => {
@@ -389,6 +512,46 @@ module.exports = class AdminService extends cds.ApplicationService {
       await this._logAudit(req, 'PAY_SUPPLIER_INVOICE', 'FactureFournisseur', invoiceId, `Supplier invoice ${invoice.invoiceNumber} paid via CARTE online. Linked PO closed.`);
 
       return SELECT.one.from(FactureFournisseur).where({ ID: invoiceId });
+    });
+
+    // ── Auto send Facture on Cash Order Validation by Admin ──
+    this.after('validateCashOrder', async (commande, req) => {
+      try {
+        const commandeId = commande.ID;
+        const fullCommande = await SELECT.one.from('sap.pme.doc.CommandeClient').where({ ID: commandeId });
+        if (fullCommande.facture_ID) {
+          const client = fullCommande.clientB2B_ID
+            ? await SELECT.one.from('sap.pme.crm.ClientB2B', fullCommande.clientB2B_ID)
+            : await SELECT.one.from('sap.pme.crm.ClientB2C', fullCommande.clientB2C_ID);
+          const clientEmail = client.email;
+          const clientName = fullCommande.clientB2B_ID
+            ? (client.contactName || client.companyName)
+            : (client.firstName || client.lastName);
+          
+          const facture = await SELECT.one.from('sap.pme.doc.FactureClient').where({ ID: fullCommande.facture_ID });
+          if (facture) {
+            const factItems = await SELECT.from('sap.pme.doc.FactureItem').where({ parent_ID: facture.ID });
+            const { Produit } = cds.entities('sap.pme');
+            for (let item of factItems) {
+              if (!item.description && item.product_ID) {
+                const prod = await SELECT.one.from(Produit).where({ ID: item.product_ID });
+                item.description = prod?.name || `Produit ${item.product_ID}`;
+              }
+            }
+            const pdfBufferFact = await generateFacturePDF({
+              ...facture,
+              items: factItems,
+              clientB2B: fullCommande.clientB2B_ID ? client : null,
+              clientB2C: !fullCommande.clientB2B_ID ? client : null
+            });
+            sendFacture(clientEmail, clientName, facture.invoiceNumber, facture.dueDate, facture.totalTTC, facture.currency_code, pdfBufferFact).catch((err) => {
+              console.error('Send validateCashOrder facture email error in background:', err.message);
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Auto send validateCashOrder email error:', e.message);
+      }
     });
 
     await super.init();

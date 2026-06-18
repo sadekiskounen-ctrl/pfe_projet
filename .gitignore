@@ -6,7 +6,14 @@ gen/
 .cdsrc-private.json
 default-*.json
 *.sqlite
+*.sqlite-shm
+*.sqlite-wal
 
+# Compiled admin dashboard assets (may contain embedded secrets)
+frontend/admin/assets/
+
+# Base64 data files
+scratch/logo_b64.txt
 # MTA
 mta_archives/
 *_mta_build_tmp

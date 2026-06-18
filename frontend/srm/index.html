@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bridgify Cloud | Portail Fournisseur</title>
+    <link rel="icon" type="image/png" href="/images/logo_round.png">
 <meta name="description" content="Portail Fournisseur Bridgify Cloud — Appels d'offres, bons de commande et suivi 3-way match.">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -709,29 +710,29 @@ input:checked + .slider-toggle:before {
     <span class="portal-badge-top" id="portalBadgeTop">FR</span>
   </div>
   <nav class="sidebar-nav">
-    <div class="nav-section-label">Tableau de bord</div>
+    <div class="nav-section-label" data-i18n="dashboardLabel">Tableau de bord</div>
     <div class="nav-item active" id="nav-dashboard" onclick="showView('dashboard',this)">
-      <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span> <span class="nav-text">Tableau de bord</span>
+      <span class="nav-icon"><i class="fas fa-tachometer-alt"></i></span> <span class="nav-text" data-i18n="dashboard">Tableau de bord</span>
     </div>
-    <div class="nav-section-label">Achats</div>
+    <div class="nav-section-label" data-i18n="achats">Achats</div>
     <div class="nav-item" id="nav-rfqs" onclick="showView('rfqs',this)">
       <span class="noti-dot dot-green" id="rfqDot" style="display:none"></span>
-      <span class="nav-icon"><i class="fas fa-file-contract"></i></span> <span class="nav-text">Appels d'Offres</span>
+      <span class="nav-icon"><i class="fas fa-file-contract"></i></span> <span class="nav-text" data-i18n="rfqs">Appels d'Offres</span>
       <span class="nav-badge noti-badge-pulse" id="rfqBadge" style="display:none">0</span>
     </div>
     <div class="nav-item" id="nav-pos" onclick="showView('pos',this)">
       <span class="noti-dot dot-purple" id="poDot" style="display:none"></span>
-      <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span> <span class="nav-text">Bons de Commande</span>
+      <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span> <span class="nav-text" data-i18n="pos">Bons de Commande</span>
       <span class="nav-badge noti-badge-pulse" id="poBadge" style="display:none">0</span>
     </div>
     <div class="nav-item" id="nav-match" onclick="showView('match',this)">
       <span class="noti-dot dot-gold" id="matchDot" style="display:none"></span>
-      <span class="nav-icon"><i class="fas fa-layer-group"></i></span> <span class="nav-text">3-Way Match</span>
+      <span class="nav-icon"><i class="fas fa-layer-group"></i></span> <span class="nav-text" data-i18n="matchTitle">3-Way Match</span>
       <span class="nav-badge noti-badge-pulse" id="matchBadge" style="display:none;background:var(--accent-gold)">0</span>
     </div>
-    <div class="nav-section-label">Mon compte</div>
+    <div class="nav-section-label" data-i18n="monCompte">Mon compte</div>
     <div class="nav-item" id="nav-profil" onclick="showView('profil',this)">
-      <span class="nav-icon"><i class="fas fa-id-card"></i></span> <span class="nav-text">Profil & KYC</span>
+      <span class="nav-icon"><i class="fas fa-id-card"></i></span> <span class="nav-text" data-i18n="profilKyc">Profil & KYC</span>
     </div>
   </nav>
   <div class="sidebar-footer">
@@ -742,14 +743,17 @@ input:checked + .slider-toggle:before {
         <div class="user-email" id="userEmailDisplay"></div>
       </div>
     </div>
-    <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+    <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="deconnexion">Déconnexion</span></button>
   </div>
 </aside>
 
 <!-- MAIN -->
 <main class="main">
   <div class="topbar">
-    <h1 class="page-title" id="pageTitle">Tableau de bord</h1>
+    <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+      <h1 class="page-title" id="pageTitle" style="flex: none; margin-right: 0;" data-i18n="dashboard">Tableau de bord</h1>
+      <span id="pageDate" style="font-size: 0.85rem; color: var(--text-dim); border-left: 1px solid var(--border); padding-left: 12px; font-weight: 500;"></span>
+    </div>
     <button class="theme-toggle-btn" onclick="toggleFioriTheme()" style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-light); color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; vertical-align: middle; margin-right: 10px;" title="Changer de thème Fiori">
         <span id="theme-icon-srm">☀️</span> <span id="theme-text-srm">Morning Horizon</span>
     </button>
@@ -762,25 +766,25 @@ input:checked + .slider-toggle:before {
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-icon" style="background:rgba(0,201,167,0.15)"><i class="fas fa-file-contract" style="color:var(--accent)"></i></div>
-          <div><div class="stat-val" id="kpi-rfqs">0</div><div class="stat-lbl">Appels d'offres ouverts</div></div>
+          <div><div class="stat-val" id="kpi-rfqs">0</div><div class="stat-lbl" data-i18n="rfqsOuverts">Appels d'offres ouverts</div></div>
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="background:rgba(108,99,255,0.15)"><i class="fas fa-clipboard-list" style="color:var(--accent2)"></i></div>
-          <div><div class="stat-val" id="kpi-pos">0</div><div class="stat-lbl">Bons de commande</div></div>
+          <div><div class="stat-val" id="kpi-pos">0</div><div class="stat-lbl" data-i18n="bonsCommande">Bons de commande</div></div>
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="background:rgba(245,166,35,0.15)"><i class="fas fa-clock" style="color:var(--accent-gold)"></i></div>
-          <div><div class="stat-val" id="kpi-pending-match">0</div><div class="stat-lbl">3-Way Match en attente</div></div>
+          <div><div class="stat-val" id="kpi-pending-match">0</div><div class="stat-lbl" data-i18n="matchEnAttente">3-Way Match en attente</div></div>
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="background:rgba(255,101,132,0.15)"><i class="fas fa-star" style="color:var(--accent-red)"></i></div>
-          <div><div class="stat-val" id="kpi-rating">—</div><div class="stat-lbl">Note fournisseur</div></div>
+          <div><div class="stat-val" id="kpi-rating">—</div><div class="stat-lbl" data-i18n="noteFournisseur">Note fournisseur</div></div>
         </div>
       </div>
       <!-- Critical alerts for delivery/reception discrepancies -->
       <div id="criticalDashboardAlerts" style="display:none; margin-bottom:20px;"></div>
       <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius);padding:24px;margin-bottom:20px">
-        <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:16px;color:var(--accent)"><i class="fas fa-bell" style="margin-right:8px"></i>Appels d'offres récents</h3>
+        <h3 style="font-size:0.9rem;font-weight:700;margin-bottom:16px;color:var(--accent)"><i class="fas fa-bell" style="margin-right:8px"></i><span data-i18n="rfqsRecents">Appels d'offres récents</span></h3>
         <div id="recentRFQs"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div></div>
       </div>
     </div>
@@ -788,18 +792,18 @@ input:checked + .slider-toggle:before {
     <!-- VIEW: RFQs -->
     <div class="view" id="view-rfqs">
       <div class="section-header">
-        <span class="section-title"><i class="fas fa-file-contract" style="color:var(--accent);margin-right:8px"></i>Appels d'Offres</span>
+        <span class="section-title"><i class="fas fa-file-contract" style="color:var(--accent);margin-right:8px"></i><span data-i18n="rfqs">Appels d'Offres</span></span>
         <select class="form-input" id="rfqStatusFilter" style="width:auto;padding:8px 14px" onchange="loadRFQs()">
-          <option value="">Tous les statuts</option>
-          <option value="OPEN">Ouverts</option>
-          <option value="CLOSED">Clôturés</option>
+          <option value="" data-i18n="tousStatuts">Tous les statuts</option>
+          <option value="OPEN" data-i18n="ouverts">Ouverts</option>
+          <option value="CLOSED" data-i18n="clotures">Clôturés</option>
         </select>
       </div>
       <div class="table-wrap">
         <table class="data-table">
           <thead><tr>
-            <th>N° RFQ</th><th>Titre</th><th>Date limite</th>
-            <th>Budget</th><th>Statut</th><th>Actions</th>
+            <th data-i18n="nRfq">N° RFQ</th><th data-i18n="titre">Titre</th><th data-i18n="dateLimite">Date limite</th>
+            <th data-i18n="budget">Budget</th><th data-i18n="statut">Statut</th><th data-i18n="actions">Actions</th>
           </tr></thead>
           <tbody id="rfqTableBody"><tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr></tbody>
         </table>
@@ -809,13 +813,13 @@ input:checked + .slider-toggle:before {
     <!-- VIEW: BONS DE COMMANDE -->
     <div class="view" id="view-pos">
       <div class="section-header">
-        <span class="section-title"><i class="fas fa-clipboard-list" style="color:var(--accent2);margin-right:8px"></i>Bons de Commande</span>
+        <span class="section-title"><i class="fas fa-clipboard-list" style="color:var(--accent2);margin-right:8px"></i><span data-i18n="pos">Bons de Commande</span></span>
       </div>
       <div class="table-wrap">
         <table class="data-table">
           <thead><tr>
-            <th>N° PO</th><th>Date</th><th>Livraison prévue</th>
-            <th>Total TTC</th><th>Statut</th><th>Actions</th>
+            <th data-i18n="nPo">N° PO</th><th data-i18n="date">Date</th><th data-i18n="livraisonPrevue">Livraison prévue</th>
+            <th data-i18n="totalTtc">Total TTC</th><th data-i18n="statut">Statut</th><th data-i18n="actions">Actions</th>
           </tr></thead>
           <tbody id="poTableBody"><tr class="empty-row"><td colspan="6"><i class="fas fa-spinner fa-spin"></i></td></tr></tbody>
         </table>
@@ -825,16 +829,16 @@ input:checked + .slider-toggle:before {
     <!-- VIEW: 3-WAY MATCH -->
     <div class="view" id="view-match">
       <div class="section-header">
-        <span class="section-title"><i class="fas fa-layer-group" style="color:var(--accent-gold);margin-right:8px"></i>Suivi 3-Way Match</span>
+        <span class="section-title"><i class="fas fa-layer-group" style="color:var(--accent-gold);margin-right:8px"></i><span data-i18n="matchTitle">Suivi 3-Way Match</span></span>
       </div>
       <div class="table-wrap">
         <table class="data-table">
           <thead><tr>
-            <th>N° Facture</th>
-            <th><i class="fas fa-clipboard-list"></i> Bon de Commande</th>
-            <th><i class="fas fa-truck"></i> Bon de Réception</th>
-            <th><i class="fas fa-file-invoice"></i> Facture</th>
-            <th>Statut Match</th><th>Montant</th><th>Actions</th>
+            <th data-i18n="nFacture">N° Facture</th>
+            <th><i class="fas fa-clipboard-list"></i> <span data-i18n="pos">Bon de Commande</span></th>
+            <th><i class="fas fa-truck"></i> <span data-i18n="bonReception">Bon de Réception</span></th>
+            <th><i class="fas fa-file-invoice"></i> <span data-i18n="facture">Facture</span></th>
+            <th data-i18n="statutMatch">Statut Match</th><th data-i18n="montant">Montant</th><th data-i18n="actions">Actions</th>
           </tr></thead>
           <tbody id="matchTableBody"><tr class="empty-row"><td colspan="7"><i class="fas fa-spinner fa-spin"></i></td></tr></tbody>
         </table>
@@ -844,28 +848,28 @@ input:checked + .slider-toggle:before {
     <!-- VIEW: PROFIL KYC -->
     <div class="view" id="view-profil">
       <div class="section-header">
-        <span class="section-title"><i class="fas fa-id-card" style="color:var(--accent);margin-right:8px"></i>Profil & KYC</span>
-        <button class="btn btn-primary" onclick="openEditProfile()"><i class="fas fa-edit"></i> Modifier</button>
+        <span class="section-title"><i class="fas fa-id-card" style="color:var(--accent);margin-right:8px"></i><span data-i18n="profilKyc">Profil & KYC</span></span>
+        <button class="btn btn-primary" onclick="openEditProfile()"><i class="fas fa-edit"></i> <span data-i18n="modifier">Modifier</span></button>
       </div>
 
       <div class="profile-section">
-        <h3><i class="fas fa-building" style="color:var(--accent)"></i> Informations Générales</h3>
+        <h3><i class="fas fa-building" style="color:var(--accent)"></i> <span data-i18n="infosGenerales">Informations Générales</span></h3>
         <div class="profile-grid" id="profileGeneral">
           <div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div>
         </div>
       </div>
       <div class="profile-section">
-        <h3><i class="fas fa-certificate" style="color:var(--accent-gold)"></i> Statut KYC</h3>
+        <h3><i class="fas fa-certificate" style="color:var(--accent-gold)"></i> <span data-i18n="kycStatus">Statut KYC</span></h3>
         <div id="kycStatus" style="padding:16px;border-radius:10px;">
           <div class="empty-state"><i class="fas fa-spinner fa-spin"></i></div>
         </div>
       </div>
       <div class="profile-section">
-        <h3><i class="fas fa-palette" style="color:var(--accent)"></i> Thème & Personnalisation</h3>
+        <h3><i class="fas fa-palette" style="color:var(--accent)"></i> <span data-i18n="themePerso">Thème & Personnalisation</span></h3>
         <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0;">
           <div>
-            <span style="font-weight: 600; display: block; color: var(--text);">Mode Sombre (Dark Mode)</span>
-            <span style="font-size: 0.85rem; color: var(--text-dim);">Activer le thème sombre pour votre portail fournisseur.</span>
+            <span style="font-weight: 600; display: block; color: var(--text);" data-i18n="modeSombre">Mode Sombre (Dark Mode)</span>
+            <span style="font-size: 0.85rem; color: var(--text-dim);" data-i18n="activerSombre">Activer le thème sombre pour votre portail fournisseur.</span>
           </div>
           <label class="switch-toggle">
             <input type="checkbox" id="darkmode-toggle-srm" onchange="toggleFioriTheme()">
@@ -878,37 +882,37 @@ input:checked + .slider-toggle:before {
   </div><!-- end content -->
 </main>
 
-<!-- MODAL: RFQ RESPONSE -->
+ <!-- MODAL: RFQ RESPONSE -->
 <div class="modal-overlay" id="rfqModal">
   <div class="modal-box" style="max-width:760px">
-    <div class="modal-title"><i class="fas fa-paper-plane" style="color:var(--accent)"></i> Soumettre une Offre</div>
+    <div class="modal-title"><i class="fas fa-paper-plane" style="color:var(--accent)"></i> <span data-i18n="soumettreOffre">Soumettre une Offre</span></div>
     <div class="modal-subtitle" id="rfqModalSubtitle">Appel d'offres — chargement...</div>
     <div class="form-grid-2" style="margin-bottom:20px">
       <div class="form-group">
-        <label>Délai de livraison (jours)</label>
+        <label data-i18n="delaiLivraison">Délai de livraison (jours)</label>
         <input type="number" class="form-input" id="resp-delivery" value="7" min="1">
       </div>
       <div class="form-group">
-        <label>Offre valide jusqu'au</label>
+        <label data-i18n="offreValide">Offre valide jusqu'au</label>
         <input type="date" class="form-input" id="resp-validUntil" disabled>
       </div>
     </div>
     <div class="form-group" style="margin-bottom:20px">
-      <label>Note commerciale (optionnel)</label>
-      <textarea class="form-input" id="resp-notes" rows="3" placeholder="Conditions particulières, remises proposées..."></textarea>
+      <label data-i18n="noteCommerciale">Note commerciale (optionnel)</label>
+      <textarea class="form-input" id="resp-notes" rows="3" data-i18n-placeholder="noteCommercialePlaceholder" placeholder="Conditions particulières, remises proposées..."></textarea>
     </div>
-    <div style="font-weight:700;font-size:0.85rem;color:var(--text-dim);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px">Articles de l'appel d'offres</div>
+    <div style="font-weight:700;font-size:0.85rem;color:var(--text-dim);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px" data-i18n="articlesRfq">Articles de l'appel d'offres</div>
     <table class="offer-items-table" id="offerItemsTable">
-      <thead><tr><th>#</th><th>Description</th><th>Qté</th><th>Prix Unitaire Proposé (DA)</th><th>Total Estimé</th></tr></thead>
+      <thead><tr><th>#</th><th data-i18n="description">Description</th><th data-i18n="qte">Qté</th><th data-i18n="prixUnitPropose">Prix Unitaire Proposé (DA)</th><th data-i18n="totalEstime">Total Estimé</th></tr></thead>
       <tbody id="offerItemsBody"></tbody>
     </table>
     <div style="display:flex;justify-content:flex-end;align-items:center;gap:20px;margin-bottom:20px;padding:16px;background:var(--bg-card2);border-radius:10px">
-      <div style="color:var(--text-dim);font-size:0.85rem">Total de votre offre :</div>
+      <div style="color:var(--text-dim);font-size:0.85rem" data-i18n="totalOffre">Total de votre offre :</div>
       <div style="font-size:1.3rem;font-weight:800;color:var(--accent)" id="offerTotal">0.00 DA</div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeRFQModal()">Annuler</button>
-      <button class="btn btn-primary" id="submitOfferBtn" onclick="submitOffer()"><i class="fas fa-paper-plane"></i> Soumettre l'offre</button>
+      <button class="btn btn-ghost" onclick="closeRFQModal()" data-i18n="annuler">Annuler</button>
+      <button class="btn btn-primary" id="submitOfferBtn" onclick="submitOffer()"><i class="fas fa-paper-plane"></i> <span data-i18n="soumettreOffreBtn">Soumettre l'offre</span></button>
     </div>
   </div>
 </div>
@@ -916,18 +920,18 @@ input:checked + .slider-toggle:before {
 <!-- MODAL: EDIT PROFILE -->
 <div class="modal-overlay" id="profileModal">
   <div class="modal-box" style="max-width:600px">
-    <div class="modal-title"><i class="fas fa-edit" style="color:var(--accent)"></i> Modifier mon profil</div>
+    <div class="modal-title"><i class="fas fa-edit" style="color:var(--accent)"></i> <span data-i18n="modifierProfil">Modifier mon profil</span></div>
     <div class="form-grid-2">
-      <div class="form-group"><label>Téléphone</label><input type="text" class="form-input" id="edit-phone" placeholder="+213..."></div>
-      <div class="form-group"><label>Wilaya</label><input type="text" class="form-input" id="edit-wilaya" placeholder="Ex: Alger"></div>
-      <div class="form-group"><label>Adresse</label><input type="text" class="form-input" id="edit-street" placeholder="Rue, N°..."></div>
-      <div class="form-group"><label>Ville</label><input type="text" class="form-input" id="edit-city" placeholder="Alger..."></div>
-      <div class="form-group"><label>Article d'Imposition</label><input type="text" class="form-input" id="edit-ai" placeholder="AI N°..."></div>
-      <div class="form-group"><label>RIB</label><input type="text" class="form-input" id="edit-rib" placeholder="00000 00000 00000000000 00"></div>
+      <div class="form-group"><label data-i18n="telephone">Téléphone</label><input type="text" class="form-input" id="edit-phone" placeholder="+213..."></div>
+      <div class="form-group"><label data-i18n="wilaya">Wilaya</label><input type="text" class="form-input" id="edit-wilaya" placeholder="Ex: Alger"></div>
+      <div class="form-group"><label data-i18n="adresse">Adresse</label><input type="text" class="form-input" id="edit-street" placeholder="Rue, N°..."></div>
+      <div class="form-group"><label data-i18n="ville">Ville</label><input type="text" class="form-input" id="edit-city" placeholder="Alger..."></div>
+      <div class="form-group"><label data-i18n="ai">Article d'Imposition</label><input type="text" class="form-input" id="edit-ai" placeholder="AI N°..."></div>
+      <div class="form-group"><label data-i18n="ribBank">RIB</label><input type="text" class="form-input" id="edit-rib" placeholder="00000 00000 00000000000 00"></div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeProfileModal()">Annuler</button>
-      <button class="btn btn-primary" onclick="saveProfile()"><i class="fas fa-save"></i> Enregistrer</button>
+      <button class="btn btn-ghost" onclick="closeProfileModal()" data-i18n="annuler">Annuler</button>
+      <button class="btn btn-primary" onclick="saveProfile()"><i class="fas fa-save"></i> <span data-i18n="enregistrer">Enregistrer</span></button>
     </div>
   </div>
 </div>
@@ -935,25 +939,25 @@ input:checked + .slider-toggle:before {
 <!-- MODAL: PO DETAILS -->
 <div class="modal-overlay" id="poModal">
   <div class="modal-box" style="max-width:700px">
-    <div class="modal-title"><i class="fas fa-clipboard-list" style="color:var(--accent2)"></i> Détails du Bon de Commande</div>
+    <div class="modal-title"><i class="fas fa-clipboard-list" style="color:var(--accent2)"></i> <span data-i18n="detailsPo">Détails du Bon de Commande</span></div>
     <div id="poModalContent"></div>
-    <div class="modal-actions"><button class="btn btn-ghost" onclick="closePOModal()">Fermer</button></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closePOModal()" data-i18n="fermer">Fermer</button></div>
   </div>
 </div>
 
 <!-- MODAL: CRÉER RÉCEPTION MARCHANDISE (GR) -->
 <div class="modal-overlay" id="grModal">
   <div class="modal-box" style="max-width:750px">
-    <div class="modal-title"><i class="fas fa-truck" style="color:var(--accent)"></i> Enregistrer la Réception (GR)</div>
+    <div class="modal-title"><i class="fas fa-truck" style="color:var(--accent)"></i> <span data-i18n="enregistrerReception">Enregistrer la Réception (GR)</span></div>
     <div class="modal-subtitle" id="grModalSubtitle">PO N° —</div>
     <div id="grItemsContainer"></div>
     <div class="form-group">
-      <label>Notes de réception</label>
-      <textarea class="form-input" id="gr-notes" rows="3" placeholder="Remarques sur la livraison..."></textarea>
+      <label data-i18n="notesReception">Notes de réception</label>
+      <textarea class="form-input" id="gr-notes" rows="3" data-i18n-placeholder="remarquesLivraisonPlaceholder" placeholder="Remarques sur la livraison..."></textarea>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeGRModal()">Annuler</button>
-      <button class="btn btn-primary" onclick="submitGR()"><i class="fas fa-check"></i> Valider la réception</button>
+      <button class="btn btn-ghost" onclick="closeGRModal()" data-i18n="annuler">Annuler</button>
+      <button class="btn btn-primary" onclick="submitGR()"><i class="fas fa-check"></i> <span data-i18n="validerReception">Valider la réception</span></button>
     </div>
   </div>
 </div>
@@ -961,12 +965,12 @@ input:checked + .slider-toggle:before {
 <!-- MODAL: RÉSOUDRE L'ÉCART (RENVOYER MARCHANDISE) -->
 <div class="modal-overlay" id="resolveDiscrepancyModal">
   <div class="modal-box" style="max-width:750px">
-    <div class="modal-title"><i class="fas fa-truck-loading" style="color:var(--accent)"></i> Renvoyer la marchandise</div>
+    <div class="modal-title"><i class="fas fa-truck-loading" style="color:var(--accent)"></i> <span data-i18n="renvoyerMarchandise">Renvoyer la marchandise</span></div>
     <div class="modal-subtitle" id="resolveModalSubtitle">Résolution de l'écart pour le PO N° —</div>
     <div id="resolveItemsContainer"></div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeResolveDiscrepancyModal()">Annuler</button>
-      <button class="btn btn-primary" onclick="submitResolveDiscrepancy()"><i class="fas fa-paper-plane"></i> Confirmer le renvoi</button>
+      <button class="btn btn-ghost" onclick="closeResolveDiscrepancyModal()" data-i18n="annuler">Annuler</button>
+      <button class="btn btn-primary" onclick="submitResolveDiscrepancy()"><i class="fas fa-paper-plane"></i> <span data-i18n="confirmerRenvoi">Confirmer le renvoi</span></button>
     </div>
   </div>
 </div>
@@ -974,27 +978,27 @@ input:checked + .slider-toggle:before {
 <!-- MODAL: CRÉER FACTURE FOURNISSEUR -->
 <div class="modal-overlay" id="supplierInvoiceModal">
   <div class="modal-box" style="max-width:750px">
-    <div class="modal-title"><i class="fas fa-file-invoice" style="color:var(--accent-gold)"></i> Créer une Facture Fournisseur</div>
+    <div class="modal-title"><i class="fas fa-file-invoice" style="color:var(--accent-gold)"></i> <span data-i18n="creerFacture">Créer une Facture Fournisseur</span></div>
     <div class="modal-subtitle" id="invoiceModalSubtitle">PO N° —</div>
     <div id="invoiceItemsContainer"></div>
     <div class="form-grid-2">
       <div class="form-group">
-        <label>Date d'échéance</label>
+        <label data-i18n="dateEcheance">Date d'échéance</label>
         <input type="date" class="form-input" id="inv-dueDate">
       </div>
       <div class="form-group">
-        <label>Notes</label>
-        <input type="text" class="form-input" id="inv-notes" placeholder="Référence facture...">
+        <label data-i18n="notes">Notes</label>
+        <input type="text" class="form-input" id="inv-notes" data-i18n-placeholder="refFacturePlaceholder" placeholder="Référence facture...">
       </div>
     </div>
     <div style="display:flex;justify-content:flex-end;gap:16px;padding:14px;background:var(--bg-card2);border-radius:10px;margin-bottom:16px">
-      <div><span style="color:var(--text-dim);font-size:0.82rem">Total HT : </span><strong id="inv-totalHT">0,00</strong> DA</div>
-      <div><span style="color:var(--text-dim);font-size:0.82rem">TVA : </span><strong id="inv-totalTVA">0,00</strong> DA</div>
-      <div style="font-size:1.1rem"><span style="color:var(--text-dim);font-size:0.82rem">Total TTC : </span><strong style="color:var(--accent)" id="inv-totalTTC">0,00</strong> DA</div>
+      <div><span style="color:var(--text-dim);font-size:0.82rem" data-i18n="totalHTLabel">Total HT : </span><strong id="inv-totalHT">0,00</strong> DA</div>
+      <div><span style="color:var(--text-dim);font-size:0.82rem" data-i18n="tvaLabel">TVA : </span><strong id="inv-totalTVA">0,00</strong> DA</div>
+      <div style="font-size:1.1rem"><span style="color:var(--text-dim);font-size:0.82rem" data-i18n="totalTTCLabel">Total TTC : </span><strong style="color:var(--accent)" id="inv-totalTTC">0,00</strong> DA</div>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeInvoiceModal()">Annuler</button>
-      <button class="btn btn-primary" id="submitInvoiceBtn" onclick="submitSupplierInvoice()"><i class="fas fa-paper-plane"></i> Soumettre la facture</button>
+      <button class="btn btn-ghost" onclick="closeInvoiceModal()" data-i18n="annuler">Annuler</button>
+      <button class="btn btn-primary" id="submitInvoiceBtn" onclick="submitSupplierInvoice()"><i class="fas fa-paper-plane"></i> <span data-i18n="soumettreFactureBtn">Soumettre la facture</span></button>
     </div>
   </div>
 </div>
@@ -1069,7 +1073,13 @@ function showView(id, navEl) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('view-' + id)?.classList.add('active');
   if (navEl) navEl.classList.add('active');
-  const titles = { dashboard:'Tableau de bord', rfqs:'Appels d\'Offres', pos:'Bons de Commande', match:'Suivi 3-Way Match', profil:'Profil & KYC' };
+  const titles = {
+    dashboard: translateSRMText('dashboard'),
+    rfqs: translateSRMText('rfqs'),
+    pos: translateSRMText('pos'),
+    match: translateSRMText('matchTitle'),
+    profil: translateSRMText('profilKyc')
+  };
   document.getElementById('pageTitle').textContent = titles[id] || '';
   if (id === 'rfqs')    loadRFQs();
   if (id === 'pos')     loadPOs();
@@ -1080,6 +1090,212 @@ function showView(id, navEl) {
 // ═══════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════
+// LANGUAGE I18N SYSTEM
+// ═══════════════════════════════════════════════════════
+const translations = {
+  FR: {
+    dashboardLabel: "Tableau de bord",
+    dashboard: "Tableau de bord",
+    achats: "Achats",
+    rfqs: "Appels d'Offres",
+    pos: "Bons de Commande",
+    matchTitle: "3-Way Match",
+    monCompte: "Mon compte",
+    profilKyc: "Profil & KYC",
+    deconnexion: "Déconnexion",
+    rfqsOuverts: "Appels d'offres ouverts",
+    bonsCommande: "Bons de commande",
+    matchEnAttente: "3-Way Match en attente",
+    noteFournisseur: "Note fournisseur",
+    rfqsRecents: "Appels d'offres récents",
+    tousStatuts: "Tous les statuts",
+    ouverts: "Ouverts",
+    clotures: "Clôturés",
+    nRfq: "N° RFQ",
+    titre: "Titre",
+    dateLimite: "Date limite",
+    budget: "Budget",
+    statut: "Statut",
+    actions: "Actions",
+    nPo: "N° PO",
+    date: "Date",
+    livraisonPrevue: "Livraison prévue",
+    totalTtc: "Total TTC",
+    nFacture: "N° Facture",
+    statutMatch: "Statut Match",
+    montant: "Montant",
+    profilNonDispo: "Profil non disponible",
+    raisonSociale: "Raison Sociale",
+    secteur: "Secteur",
+    telephone: "Téléphone",
+    rc: "RC (Reg. Commerce)",
+    nif: "NIF (Fiscal)",
+    ribBank: "RIB (Banque)",
+    ai: "AI (Imposition)",
+    adresse: "Adresse",
+    ville: "Ville",
+    wilaya: "Wilaya",
+    valide: "Validé",
+    rejete: "Rejeté",
+    enAttente: "En attente",
+    kycValideDesc: "Validé le {date} par {admin}",
+    kycRejeteDesc: "Dossier rejeté. Contactez l'administrateur.",
+    kycAttenteDesc: "Votre dossier est en cours d'examen par l'administrateur.",
+    profileUpdated: "Profil mis à jour avec succès",
+    aucunRfq: "Aucun appel d'offres.",
+    ouvert: "Ouvert",
+    cloture: "Clôturé",
+    repondre: "Répondre",
+    nonDefini: "Non défini",
+    rfqSansArticles: "Cet appel d'offres n'a pas d'articles.",
+    aucunPo: "Aucun bon de commande.",
+    sent: "Envoyé",
+    confirmed: "Accepté",
+    delivered: "Livré",
+    cancelled: "Annulé",
+    toApprove: "Renvoyé — en attente d'approbation",
+    paid: "Payé",
+    closed: "Clôturé",
+    voir: "Voir",
+    accepter: "Accepter",
+    soumettreFacture: "Soumettre Facture 🔔",
+    ecartReception: "⚠️ ÉCART DE RÉCEPTION",
+    grValidee: "GR VALIDÉE ✓",
+    aucuneFacture: "Aucune facture à apparier.",
+    apparie: "Apparié ✓",
+    ecartDetecte: "Écart détecté",
+    aucunPoLabel: "Aucun PO",
+    reste: "Reste",
+    confirmerEncaissement: "Confirmer encaissement",
+    encaisse: "Encaissé",
+    urgent: "Urgent",
+    aucunRfqOuvert: "Aucun appel d'offres ouvert.",
+    sansTitre: "Sans titre",
+    limite: "Limite",
+    consulterDetails: "Consulter les détails",
+    renvoyerMarchandise: "Renvoyer la marchandise",
+    telechargerPdfGr: "Télécharger le Bon de Réception (PDF)",
+    marchandiseRenvoyeeTitle: "🔄 MARCHANDISE RENVOYÉE - EN ATTENTE DE VALIDATION",
+    marchandiseRenvoyeeDesc: "Le renvoi de marchandise pour le bon de commande N° <strong>{poNum}</strong> a été enregistré. Le processus reprendra dès que l'administration aura physiquement vérifié et approuvé la réception.",
+    ecartLivraisonTitle: "🚨 ALERTE CRITIQUE : ÉCART DE LIVRAISON CONSTATÉ",
+    ecartLivraisonDesc: "Des anomalies ont été enregistrées par l'administration lors de la réception du bon de commande N° <strong>{poNum}</strong> :",
+    piecesManquantes: "pièces manquantes (non livrées)",
+    piecesRejetees: "pièces rejetées par l'administration",
+    themePerso: "Thème & Personnalisation",
+    modeSombre: "Mode Sombre (Dark Mode)",
+    activerSombre: "Activer le thème sombre pour votre portail fournisseur.",
+    modifier: "Modifier",
+    enregistrer: "Enregistrer",
+    
+    // Modals & Dynamic Texts
+    soumettreOffre: "Soumettre une Offre",
+    delaiLivraison: "Délai de livraison (jours)",
+    offreValide: "Offre valide jusqu'au",
+    noteCommerciale: "Note commerciale (optionnel)",
+    noteCommercialePlaceholder: "Conditions particulières, remises proposées...",
+    articlesRfq: "Articles de l'appel d'offres",
+    prixUnitPropose: "Prix Unitaire Proposé (DA)",
+    totalEstime: "Total Estimé",
+    totalOffre: "Total de votre offre :",
+    soumettreOffreBtn: "Soumettre l'offre",
+    modifierProfil: "Modifier mon profil",
+    detailsPo: "Détails du Bon de Commande",
+    fermer: "Fermer",
+    historiqueGr: "Historique des Réceptions (GR)",
+    commande: "Commandé",
+    recu: "Reçu",
+    accepte: "Accepté",
+    rejete: "Rejeté",
+    statutResolution: "Statut de résolution :",
+    remplacementRenvoyeDesc: "La marchandise de remplacement a été renvoyée. En attente de validation par l'administration.",
+    alerteEcart: "Alerte Écart de Réception :",
+    piecesManquantesDesc: "pièce(s) manquante(s) (non livrée(s))",
+    piecesRejeteesDesc: "pièce(s) rejetée(s) par l'administrateur",
+    renvoyerMarchandiseAction: "Renvoyer la marchandise (Résoudre l'écart)",
+    dateLivraison: "Date livraison",
+    totalHt: "Total HT",
+    enregistrerReception: "Enregistrer la Réception (GR)",
+    notesReception: "Notes de réception",
+    remarquesLivraisonPlaceholder: "Remarques sur la livraison...",
+    validerReception: "Valider la réception",
+    qteCommandee: "Qté commandée",
+    qteRecue: "Qté reçue",
+    qteAcceptee: "Qté acceptée",
+    qteRejetee: "Qté rejetée",
+    confirmerRenvoi: "Confirmer le renvoi",
+    resolutionEcartPo: "Résolution de l'écart pour le PO N° {poNum}",
+    ecartMax: "Écart (Max)",
+    qteRenvoyee: "Quantité Renvoyée",
+    creerFacture: "Créer une Facture Fournisseur",
+    dateEcheance: "Date d'échéance",
+    refFacturePlaceholder: "Référence facture...",
+    totalHTLabel: "Total HT : ",
+    tvaLabel: "TVA : ",
+    totalTTCLabel: "Total TTC : ",
+    soumettreFactureBtn: "Soumettre la facture",
+    puHt: "Prix unitaire HT",
+    valeurInvalideQty: "Veuillez saisir une quantité valide pour {desc}",
+    valeurDepasseEcart: "La quantité pour {desc} ne peut pas dépasser l'écart de {max}",
+    renvoyerAuMoinsUnArticle: "Veuillez renvoyer au moins un article avec une quantité supérieure à 0.",
+    renvoiEnregistre: "Le renvoi de la marchandise a été enregistré. En attente de validation administrative.",
+    profilNonCharge: "Profil non chargé",
+    verifierPrixZero: "Veuillez vérifier les prix — certains sont à 0.",
+    offreSoumiseSucces: "Offre soumise avec succès !",
+    confirmCashReceiptMsg: "Confirmer la réception du paiement en espèces pour la facture {num} ?\nCela clôturera officiellement la transaction.",
+    confirmation: "Confirmation",
+    paiementConfirme: "Paiement en espèces pour la facture {invNum} confirmé avec succès !",
+    poAccepteSucces: "Bon de commande accepté avec succès !",
+    receptionEnregistree: "Réception {num} enregistrée avec succès",
+    matchAutomatique: "✓ Apparié automatiquement (conforme)",
+    ecartDetecteAttente: "⚠️ Écart détecté — en attente de résolution",
+    factureCreee: "Facture {num} créée. {msg}",
+    confirmLogoutMsg: "Déconnexion ?",
+    voirDetails: "Consulter les détails",
+    kycDatePar: "Validé le {date} par {admin}",
+    infosGenerales: "Informations Générales",
+    bonReception: "Bon de Réception",
+    facture: "Facture",
+    statutMatch: "Statut Match",
+    modifier: "Modifier",
+    enregistrer: "Enregistrer"
+  }
+};;
+
+function getSRMCurrentLang() {
+  return 'FR';
+}
+
+function translateSRMText(key) {
+  const lang = getSRMCurrentLang();
+  return (translations[lang] || translations['FR'])[key] || key;
+}
+
+function toggleLanguage() {
+  // no-op
+}
+
+function initLanguage() {
+  const current = getSRMCurrentLang();
+  const btnText = document.getElementById('lang-btn-text');
+  if (btnText) btnText.textContent = current;
+
+  // update supplier-badge
+  const supBadge = document.querySelector('.supplier-badge');
+  if (supBadge) supBadge.textContent = current === 'FR' ? 'FOURNISSEUR' : 'SUPPLIER';
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = translateSRMText(key);
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    el.placeholder = translateSRMText(key);
+  });
+}
+
 function initTheme() {
   const isDark = localStorage.getItem('theme-dark') === 'true';
   const headerIcon = document.getElementById('theme-icon-srm');
@@ -1106,6 +1322,11 @@ function toggleFioriTheme() {
 }
 
 async function init() {
+  initLanguage();
+  const pageDateEl = document.getElementById('pageDate');
+  if (pageDateEl) {
+    pageDateEl.textContent = new Date().toLocaleDateString(getSRMCurrentLang() === 'FR' ? 'fr-FR' : 'en-US');
+  }
   initTheme();
   showLoader(true);
   try {
@@ -1167,16 +1388,16 @@ async function loadDashboard() {
                 <i class="fas fa-truck-loading"></i>
               </div>
               <div style="text-align: left;">
-                <h4 style="color:#1e3a8a; font-size:1.05rem; font-weight:800; margin:0 0 4px 0; letter-spacing:-0.2px">🔄 MARCHANDISE RENVOYÉE - EN ATTENTE DE VALIDATION</h4>
+                <h4 style="color:#1e3a8a; font-size:1.05rem; font-weight:800; margin:0 0 4px 0; letter-spacing:-0.2px">${translateSRMText("marchandiseRenvoyeeTitle")}</h4>
                 <p style="color:#1e3a8a; font-size:0.88rem; margin:0; line-height:1.4">
-                  Le renvoi de marchandise pour le bon de commande N° <strong>${po.poNumber}</strong> a été enregistré. Le processus reprendra dès que l'administration aura physiquement vérifié et approuvé la réception.
+                  ${translateSRMText("marchandiseRenvoyeeDesc").replace("{poNum}", po.poNumber)}
                 </p>
                 <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
-                  <button class="btn btn-accent2 btn-sm" onclick="viewPO('${po.ID}')" style="background:#3b82f6; color:white; font-weight:700; border-color:#3b82f6;"><i class="fas fa-search"></i> Consulter les détails</button>
+                  <button class="btn btn-accent2 btn-sm" onclick="viewPO('${po.ID}')" style="background:#3b82f6; color:white; font-weight:700; border-color:#3b82f6;"><i class="fas fa-search"></i> ${translateSRMText("consulterDetails")}</button>
                 </div>
               </div>
             </div>
-            <span style="background:#dbeafe; border:1px solid #bfdbfe; color:#1e40af; font-size:0.7rem; font-weight:800; padding:4px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px">En attente</span>
+            <span style="background:#dbeafe; border:1px solid #bfdbfe; color:#1e40af; font-size:0.7rem; font-weight:800; padding:4px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px">${translateSRMText("enAttente")}</span>
           </div>
         </div>
       `;
@@ -1210,22 +1431,22 @@ async function loadDashboard() {
                   <i class="fas fa-exclamation-triangle"></i>
                 </div>
                 <div style="text-align: left;">
-                  <h4 style="color:#991b1b; font-size:1.05rem; font-weight:800; margin:0 0 4px 0; letter-spacing:-0.2px">🚨 ALERTE CRITIQUE : ÉCART DE LIVRAISON CONSTATÉ</h4>
+                  <h4 style="color:#991b1b; font-size:1.05rem; font-weight:800; margin:0 0 4px 0; letter-spacing:-0.2px">${translateSRMText("ecartLivraisonTitle")}</h4>
                   <p style="color:#7f1d1d; font-size:0.88rem; margin:0 0 8px 0; line-height:1.4">
-                    Des anomalies ont été enregistrées par l'administration lors de la réception du bon de commande N° <strong>${po.poNumber}</strong> :
+                    ${translateSRMText("ecartLivraisonDesc").replace("{poNum}", po.poNumber)}
                     <ul style="margin:4px 0 8px 16px; padding:0; font-size:0.85rem; color:#7f1d1d">
-                      ${totalMissing > 0 ? `<li><strong>${totalMissing} pièces manquantes</strong> (non livrées)</li>` : ''}
-                      ${totalRejected > 0 ? `<li><strong>${totalRejected} pièces rejetées</strong> par l'administration</li>` : ''}
+                      ${totalMissing > 0 ? `<li><strong>${totalMissing} ${translateSRMText("piecesManquantes")}</strong></li>` : ''}
+                      ${totalRejected > 0 ? `<li><strong>${totalRejected} ${translateSRMText("piecesRejetees")}</strong></li>` : ''}
                     </ul>
                   </p>
                   <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                    <button class="btn btn-accent2 btn-sm" onclick="viewPO('${po.ID}')" style="background:#dc2626; color:white; font-weight:700; border-color:#dc2626;"><i class="fas fa-search"></i> Consulter les détails</button>
-                    <button class="btn btn-accent2 btn-sm" onclick="openResolveDiscrepancyModal('${po.ID}', '${po.poNumber}')" style="background:#10b981; color:white; font-weight:700; border-color:#10b981; display:inline-flex; align-items:center; gap:6px; cursor:pointer;"><i class="fas fa-truck"></i> Renvoyer la marchandise</button>
-                    <button class="btn btn-ghost btn-sm" onclick="viewGRPDF('${po.receptions[0].ID}', '${po.receptions[0].receiptNumber}')" style="color:#991b1b; font-weight:700; padding: 0;"><i class="fas fa-file-pdf"></i> Télécharger le Bon de Réception (PDF)</button>
+                    <button class="btn btn-accent2 btn-sm" onclick="viewPO('${po.ID}')" style="background:#dc2626; color:white; font-weight:700; border-color:#dc2626;"><i class="fas fa-search"></i> ${translateSRMText("consulterDetails")}</button>
+                    <button class="btn btn-accent2 btn-sm" onclick="openResolveDiscrepancyModal('${po.ID}', '${po.poNumber}')" style="background:#10b981; color:white; font-weight:700; border-color:#10b981; display:inline-flex; align-items:center; gap:6px; cursor:pointer;"><i class="fas fa-truck"></i> ${translateSRMText("renvoyerMarchandise")}</button>
+                    <button class="btn btn-ghost btn-sm" onclick="viewGRPDF('${po.receptions[0].ID}', '${po.receptions[0].receiptNumber}')" style="color:#991b1b; font-weight:700; padding: 0;"><i class="fas fa-file-pdf"></i> ${translateSRMText("telechargerPdfGr")}</button>
                   </div>
                 </div>
               </div>
-              <span style="background:#fee2e2; border:1px solid #fca5a5; color:#b91c1c; font-size:0.7rem; font-weight:800; padding:4px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px">Urgent</span>
+              <span style="background:#fee2e2; border:1px solid #fca5a5; color:#b91c1c; font-size:0.7rem; font-weight:800; padding:4px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:0.5px">${translateSRMText("urgent")}</span>
             </div>
           </div>
         `;
@@ -1245,23 +1466,25 @@ async function loadDashboard() {
 
   // Recent RFQs on dashboard
   const container = document.getElementById('recentRFQs');
-  if (!rfqsList.length) {
-    container.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>Aucun appel d\'offres ouvert.</p></div>';
-  } else {
-    container.innerHTML = rfqsList.slice(0, 5).map(r => {
-      const computedBudget = (r.items && r.items.length > 0)
-        ? r.items.reduce((s, item) => s + ((parseFloat(item.quantity) || 0) * (parseFloat(item.targetPrice) || 0)), 0)
-        : (parseFloat(r.totalBudget) || 0);
-      return `
-      <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border-light)">
-        <div style="flex:1">
-          <div style="font-weight:700;font-size:0.88rem">${r.title || 'Sans titre'}</div>
-          <div style="font-size:0.75rem;color:var(--text-dim);margin-top:3px">Limite : ${fmtDate(r.deadline)} · Budget : ${fmt(computedBudget)} DA</div>
+  if (container) {
+    if (!rfqsList.length) {
+      container.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><p>${translateSRMText("aucunRfqOuvert")}</p></div>`;
+    } else {
+      container.innerHTML = rfqsList.slice(0, 5).map(r => {
+        const computedBudget = (r.items && r.items.length > 0)
+          ? r.items.reduce((s, item) => s + ((parseFloat(item.quantity) || 0) * (parseFloat(item.targetPrice) || 0)), 0)
+          : (parseFloat(r.totalBudget) || 0);
+        return `
+        <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border-light)">
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:0.88rem">${r.title || translateSRMText("sansTitre")}</div>
+            <div style="font-size:0.75rem;color:var(--text-dim);margin-top:3px">${translateSRMText("limite")} : ${fmtDate(r.deadline)} · ${translateSRMText("budget")} : ${fmt(computedBudget)} DA</div>
+          </div>
+          <span class="badge badge-open">${translateSRMText("ouvert").toUpperCase()}</span>
+          <button class="btn btn-primary btn-sm" onclick="openRFQModal('${r.ID}')"><i class="fas fa-reply"></i> ${translateSRMText("repondre")}</button>
         </div>
-        <span class="badge badge-open">OUVERT</span>
-        <button class="btn btn-primary btn-sm" onclick="openRFQModal('${r.ID}')"><i class="fas fa-reply"></i> Répondre</button>
-      </div>
-    `; }).join('');
+      `; }).join('');
+    }
   }
 }
 
@@ -1279,23 +1502,23 @@ async function loadRFQs(isSilent = false) {
     const res  = await fetch(url);
     const data = await res.json();
     rfqsList = data.value || [];
-    if (!rfqsList.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>Aucun appel d\'offres.</td></tr>'; return; }
+    if (!rfqsList.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>${translateSRMText('aucunRfq')}</td></tr>`; return; }
     tbody.innerHTML = rfqsList.map(r => {
       const isOpen = r.status === 'OPEN' || !r.status;
-      const action = isOpen ? `<button class="btn btn-primary btn-sm" onclick="openRFQModal('${r.ID}')"><i class="fas fa-reply"></i> Répondre</button>` : '<span style="color:var(--text-dim);font-size:0.8rem">Clôturé</span>';
+      const action = isOpen ? `<button class="btn btn-primary btn-sm" onclick="openRFQModal('${r.ID}')"><i class="fas fa-reply"></i> ${translateSRMText('repondre')}</button>` : `<span style="color:var(--text-dim);font-size:0.8rem">${translateSRMText('cloture')}</span>`;
       
       // Calculate total budget dynamically from item target prices and quantities for maximum compatibility
       const computedBudget = (r.items && r.items.length > 0)
-        ? r.items.reduce((s, item) => s + ((parseFloat(item.quantity) || 0) * (parseFloat(item.targetPrice) || 0)), 0)
-        : (parseFloat(r.totalBudget) || 0);
-      const budgetDisplay = (computedBudget > 0) ? `${fmt(computedBudget)} DA` : '<span style="color:var(--text-dim)">Non défini</span>';
+         ? r.items.reduce((s, item) => s + ((parseFloat(item.quantity) || 0) * (parseFloat(item.targetPrice) || 0)), 0)
+         : (parseFloat(r.totalBudget) || 0);
+      const budgetDisplay = (computedBudget > 0) ? `${fmt(computedBudget)} DA` : `<span style="color:var(--text-dim)">${translateSRMText('nonDefini')}</span>`;
       
       return `<tr>
         <td style="font-family:monospace;font-weight:600">${r.rfqNumber||'—'}</td>
         <td style="font-weight:700">${r.title||'—'}</td>
         <td>${fmtDate(r.deadline)}</td>
         <td style="color:var(--accent-gold);font-weight:700">${budgetDisplay}</td>
-        <td><span class="badge ${isOpen?'badge-open':'badge-closed'}">${isOpen?'Ouvert':'Clôturé'}</span></td>
+        <td><span class="badge ${isOpen?'badge-open':'badge-closed'}">${isOpen ? translateSRMText('ouvert') : translateSRMText('cloture')}</span></td>
         <td>${action}</td>
       </tr>`;
     }).join('');
@@ -1306,7 +1529,7 @@ async function openRFQModal(rfqId) {
   showLoader(true);
   try {
     const res  = await fetch(`/odata/v4/srm/RFQs(ID=${rfqId})?$expand=items`);
-    if (!res.ok) throw new Error('Chargement RFQ échoué');
+    if (!res.ok) throw new Error(getSRMCurrentLang() === 'FR' ? 'Chargement RFQ échoué' : 'Loading RFQ failed');
     currentRFQ = await res.json();
 
     // Titre en gras, sans "Limite : XX/XX"
@@ -1322,12 +1545,12 @@ async function openRFQModal(rfqId) {
 
     const tbody = document.getElementById('offerItemsBody');
     const items = currentRFQ.items || [];
-    if (!items.length) { toast('error', 'Cet appel d\'offres n\'a pas d\'articles.'); return; }
+    if (!items.length) { toast('error', translateSRMText('rfqSansArticles')); return; }
     // Prix unitaire proposé — saisie éditable par le fournisseur
     tbody.innerHTML = items.map((item, i) => `
       <tr>
         <td>${i+1}</td>
-        <td style="font-weight:600">${item.description||'Article '+(i+1)}</td>
+        <td style="font-weight:600">${item.description||(getSRMCurrentLang() === 'FR' ? 'Article ' : 'Item ') + (i+1)}</td>
         <td style="font-family:monospace">${item.quantity} ${item.unit||''}</td>
         <td>
           <input type="number" class="price-input" id="price-${item.ID}"
@@ -1363,17 +1586,18 @@ function recalcOffer() {
 function closeRFQModal() { document.getElementById('rfqModal').classList.remove('open'); currentRFQ = null; }
 
 async function submitOffer() {
-  if (!profile) { toast('error', 'Profil non chargé'); return; }
+  if (!profile) { toast('error', translateSRMText('profilNonCharge')); return; }
   const items = (currentRFQ?.items || []).map(item => {
     const priceEl = document.getElementById(`price-${item.ID}`);
     // Utiliser le prix proposé saisi par le fournisseur
     const price = parseFloat(priceEl?.value || 0);
     return { rfqItemId: item.ID, unitPrice: price, notes: '' };
   });
-  if (items.some(i => i.unitPrice <= 0)) { toast('error', 'Veuillez vérifier les prix — certains sont à 0.'); return; }
+  if (items.some(i => i.unitPrice <= 0)) { toast('error', translateSRMText('verifierPrixZero')); return; }
 
   const btn = document.getElementById('submitOfferBtn');
-  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+  btn.disabled = true; 
+  btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${getSRMCurrentLang() === 'FR' ? 'Envoi...' : 'Sending...'}`;
   showLoader(true);
   try {
     const res = await fetch('/odata/v4/srm/submitRFQResponse', {
@@ -1389,14 +1613,14 @@ async function submitOffer() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message || 'Erreur serveur');
-    toast('success', 'Offre soumise avec succès !');
+    toast('success', translateSRMText('offreSoumiseSucces'));
     closeRFQModal();
     loadRFQs();
   } catch(e) { toast('error', e.message); }
   finally {
     showLoader(false);
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Soumettre l\'offre';
+    btn.innerHTML = `<i class="fas fa-paper-plane"></i> ${translateSRMText('soumettreOffreBtn')}`;
   }
 }
 
@@ -1417,37 +1641,51 @@ async function loadPOs(isSilent = false) {
     ]);
     if (!poRes.ok) {
       const err = await poRes.json().catch(() => ({}));
-      throw new Error(err.error?.message || "Erreur de chargement des commandes");
+      throw new Error(err.error?.message || (getSRMCurrentLang() === 'FR' ? "Erreur de chargement des commandes" : "Error loading purchase orders"));
     }
     if (!factRes.ok) {
       const err = await factRes.json().catch(() => ({}));
-      throw new Error(err.error?.message || "Erreur de chargement des factures");
+      throw new Error(err.error?.message || (getSRMCurrentLang() === 'FR' ? "Erreur de chargement des factures" : "Error loading invoices"));
     }
     const data = await poRes.json();
     const factData = await factRes.json();
     posList = data.value || [];
     const invoicedPoIds = (factData.value || []).map(f => f.bonCommande_ID).filter(Boolean);
-    if (!posList.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="6"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>Aucun bon de commande.</td></tr>'; return; }
-    const statusMap = { SENT:'badge-pending', CONFIRMED:'badge-confirmed', DELIVERED:'badge-matched', CANCELLED:'badge-closed', TO_APPROVE:'badge-pending' };
+    if (!posList.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="6"><i class="fas fa-inbox" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>${translateSRMText('aucunPo')}</td></tr>`; return; }
+    const statusMap = {
+      SENT:       'badge-pending',
+      CONFIRMED:  'badge-confirmed',
+      DELIVERED:  'badge-matched',
+      CANCELLED:  'badge-closed',
+      TO_APPROVE: 'badge-pending',
+      PAID:       'badge-matched',
+      CLOSED:     'badge-closed',
+    };
+    const poLabelKeyMap = {
+      SENT:       'sent',
+      CONFIRMED:  'confirmed',
+      DELIVERED:  'delivered',
+      CANCELLED:  'cancelled',
+      TO_APPROVE: 'toApprove',
+      PAID:       'paid',
+      CLOSED:     'closed',
+    };
     tbody.innerHTML = posList.map(po => {
-      let actionBtns = `<button class="btn btn-ghost btn-sm" onclick="viewPO('${po.ID}')"><i class="fas fa-eye"></i> Voir</button>`;
+      let actionBtns = `<button class="btn btn-ghost btn-sm" onclick="viewPO('${po.ID}')"><i class="fas fa-eye"></i> ${translateSRMText('voir')}</button>`;
       if (po.status === 'SENT') {
-        actionBtns += ` <button class="btn btn-accent2 btn-sm accept-btn-${po.ID}" onclick="acceptPurchaseOrder('${po.ID}')"><i class="fas fa-check"></i> Accepter</button>`;
+        actionBtns += ` <button class="btn btn-accent2 btn-sm accept-btn-${po.ID}" onclick="acceptPurchaseOrder('${po.ID}')"><i class="fas fa-check"></i> ${translateSRMText('accepter')}</button>`;
       }
       if (po.status === 'DELIVERED') {
         const hasInvoice = invoicedPoIds.includes(po.ID);
         if (hasInvoice) {
-          actionBtns += ` <span class="badge badge-submitted" style="font-weight:700;"><i class="fas fa-clock"></i> En attente</span>`;
+          actionBtns += ` <span class="badge badge-submitted" style="font-weight:700;"><i class="fas fa-clock"></i> ${translateSRMText('enAttente')}</span>`;
         } else {
-          actionBtns += ` <button class="btn btn-accent2 btn-sm noti-badge-pulse" onclick="openCreateInvoiceModal('${po.ID}', '${po.poNumber}')" style="font-weight:700; animation: badgePulse 1.2s infinite;"><i class="fas fa-file-invoice"></i> Soumettre Facture 🔔</button>`;
+          actionBtns += ` <button class="btn btn-accent2 btn-sm noti-badge-pulse" onclick="openCreateInvoiceModal('${po.ID}', '${po.poNumber}')" style="font-weight:700; animation: badgePulse 1.2s infinite;"><i class="fas fa-file-invoice"></i> ${translateSRMText('soumettreFacture')}</button>`;
         }
       }
 
-      let statusLabelText = po.status;
-      if (po.status === 'TO_APPROVE') {
-        statusLabelText = 'Attente Approbation';
-      }
-      let statusBadge = `<span class="badge ${statusMap[po.status]||'badge-pending'}">${statusLabelText||'—'}</span>`;
+      let statusLabelText = translateSRMText(poLabelKeyMap[po.status] || po.status || 'nonDefini');
+      let statusBadge = `<span class="badge ${statusMap[po.status]||'badge-pending'}">${statusLabelText}</span>`;
       if (po.status === 'DELIVERED') {
         let hasAnomaly = false;
         if (po.receptions && po.receptions.length > 0) {
@@ -1463,9 +1701,9 @@ async function loadPOs(isSilent = false) {
           }
         }
         if (hasAnomaly) {
-          statusBadge += ` <span class="badge noti-badge-pulse" style="background:#ef4444; color:#ffffff; font-size:0.65rem; font-weight:800; margin-left:6px; display:inline-block; vertical-align:middle; animation: badgePulse 1.2s infinite;">⚠️ ÉCART DE RÉCEPTION</span>`;
+          statusBadge += ` <span class="badge noti-badge-pulse" style="background:#ef4444; color:#ffffff; font-size:0.65rem; font-weight:800; margin-left:6px; display:inline-block; vertical-align:middle; animation: badgePulse 1.2s infinite;">${translateSRMText('ecartReception')}</span>`;
         } else {
-          statusBadge += ` <span class="badge noti-badge-pulse" style="background:#10b981; color:#ffffff; font-size:0.65rem; font-weight:800; margin-left:6px; display:inline-block; vertical-align:middle;">GR VALIDÉE ✓</span>`;
+          statusBadge += ` <span class="badge noti-badge-pulse" style="background:#10b981; color:#ffffff; font-size:0.65rem; font-weight:800; margin-left:6px; display:inline-block; vertical-align:middle;">${translateSRMText('grValidee')}</span>`;
         }
       }
 
@@ -1494,7 +1732,7 @@ async function viewPO(poId) {
     if (data.receptions && data.receptions.length > 0) {
       grHtml = `
         <div style="margin-top:20px; border-top:1px dashed var(--border); padding-top:15px">
-          <h4 style="margin-bottom:10px; color:var(--text); font-weight:700;"><i class="fas fa-truck"></i> Historique des Réceptions (GR)</h4>
+          <h4 style="margin-bottom:10px; color:var(--text); font-weight:700;"><i class="fas fa-truck"></i> ${translateSRMText('historiqueGr')}</h4>
           ${data.receptions.map(gr => {
             let grItemsHtml = '';
             let anomalyAlert = '';
@@ -1505,11 +1743,11 @@ async function viewPO(poId) {
               grItemsHtml = `
                 <table class="offer-items-table" style="margin-top:10px; font-size:0.8rem; width:100%">
                   <thead>
-                    <tr><th>#</th><th>Description</th><th style="text-align:center">Commandé</th><th style="text-align:center">Reçu</th><th style="text-align:center">Accepté</th><th style="text-align:center">Rejeté</th></tr>
+                    <tr><th>#</th><th>Description</th><th style="text-align:center">${translateSRMText('commande')}</th><th style="text-align:center">${translateSRMText('recu')}</th><th style="text-align:center">${translateSRMText('accepte')}</th><th style="text-align:center">${translateSRMText('rejete')}</th></tr>
                   </thead>
                   <tbody>
                     ${gr.items.map((gi, idx) => {
-                      const desc = (gi.product && gi.product.name) || (gi.poItem && gi.poItem.description) || gi.description || `Article #${idx+1}`;
+                      const desc = (gi.product && gi.product.name) || (gi.poItem && gi.poItem.description) || gi.description || `${getSRMCurrentLang() === 'FR' ? 'Article' : 'Item'} #${idx+1}`;
                       const rej = parseFloat(gi.rejectedQty) || 0;
                       const mis = Math.max(0, (parseFloat(gi.orderedQty) || 0) - (parseFloat(gi.receivedQty) || 0));
                       totalMissing += mis;
@@ -1533,19 +1771,19 @@ async function viewPO(poId) {
             if (data.status === 'TO_APPROVE') {
               anomalyAlert = `
                 <div style="background:rgba(59,130,246,0.1); border:1px solid rgba(59,130,246,0.2); border-radius:8px; padding:12px; margin-bottom:10px; color:#1e3a8a; font-size:0.85rem">
-                  <strong>🔄 Statut de résolution :</strong><br/>
-                  La marchandise de remplacement a été renvoyée. En attente de validation par l'administration.
+                  <strong>🔄 ${translateSRMText('statutResolution')}</strong><br/>
+                  ${translateSRMText('remplacementRenvoyeDesc')}
                 </div>
               `;
             } else if (totalMissing > 0 || totalRejected > 0) {
               anomalyAlert = `
                 <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); border-radius:8px; padding:12px; margin-bottom:10px; color:#ef4444; font-size:0.85rem">
-                  <strong>⚠️ Alerte Écart de Réception :</strong><br/>
-                  ${totalMissing > 0 ? `- ${totalMissing} pièce(s) manquante(s) (non livrée(s))<br/>` : ''}
-                  ${totalRejected > 0 ? `- ${totalRejected} pièce(s) rejetée(s) par l'administrateur<br/>` : ''}
+                  <strong>⚠️ ${translateSRMText('alerteEcart')}</strong><br/>
+                  ${totalMissing > 0 ? `- ${totalMissing} ${translateSRMText('piecesManquantesDesc')}<br/>` : ''}
+                  ${totalRejected > 0 ? `- ${totalRejected} ${translateSRMText('piecesRejeteesDesc')}<br/>` : ''}
                   <div style="margin-top:10px;">
                     <button class="btn btn-accent2 btn-sm" onclick="openResolveDiscrepancyModal('${data.ID}', '${data.poNumber}')" style="background:#10b981; color:white; font-weight:700; border-color:#10b981; display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
-                      <i class="fas fa-truck"></i> Renvoyer la marchandise (Résoudre l'écart)
+                      <i class="fas fa-truck"></i> ${translateSRMText('renvoyerMarchandiseAction')}
                     </button>
                   </div>
                 </div>
@@ -1573,11 +1811,11 @@ async function viewPO(poId) {
 
     document.getElementById('poModalContent').innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
-        <div><div style="font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">N° PO</div><div style="font-family:monospace;font-weight:700">${data.poNumber||'—'}</div></div>
-        <div><div style="font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Date livraison</div><div style="font-weight:600">${fmtDate(data.deliveryDate)}</div></div>
+        <div><div style="font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">${translateSRMText('nPo')}</div><div style="font-family:monospace;font-weight:700">${data.poNumber||'—'}</div></div>
+        <div><div style="font-size:0.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">${translateSRMText('dateLivraison')}</div><div style="font-weight:600">${fmtDate(data.deliveryDate)}</div></div>
       </div>
       <table class="offer-items-table">
-        <thead><tr><th>#</th><th>Description</th><th>Qté</th><th>P.U.</th><th>TVA</th><th>Total HT</th></tr></thead>
+        <thead><tr><th>#</th><th>Description</th><th>${translateSRMText('qte')}</th><th>P.U.</th><th>TVA</th><th>Total HT</th></tr></thead>
         <tbody>${items.map((item,i) => `
           <tr>
             <td>${i+1}</td>
@@ -1590,9 +1828,9 @@ async function viewPO(poId) {
         </tbody>
       </table>
       <div style="display:flex;justify-content:flex-end;gap:20px;padding:16px;background:var(--bg-card2);border-radius:10px;margin-top:12px">
-        <div><span style="color:var(--text-dim);font-size:0.82rem">Total HT: </span><strong>${fmt(data.totalHT)} DA</strong></div>
+        <div><span style="color:var(--text-dim);font-size:0.82rem">${translateSRMText('totalHt')}: </span><strong>${fmt(data.totalHT)} DA</strong></div>
         <div><span style="color:var(--text-dim);font-size:0.82rem">TVA: </span><strong>${fmt(data.totalTVA)} DA</strong></div>
-        <div style="font-size:1.1rem"><span style="color:var(--text-dim);font-size:0.82rem">Total TTC: </span><strong style="color:var(--accent)">${fmt(data.totalTTC)} DA</strong></div>
+        <div style="font-size:1.1rem"><span style="color:var(--text-dim);font-size:0.82rem">${translateSRMText('totalTtc')}: </span><strong style="color:var(--accent)">${fmt(data.totalTTC)} DA</strong></div>
       </div>
       ${grHtml}
     `;
@@ -1606,7 +1844,7 @@ async function acceptPurchaseOrder(poId) {
   const btn = document.querySelector(`.accept-btn-${poId}`);
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${getSRMCurrentLang() === 'FR' ? 'Traitement...' : 'Processing...'}`;
   }
   try {
     const res = await fetch('/odata/v4/srm/acceptPO', {
@@ -1615,15 +1853,15 @@ async function acceptPurchaseOrder(poId) {
       body: JSON.stringify({ poId })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || "Erreur lors de l'acceptation");
+    if (!res.ok) throw new Error(data.error?.message || (getSRMCurrentLang() === 'FR' ? "Erreur lors de l'acceptation" : "Error during acceptance"));
     
     // Visually transition the button instantly
     if (btn) {
       btn.className = 'badge badge-confirmed';
-      btn.innerHTML = '✓ Accepté';
+      btn.innerHTML = getSRMCurrentLang() === 'FR' ? '✓ Accepté' : '✓ Accepted';
       btn.onclick = null;
     }
-    toast('success', 'Bon de commande accepté avec succès !');
+    toast('success', translateSRMText('poAccepteSucces'));
     setTimeout(() => {
       loadPOs();
     }, 1200);
@@ -1631,7 +1869,7 @@ async function acceptPurchaseOrder(poId) {
     toast('error', e.message);
     if (btn) {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-check"></i> Accepter';
+      btn.innerHTML = `<i class="fas fa-check"></i> ${translateSRMText('accepter')}`;
     }
   }
 }
@@ -1641,7 +1879,7 @@ let resolveItemsList = [];
 
 async function openResolveDiscrepancyModal(poId, poNumber) {
   resolvePoId = poId;
-  document.getElementById('resolveModalSubtitle').textContent = `Résolution de l'écart pour le PO N° ${poNumber || '—'}`;
+  document.getElementById('resolveModalSubtitle').textContent = translateSRMText("resolutionEcartPo").replace("{poNum}", poNumber || '—');
   showLoader(true);
   try {
     const res = await fetch(`/odata/v4/srm/BonsCommande(ID=${poId})?$expand=items,receptions($expand=items($expand=product,poItem))`);
@@ -1657,7 +1895,7 @@ async function openResolveDiscrepancyModal(poId, poNumber) {
             const discrepancy = ordered - accepted;
             if (discrepancy > 0) {
               const poItemId = gi.poItem_ID || gi.poItem?.ID;
-              const desc = (gi.product && gi.product.name) || (gi.poItem && gi.poItem.description) || gi.description || "Article";
+              const desc = (gi.product && gi.product.name) || (gi.poItem && gi.poItem.description) || gi.description || (getSRMCurrentLang() === 'FR' ? "Article" : "Item");
               if (!itemsWithDiscrepancy.some(x => x.poItemId === poItemId)) {
                 itemsWithDiscrepancy.push({
                   poItemId,
@@ -1676,7 +1914,7 @@ async function openResolveDiscrepancyModal(poId, poNumber) {
     resolveItemsList = itemsWithDiscrepancy;
 
     if (itemsWithDiscrepancy.length === 0) {
-      toast('info', "Aucun écart à résoudre sur ce bon de commande.");
+      toast('info', getSRMCurrentLang() === 'FR' ? "Aucun écart à résoudre sur ce bon de commande." : "No discrepancy to resolve on this purchase order.");
       showLoader(false);
       return;
     }
@@ -1686,10 +1924,10 @@ async function openResolveDiscrepancyModal(poId, poNumber) {
         <thead>
           <tr>
             <th>Description</th>
-            <th style="text-align:center">Commandé</th>
-            <th style="text-align:center">Accepté</th>
-            <th style="text-align:center">Écart (Max)</th>
-            <th style="text-align:center">Quantité Renvoyée</th>
+            <th style="text-align:center">${translateSRMText('commande')}</th>
+            <th style="text-align:center">${translateSRMText('accepte')}</th>
+            <th style="text-align:center">${translateSRMText('ecartMax')}</th>
+            <th style="text-align:center">${translateSRMText('qteRenvoyee')}</th>
           </tr>
         </thead>
         <tbody>
@@ -1733,12 +1971,12 @@ async function submitResolveDiscrepancy() {
     const maxVal = item.discrepancy;
     
     if (isNaN(val) || val < 0) {
-      toast('error', `Veuillez saisir une quantité valide pour ${item.description}`);
+      toast('error', translateSRMText('valeurInvalideQty').replace('{desc}', item.description));
       return;
     }
     
     if (val > maxVal + 0.001) {
-      toast('error', `La quantité pour ${item.description} ne peut pas dépasser l'écart de ${maxVal}`);
+      toast('error', translateSRMText('valeurDepasseEcart').replace('{desc}', item.description).replace('{max}', maxVal));
       return;
     }
     
@@ -1749,7 +1987,7 @@ async function submitResolveDiscrepancy() {
   }
 
   if (items.every(item => item.resendQty === 0)) {
-    toast('error', "Veuillez renvoyer au moins un article avec une quantité supérieure à 0.");
+    toast('error', translateSRMText('renvoyerAuMoinsUnArticle'));
     return;
   }
 
@@ -1761,9 +1999,9 @@ async function submitResolveDiscrepancy() {
       body: JSON.stringify({ poId: resolvePoId, items })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Erreur lors de la résolution');
+    if (!res.ok) throw new Error(data.error?.message || (getSRMCurrentLang() === 'FR' ? "Erreur lors de la résolution" : "Error during resolution"));
     
-    toast('success', "Le renvoi de la marchandise a été enregistré. En attente de validation administrative.");
+    toast('success', translateSRMText('renvoiEnregistre'));
     closeResolveDiscrepancyModal();
     closePOModal();
     await loadDashboard();
@@ -1794,7 +2032,7 @@ async function openGRModal(poId, poNumber) {
     grPoItems = data.items || [];
     document.getElementById('grItemsContainer').innerHTML = `
       <table class="offer-items-table">
-        <thead><tr><th>#</th><th>Description</th><th>Qté commandée</th><th>Qté reçue</th><th>Qté acceptée</th><th>Qté rejetée</th></tr></thead>
+        <thead><tr><th>#</th><th>Description</th><th>${translateSRMText('qteCommandee')}</th><th>${translateSRMText('qteRecue')}</th><th>${translateSRMText('qteAcceptee')}</th><th>${translateSRMText('qteRejetee')}</th></tr></thead>
         <tbody>${grPoItems.map((item, i) => `
           <tr>
             <td>${i + 1}</td>
@@ -1841,9 +2079,9 @@ async function submitGR() {
       body: JSON.stringify(body)
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Erreur serveur');
+    if (!res.ok) throw new Error(data.error?.message || (getSRMCurrentLang() === 'FR' ? "Erreur serveur" : "Server error"));
     closeGRModal();
-    toast('success', `Réception ${data.receiptNumber || ''} enregistrée avec succès`);
+    toast('success', translateSRMText('receptionEnregistree').replace('{num}', data.receiptNumber || ''));
     loadPOs();
   } catch(e) { toast('error', e.message); }
   finally { showLoader(false); }
@@ -1872,7 +2110,7 @@ async function openCreateInvoiceModal(poId, poNumber) {
 
     document.getElementById('invoiceItemsContainer').innerHTML = `
       <table class="offer-items-table">
-        <thead><tr><th>#</th><th>Description</th><th>Qté</th><th>Prix unitaire HT</th><th>TVA %</th><th>Total TTC</th></tr></thead>
+        <thead><tr><th>#</th><th data-i18n="description">${translateSRMText('description')}</th><th data-i18n="qte">${translateSRMText('qte')}</th><th data-i18n="puHt">${translateSRMText('puHt')}</th><th>TVA %</th><th data-i18n="totalTtc">${translateSRMText('totalTtc')}</th></tr></thead>
         <tbody>${invPoItems.map((item, i) => `
           <tr>
             <td>${i + 1}</td>
@@ -1895,7 +2133,7 @@ function closeInvoiceModal() {
   const btn = document.getElementById('submitInvoiceBtn');
   if (btn) {
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Soumettre la facture';
+    btn.innerHTML = `<i class="fas fa-paper-plane"></i> ${translateSRMText('soumettreFactureBtn')}`;
   }
 }
 
@@ -1924,7 +2162,7 @@ async function submitSupplierInvoice() {
   const btn = document.getElementById('submitInvoiceBtn');
   if (btn) {
     btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${getSRMCurrentLang() === 'FR' ? 'Envoi...' : 'Sending...'}`;
   }
   showLoader(true);
   try {
@@ -1947,12 +2185,12 @@ async function submitSupplierInvoice() {
       body: JSON.stringify(body)
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Erreur serveur');
+    if (!res.ok) throw new Error(data.error?.message || (getSRMCurrentLang() === 'FR' ? "Erreur serveur" : "Server error"));
     closeInvoiceModal();
     const matchMsg = data.matchStatus === 'MATCHED'
-      ? '✓ Apparié automatiquement (conforme)'
-      : '⚠ Écart détecté — en attente de résolution';
-    toast(data.matchStatus === 'MATCHED' ? 'success' : 'info', `Facture ${data.invoiceNumber || ''} créée. ${matchMsg}`);
+      ? translateSRMText('matchAutomatique')
+      : translateSRMText('ecartDetecteAttente');
+    toast(data.matchStatus === 'MATCHED' ? 'success' : 'info', translateSRMText('factureCreee').replace('{num}', data.invoiceNumber || '').replace('{msg}', matchMsg));
     loadPOs();
     loadMatch();
   } catch(e) { toast('error', e.message); }
@@ -1990,26 +2228,30 @@ async function loadMatch(isSilent = false) {
       refreshNotifications(false);
     }
 
-    if (!matchList.length) { tbody.innerHTML = '<tr class="empty-row"><td colspan="7"><i class="fas fa-layer-group" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>Aucune facture à apparier.</td></tr>'; return; }
+    if (!matchList.length) { tbody.innerHTML = `<tr class="empty-row"><td colspan="7"><i class="fas fa-layer-group" style="font-size:1.5rem;display:block;margin-bottom:8px;opacity:0.3"></i>${translateSRMText('aucuneFacture')}</td></tr>`; return; }
     const matchBadge = { PENDING:'badge-pending', MATCHED:'badge-matched', DISCREPANCY:'badge-discrepancy' };
-    const matchLabel = { PENDING:'En attente', MATCHED:'Apparié ✓', DISCREPANCY:'Écart détecté' };
+    const matchLabel = { 
+      PENDING: translateSRMText('enAttente'), 
+      MATCHED: translateSRMText('apparie'), 
+      DISCREPANCY: translateSRMText('ecartDetecte') 
+    };
     tbody.innerHTML = matchList.map(f => {
       const po  = f.bonCommande;
       const gr  = f.reception;
       const poPdf  = po ? ` <button class="pdf-icon-btn" onclick="viewPOPDF('${po.ID}','${po.poNumber}')" title="PDF Bon de Commande"><i class="fas fa-file-pdf"></i></button>` : '';
       const grPdf  = gr ? ` <button class="pdf-icon-btn" onclick="viewGRPDF('${gr.ID}','${gr.receiptNumber}')" title="PDF Bon de Réception"><i class="fas fa-file-pdf"></i></button>` : '';
       const invPdf = ` <button class="pdf-icon-btn" onclick="viewInvoicePDF('${f.ID}','${f.invoiceNumber}')" title="PDF Facture"><i class="fas fa-file-pdf"></i></button>`;
-      const poIcon  = po ? `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${po.poNumber}${poPdf}` : `<span class="match-status-err"><i class="fas fa-times-circle"></i></span> Aucun PO`;
-      const grIcon  = gr ? `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${gr.receiptNumber}${grPdf}` : `<span class="match-status-warn"><i class="fas fa-clock"></i></span> En attente`;
+      const poIcon  = po ? `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${po.poNumber}${poPdf}` : `<span class="match-status-err"><i class="fas fa-times-circle"></i></span> ${translateSRMText('aucunPoLabel')}`;
+      const grIcon  = gr ? `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${gr.receiptNumber}${grPdf}` : `<span class="match-status-warn"><i class="fas fa-clock"></i></span> ${translateSRMText('enAttente')}`;
       const invIcon = `<span class="match-status-ok"><i class="fas fa-check-circle"></i></span> ${f.invoiceNumber}${invPdf}`;
       const remAmt = f.remainingAmount !== undefined ? f.remainingAmount : (f.status === 'PAID' ? 0 : f.totalTTC);
-      const remHtml = `<div style="font-size:0.72rem; color:var(--text-dim); margin-top:2px;">Reste : ${fmt(remAmt)} DA</div>`;
+      const remHtml = `<div style="font-size:0.72rem; color:var(--text-dim); margin-top:2px;">${translateSRMText('reste')} : ${fmt(remAmt)} DA</div>`;
 
       let actionHtml = '-';
       if (f.status === 'PENDING_CASH') {
-        actionHtml = `<button class="btn btn-accent2 btn-sm" style="padding:4px 8px; font-size:0.75rem;" onclick="supplierConfirmCashReceipt('${f.ID}', '${f.invoiceNumber}')"><i class="fas fa-check"></i> Confirmer encaissement</button>`;
+        actionHtml = `<button class="btn btn-accent2 btn-sm" style="padding:4px 8px; font-size:0.75rem;" onclick="supplierConfirmCashReceipt('${f.ID}', '${f.invoiceNumber}')"><i class="fas fa-check"></i> ${translateSRMText('confirmerEncaissement')}</button>`;
       } else if (f.status === 'PAID') {
-        actionHtml = `<span style="color:#22c55e; font-weight:600; font-size:0.8rem;"><i class="fas fa-check-double"></i> Encaissé</span>`;
+        actionHtml = `<span style="color:#22c55e; font-weight:600; font-size:0.8rem;"><i class="fas fa-check-double"></i> ${translateSRMText('encaisse')}</span>`;
       }
 
       return `<tr>
@@ -2026,7 +2268,9 @@ async function loadMatch(isSilent = false) {
 }
 
 async function supplierConfirmCashReceipt(factureId, invoiceNumber) {
-  if (!await Dialog.confirm(`Confirmer la réception du paiement en espèces pour la facture ${invoiceNumber} ?\nCela clôturera officiellement la transaction.`)) return;
+  const confirmMsg = translateSRMText('confirmCashReceiptMsg').replace('{num}', invoiceNumber);
+  const confirmTitle = translateSRMText('confirmation');
+  if (!await Dialog.confirm(confirmMsg, confirmTitle)) return;
   showLoader(true);
   try {
     const res = await fetch('/odata/v4/srm/confirmCashPayment', {
@@ -2035,8 +2279,8 @@ async function supplierConfirmCashReceipt(factureId, invoiceNumber) {
       body: JSON.stringify({ factureId })
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Erreur lors de la confirmation');
-    toast('success', `Paiement en espèces pour la facture ${invoiceNumber} confirmé avec succès !`);
+    if (!res.ok) throw new Error(data.error?.message || (getSRMCurrentLang() === 'FR' ? "Erreur lors de la confirmation" : "Error during confirmation"));
+    toast('success', translateSRMText('paiementConfirme').replace('{invNum}', invoiceNumber));
     loadMatch();
   } catch(e) { toast('error', e.message); }
   finally { showLoader(false); }
@@ -2046,35 +2290,42 @@ async function supplierConfirmCashReceipt(factureId, invoiceNumber) {
 // PROFIL KYC
 // ═══════════════════════════════════════════════════════
 function renderProfileView() {
-  if (!profile) { toast('error', 'Profil non disponible'); return; }
+  if (!profile) { toast('error', translateSRMText('profilNonDispo')); return; }
   const g1 = document.getElementById('profileGeneral');
   g1.innerHTML = `
-    <div class="profile-field"><label>Raison Sociale</label><p>${profile.companyName||'—'}</p></div>
-    <div class="profile-field"><label>Secteur</label><p>${profile.sector||'—'}</p></div>
+    <div class="profile-field"><label>${translateSRMText('raisonSociale')}</label><p>${profile.companyName||'—'}</p></div>
+    <div class="profile-field"><label>${translateSRMText('secteur')}</label><p>${profile.sector||'—'}</p></div>
     <div class="profile-field"><label>Email</label><p>${profile.email||'—'}</p></div>
-    <div class="profile-field"><label>Téléphone</label><p>${profile.phone||'—'}</p></div>
-    <div class="profile-field"><label>RC</label><p style="font-family:monospace">${profile.rc||'—'}</p></div>
-    <div class="profile-field"><label>NIF</label><p style="font-family:monospace">${profile.nif||'—'}</p></div>
-    <div class="profile-field"><label>RIB</label><p style="font-family:monospace">${profile.rib||'—'}</p></div>
-    <div class="profile-field"><label>Article d'Imposition</label><p style="font-family:monospace">${profile.ai||'—'}</p></div>
-    <div class="profile-field"><label>Adresse</label><p>${profile.street||'—'}</p></div>
-    <div class="profile-field"><label>Ville</label><p>${profile.city||'—'}</p></div>
-    <div class="profile-field"><label>Wilaya</label><p>${profile.wilaya||'—'}</p></div>
-    <div class="profile-field"><label>Note Fournisseur</label><p>${(profile.bp?.rating > 0) ? renderStars(profile.bp.rating) : '—'}</p></div>
+    <div class="profile-field"><label>${translateSRMText('telephone')}</label><p>${profile.phone||'—'}</p></div>
+    <div class="profile-field"><label>${translateSRMText('rc')}</label><p style="font-family:monospace">${profile.rc||'—'}</p></div>
+    <div class="profile-field"><label>${translateSRMText('nif')}</label><p style="font-family:monospace">${profile.nif||'—'}</p></div>
+    <div class="profile-field"><label>${translateSRMText('ribBank')}</label><p style="font-family:monospace">${profile.rib||'—'}</p></div>
+    <div class="profile-field"><label>${translateSRMText('ai')}</label><p style="font-family:monospace">${profile.ai||'—'}</p></div>
+    <div class="profile-field"><label>${translateSRMText('adresse')}</label><p>${profile.street||'—'}</p></div>
+    <div class="profile-field"><label>${translateSRMText('ville')}</label><p>${profile.city||'—'}</p></div>
+    <div class="profile-field"><label>${translateSRMText('wilaya')}</label><p>${profile.wilaya||'—'}</p></div>
+    <div class="profile-field"><label>${translateSRMText('noteFournisseur')}</label><p>${(profile.bp?.rating > 0) ? renderStars(profile.bp.rating) : '—'}</p></div>
   `;
   const kycCont = document.getElementById('kycStatus');
-  const kycOK = profile.kycStatus === 'VALIDATED';
   const kycColors = { VALIDATED: { bg:'rgba(0,201,167,0.1)', border:'rgba(0,201,167,0.3)', color:'var(--accent)', icon:'fa-check-shield' }, PENDING: { bg:'rgba(245,166,35,0.1)', border:'rgba(245,166,35,0.3)', color:'var(--accent-gold)', icon:'fa-clock' }, REJECTED: { bg:'rgba(255,101,132,0.1)', border:'rgba(255,101,132,0.3)', color:'var(--accent-red)', icon:'fa-times-circle' } };
   const kStyle = kycColors[profile.kycStatus] || kycColors.PENDING;
   kycCont.style.background = kStyle.bg;
   kycCont.style.border = `1px solid ${kStyle.border}`;
+  
+  const kycStatusLabel = translateSRMText(profile.kycStatus === 'VALIDATED' ? 'valide' : (profile.kycStatus === 'REJECTED' ? 'rejete' : 'enAttente'));
+  const kycDetails = profile.kycStatus === 'VALIDATED'
+    ? translateSRMText('kycValideDesc').replace('{date}', fmtDate(profile.kycDate)).replace('{admin}', profile.kycBy||'Admin')
+    : profile.kycStatus === 'REJECTED'
+      ? translateSRMText('kycRejeteDesc')
+      : translateSRMText('kycAttenteDesc');
+
   kycCont.innerHTML = `
     <div style="display:flex;align-items:center;gap:16px">
       <i class="fas ${kStyle.icon}" style="font-size:1.8rem;color:${kStyle.color}"></i>
       <div>
-        <div style="font-weight:700;font-size:1rem;color:${kStyle.color}">${profile.kycStatus||'PENDING'}</div>
+        <div style="font-weight:700;font-size:1rem;color:${kStyle.color}">${kycStatusLabel}</div>
         <div style="font-size:0.82rem;color:var(--text-dim);margin-top:3px">
-          ${profile.kycStatus==='VALIDATED' ? `Validé le ${fmtDate(profile.kycDate)} par ${profile.kycBy||'Admin'}` : profile.kycStatus==='REJECTED' ? 'Dossier rejeté. Contactez l\'administrateur.' : 'Votre dossier est en cours d\'examen par l\'administrateur.'}
+          ${kycDetails}
         </div>
       </div>
     </div>
@@ -2116,7 +2367,7 @@ async function saveProfile() {
     profile = { ...profile, ...body };
     closeProfileModal();
     renderProfileView();
-    toast('success', 'Profil mis à jour avec succès');
+    toast('success', translateSRMText('profileUpdated'));
   } catch(e) { toast('error', e.message); }
   finally { showLoader(false); }
 }
@@ -2125,9 +2376,9 @@ async function saveProfile() {
 // ═══════════════════════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════════════════════
-function fmt(v) { return parseFloat(v||0).toLocaleString('fr-FR', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
-function fmtDate(d) { if (!d) return '—'; try { return new Date(d).toLocaleDateString('fr-FR'); } catch { return d; } }
-async function logout() { if (await Dialog.confirm('Déconnexion ?')) { sessionStorage.clear(); window.location.href = '/auth.html'; } }
+function fmt(v) { return parseFloat(v||0).toLocaleString(getSRMCurrentLang() === 'FR' ? 'fr-FR' : 'en-US', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
+function fmtDate(d) { if (!d) return '—'; try { return new Date(d).toLocaleDateString(getSRMCurrentLang() === 'FR' ? 'fr-FR' : 'en-US'); } catch { return d; } }
+async function logout() { if (await Dialog.confirm(translateSRMText('confirmLogoutMsg'), translateSRMText('confirmation'))) { sessionStorage.clear(); window.location.href = '/auth.html'; } }
 
 // ═══════════════════════════════════════════════════════
 // RENDER STARS (1-5)
