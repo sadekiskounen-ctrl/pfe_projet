@@ -138,25 +138,57 @@ cds.on('bootstrap', (app) => {
             }
             const db = await cds.connect.to('db');
             const { Fournisseur } = db.entities('sap.pme.srm');
-            const newRecord = await db.run(
+            const { BusinessPartner } = db.entities('sap.pme');
+
+            const resolvedEmail = email || `${companyName.toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,30)}@fournisseur-import.dz`;
+
+            // Calculate next bpNumber
+            const count = await db.run(SELECT.from(BusinessPartner).columns("count(ID) as total"));
+            const totalCount = count && count[0] ? count[0].total : 0;
+            const nextBP = "BP" + (1000 + totalCount + Math.floor(Math.random() * 100));
+
+            const bpId = cds.utils.uuid();
+            const supplierId = cds.utils.uuid();
+
+            // Create BusinessPartner
+            await db.run(
+                INSERT.into(BusinessPartner).entries({
+                    ID: bpId,
+                    bpNumber: nextBP,
+                    displayName: companyName,
+                    email: resolvedEmail,
+                    bpType: 'FOURNISSEUR',
+                    password: 'fournisseur',
+                    rc: rc || null,
+                    nif: nif || null,
+                    ribNumber: rib || null,
+                    street: street || null,
+                    country: country || 'DZ',
+                    status: 'ACTIVE'
+                })
+            );
+
+            // Create Fournisseur linked to the BusinessPartner
+            await db.run(
                 INSERT.into(Fournisseur).entries({
+                    ID: supplierId,
+                    bp_ID: bpId,
                     companyName,
-                    email: email || `${companyName.toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,30)}@fournisseur-import.dz`,
+                    email: resolvedEmail,
                     nif:   nif    || null,
                     rc:    rc     || null,
                     rib:   rib    || null,
                     street: street || null,
                     country: country || 'DZ',
-                    kycStatus: 'PENDING',
+                    status: 'ACTIVE',
+                    kycStatus: 'VALIDATED',
                     score: 0
                 })
             );
-            // Retrieve the created record to get its generated ID
-            const created = await db.run(
-                SELECT.one.from(Fournisseur).where({ companyName }).orderBy({ createdAt: 'desc' })
-            );
-            console.log('[create-fournisseur] Created supplier:', created?.ID, companyName);
-            return res.status(201).json({ ID: created?.ID, companyName });
+
+            console.log('[create-fournisseur] Created BusinessPartner & Supplier:', bpId, supplierId, companyName);
+            // Return supplierId (Fournisseur.ID) to match what client-side code expects
+            return res.status(201).json({ ID: supplierId, companyName });
         } catch (err) {
             console.error('[create-fournisseur] Error:', err);
             return res.status(500).json({ error: { message: err.message || 'Erreur création fournisseur' } });
@@ -281,6 +313,66 @@ cds.on('served', async () => {
         const { ClientB2B, ClientB2C } = cds.entities('sap.pme.crm');
         const { Fournisseur } = cds.entities('sap.pme.srm');
 
+        // --- Mock Data One-Time Cleanup ---
+        if (process.env.NODE_ENV !== 'test') {
+            console.log('[Cleanup] Checking for mock test data to remove...');
+            const mockBPIds = [
+                '36f7799d-963a-40af-b8cf-745760e51391',
+                '36f7799d-963a-40af-b8cf-745760e51392',
+                '36f7799d-963a-40af-b8cf-745760e51393',
+                '36f7799d-963a-40af-b8cf-745760e51394',
+                '36f7799d-963a-40af-b8cf-745760e51395',
+                'bbbb0004-0000-4000-a000-000000000004',
+                'bbbb0005-0000-4000-a000-000000000005'
+            ];
+            
+            if (BusinessPartner) {
+                const deletedBPs = await DELETE.from(BusinessPartner).where({ ID: { 'in': mockBPIds } });
+                if (deletedBPs > 0) console.log(`[Cleanup] Deleted ${deletedBPs} mock BusinessPartners.`);
+            }
+            if (ClientB2B) {
+                const deletedB2B = await DELETE.from(ClientB2B).where({ bp_ID: { 'in': mockBPIds } });
+                if (deletedB2B > 0) console.log(`[Cleanup] Deleted ${deletedB2B} mock ClientB2B records.`);
+            }
+            if (ClientB2C) {
+                const deletedB2C = await DELETE.from(ClientB2C).where({ bp_ID: { 'in': mockBPIds } });
+                if (deletedB2C > 0) console.log(`[Cleanup] Deleted ${deletedB2C} mock ClientB2C records.`);
+            }
+            if (Fournisseur) {
+                const deletedFourn = await DELETE.from(Fournisseur).where({ bp_ID: { 'in': mockBPIds } });
+                if (deletedFourn > 0) console.log(`[Cleanup] Deleted ${deletedFourn} mock Fournisseur records.`);
+            }
+
+            const { RegistrationRequest } = cds.entities('pme.registration') || {};
+            if (RegistrationRequest) {
+                const mockRegIds = ['reg-001', 'reg-002', 'reg-003'];
+                const deletedRegs = await DELETE.from(RegistrationRequest).where({ ID: { 'in': mockRegIds } });
+                if (deletedRegs > 0) console.log(`[Cleanup] Deleted ${deletedRegs} mock registration requests.`);
+            }
+
+            try {
+                const docEntities = [
+                    'sap.pme.doc.Devis', 'sap.pme.doc.DevisItem', 
+                    'sap.pme.doc.CommandeClient', 'sap.pme.doc.CommandeItem', 
+                    'sap.pme.doc.FactureClient', 'sap.pme.doc.FactureClientItem', 
+                    'sap.pme.doc.Paiement', 'sap.pme.doc.FactureFournisseur', 
+                    'sap.pme.doc.FactureFournisseurItem', 'sap.pme.doc.ReceptionMarchandise', 
+                    'sap.pme.doc.ReceptionItem', 'sap.pme.doc.POItem', 
+                    'sap.pme.doc.BonCommandeFournisseur', 'sap.pme.doc.RFQ', 
+                    'sap.pme.doc.RFQItem', 'sap.pme.doc.RFQResponse', 
+                    'sap.pme.doc.RFQResponseItem', 'sap.pme.admin.AuditLog'
+                ];
+                for (const ent of docEntities) {
+                    if (cds.entities[ent]) {
+                        const count = await DELETE.from(ent);
+                        if (count > 0) console.log(`[Cleanup] Cleared ${count} mock rows from ${ent}`);
+                    }
+                }
+            } catch (e) {
+                console.warn('[Cleanup] Transactional tables cleanup warning:', e.message);
+            }
+        }
+
         if (BusinessPartner && ClientB2B && Fournisseur && ClientB2C) {
             const bps = await SELECT.from(BusinessPartner);
             for (const bp of bps) {
@@ -382,6 +474,50 @@ cds.on('served', async () => {
                     }
                 }
             }
+
+            // --- REVERSE SYNC: Fournisseur -> BusinessPartner (Fixes orphan suppliers) ---
+            const allSuppliers = await SELECT.from(Fournisseur);
+            for (const f of allSuppliers) {
+                let bp = null;
+                if (f.bp_ID) {
+                    bp = await SELECT.one.from(BusinessPartner).where({ ID: f.bp_ID });
+                }
+                if (!bp && f.email) {
+                    bp = await SELECT.one.from(BusinessPartner).where({ email: f.email });
+                }
+
+                if (!bp) {
+                    console.log(`[Sync] Found orphan Fournisseur: ${f.companyName}. Creating BusinessPartner...`);
+                    const bpId = cds.utils.uuid();
+                    
+                    // Generate unique bpNumber
+                    const countBP = await SELECT.from(BusinessPartner).columns("count(ID) as total");
+                    const totalBP = countBP && countBP[0] ? countBP[0].total : 0;
+                    const nextBP = "BP" + (1000 + totalBP + Math.floor(Math.random() * 100));
+
+                    await INSERT.into(BusinessPartner).entries({
+                        ID: bpId,
+                        bpNumber: nextBP,
+                        displayName: f.companyName,
+                        email: f.email,
+                        bpType: 'FOURNISSEUR',
+                        password: 'fournisseur',
+                        rc: f.rc || null,
+                        nif: f.nif || null,
+                        ribNumber: f.rib || null,
+                        street: f.street || null,
+                        country: f.country || 'DZ',
+                        status: 'ACTIVE'
+                    });
+
+                    // Update Fournisseur with linked bpId
+                    await UPDATE(Fournisseur).set({ bp_ID: bpId }).where({ ID: f.ID });
+                } else if (!f.bp_ID) {
+                    console.log(`[Sync] Linking existing BusinessPartner ${bp.ID} to Fournisseur ${f.companyName}`);
+                    await UPDATE(Fournisseur).set({ bp_ID: bp.ID }).where({ ID: f.ID });
+                }
+            }
+
             console.log('[Sync] Database synchronization completed successfully.');
         }
     } catch (err) {

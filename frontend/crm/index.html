@@ -8,6 +8,8 @@
       name="description"
       content="Portail client Bridgify Cloud — Catalogue, devis et commandes en ligne."
     />
+    <link rel="icon" type="image/png" href="/images/logo_round.png" />
+    <link rel="shortcut icon" type="image/png" href="/images/logo_round.png" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap"
       rel="stylesheet"
@@ -18,6 +20,15 @@
     />
     <!-- auth-interceptor.js est externe — actif pour injecter les headers de sécurité -->
     <script src="/auth-interceptor.js"></script>
+    <script>
+      // --- SECURITY GUARD (identique à SRM et Admin) ---
+      // Redirige vers la page de login si l'utilisateur n'est pas connecté ou n'est pas un client
+      const _role = sessionStorage.getItem('userRole');
+      if (sessionStorage.getItem('isLoggedIn') !== 'true' ||
+          (_role !== 'client_b2b' && _role !== 'client_b2c')) {
+        window.location.href = '/auth.html?app=crm';
+      }
+    </script>
     <style>
       body,
       input,
@@ -1868,7 +1879,7 @@
         <!-- VIEW: CATALOGUE -->
         <div class="view active" id="view-catalogue">
           <div class="stats-grid" id="statsGrid">
-            <div class="stat-card">
+            <div class="stat-card" id="kpiCardDevis">
               <div
                 class="stat-icon"
                 style="background: rgba(108, 99, 255, 0.15)"
@@ -1896,7 +1907,7 @@
                 </div>
               </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card" id="kpiCardPending">
               <div
                 class="stat-icon"
                 style="background: rgba(245, 166, 35, 0.15)"
@@ -2669,12 +2680,13 @@
       /* ─── STATE ─── */
       const EMAIL = sessionStorage.getItem("currentUser") || "";
       const BP_TYPE = sessionStorage.getItem("bpType") || "";
-      const IS_B2B =
-        BP_TYPE === "CLIENT_B2B" ||
-        sessionStorage.getItem("userRole") === "client_b2b";
+      const USER_ROLE = sessionStorage.getItem("userRole") || "";
+
+      // Détermination définitive : priorité à bpType, fallback sur userRole
       const IS_B2C =
-        BP_TYPE === "CLIENT_B2C" ||
-        sessionStorage.getItem("userRole") === "client_b2c";
+        BP_TYPE === "CLIENT_B2C" || USER_ROLE === "client_b2c";
+      const IS_B2B =
+        !IS_B2C && (BP_TYPE === "CLIENT_B2B" || USER_ROLE === "client_b2b");
 
       let profile = null;
       let products = [];
@@ -3033,6 +3045,56 @@
             document.getElementById("avatarInitial").textContent = name
               .charAt(0)
               .toUpperCase();
+
+            // Dynamically update the badges based on profile type
+            const clientBadge = document.getElementById("clientBadge");
+            const portalBadgeTop = document.getElementById("portalBadgeTop");
+            if (clientBadge) {
+              clientBadge.textContent = IS_B2B ? "B2B" : "B2C";
+              clientBadge.classList.remove("badge-b2b", "badge-b2c");
+              clientBadge.classList.add(IS_B2B ? "badge-b2b" : "badge-b2c");
+            }
+            if (portalBadgeTop) {
+              portalBadgeTop.textContent = IS_B2B ? "B2B" : "B2C";
+              portalBadgeTop.classList.remove("badge-b2b", "badge-b2c");
+              portalBadgeTop.classList.add(IS_B2B ? "badge-b2b" : "badge-b2c");
+            }
+
+            // Update cart submit button for B2B vs B2C
+            const cartSubmitBtn = document.getElementById("cartSubmitBtn");
+            const cartSubmitText = document.getElementById("cartSubmitText");
+            if (cartSubmitBtn) {
+              cartSubmitBtn.classList.remove("cart-b2b-btn", "cart-b2c-btn");
+              cartSubmitBtn.classList.add(IS_B2B ? "cart-b2b-btn" : "cart-b2c-btn");
+            }
+            if (cartSubmitText) {
+              cartSubmitText.innerHTML = IS_B2B 
+                ? `<i class="fas fa-paper-plane"></i> ${translateCRMText("creerDevis")}`
+                : `<i class="fas fa-shopping-bag"></i> ${translateCRMText("passerCommande")}`;
+            }
+
+            // Toggle visibility of Mes Factures nav item
+            const navFactures = document.getElementById("nav-factures");
+            if (navFactures) {
+              navFactures.style.display = IS_B2B ? "flex" : "none";
+            }
+
+            // Toggle visibility of Mes Devis nav item
+            const navDevis = document.getElementById("nav-devis");
+            if (navDevis) {
+              navDevis.style.display = IS_B2B ? "flex" : "none";
+            }
+
+            // Toggle visibility of devis KPI cards
+            const kpiCardDevis = document.getElementById("kpiCardDevis");
+            const kpiCardPending = document.getElementById("kpiCardPending");
+            if (kpiCardDevis) {
+              kpiCardDevis.style.display = IS_B2B ? "flex" : "none";
+            }
+            if (kpiCardPending) {
+              kpiCardPending.style.display = IS_B2B ? "flex" : "none";
+            }
+
             renderProfile();
           }
         } catch (e) {
