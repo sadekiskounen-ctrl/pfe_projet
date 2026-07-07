@@ -142,6 +142,23 @@ cds.on('bootstrap', (app) => {
 
             const resolvedEmail = email || `${companyName.toLowerCase().replace(/[^a-z0-9]/g,'').substring(0,30)}@fournisseur-import.dz`;
 
+            // ── Déduplication : vérifier si un fournisseur identique existe déjà ──
+            // Priorité : NIF (identifiant fiscal unique) → RC → email
+            let existingFournisseur = null;
+            if (nif) {
+                existingFournisseur = await db.run(SELECT.one.from(Fournisseur).where({ nif }));
+            }
+            if (!existingFournisseur && rc) {
+                existingFournisseur = await db.run(SELECT.one.from(Fournisseur).where({ rc }));
+            }
+            if (!existingFournisseur) {
+                existingFournisseur = await db.run(SELECT.one.from(Fournisseur).where({ email: resolvedEmail }));
+            }
+            if (existingFournisseur) {
+                console.log('[create-fournisseur] Fournisseur already exists, returning existing record:', existingFournisseur.ID, existingFournisseur.companyName);
+                return res.status(200).json({ ID: existingFournisseur.ID, companyName: existingFournisseur.companyName, _existing: true });
+            }
+
             // Calculate next bpNumber
             const count = await db.run(SELECT.from(BusinessPartner).columns("count(ID) as total"));
             const totalCount = count && count[0] ? count[0].total : 0;
@@ -515,6 +532,60 @@ cds.on('served', async () => {
                 } else if (!f.bp_ID) {
                     console.log(`[Sync] Linking existing BusinessPartner ${bp.ID} to Fournisseur ${f.companyName}`);
                     await UPDATE(Fournisseur).set({ bp_ID: bp.ID }).where({ ID: f.ID });
+                }
+            }
+
+            // --- DEDUPLICATION: Fournisseur Table (Fixes duplicate entries in srm.Fournisseur) ---
+            const currentSuppliers = await SELECT.from(Fournisseur);
+            const groups = {};
+            for (const f of currentSuppliers) {
+                if (f.bp_ID) {
+                    if (!groups[f.bp_ID]) {
+                        groups[f.bp_ID] = [];
+                    }
+                    groups[f.bp_ID].push(f);
+                }
+            }
+
+            for (const bpId in groups) {
+                const group = groups[bpId];
+                if (group.length > 1) {
+                    console.log(`[Deduplicate] Found ${group.length} duplicate Fournisseur records for BusinessPartner ${bpId}`);
+                    const keep = group[0];
+                    const keepId = keep.ID;
+
+                    for (let i = 1; i < group.length; i++) {
+                        const duplicate = group[i];
+                        const dupId = duplicate.ID;
+                        console.log(`[Deduplicate] Merging and deleting duplicate Fournisseur: ${duplicate.companyName} (${dupId}) -> keep: (${keepId})`);
+
+                        // 1. Re-link RFQs
+                        if (cds.entities['sap.pme.doc.RFQ']) {
+                            const count = await UPDATE('sap.pme.doc.RFQ').set({ fournisseur_ID: keepId }).where({ fournisseur_ID: dupId });
+                            if (count > 0) console.log(`[Deduplicate] Re-linked ${count} RFQs to Fournisseur ${keepId}`);
+                        }
+                        
+                        // 2. Re-link BonCommandeFournisseur
+                        if (cds.entities['sap.pme.doc.BonCommandeFournisseur']) {
+                            const count = await UPDATE('sap.pme.doc.BonCommandeFournisseur').set({ fournisseur_ID: keepId }).where({ fournisseur_ID: dupId });
+                            if (count > 0) console.log(`[Deduplicate] Re-linked ${count} POs to Fournisseur ${keepId}`);
+                        }
+
+                        // 3. Re-link FactureFournisseur
+                        if (cds.entities['sap.pme.doc.FactureFournisseur']) {
+                            const count = await UPDATE('sap.pme.doc.FactureFournisseur').set({ fournisseur_ID: keepId }).where({ fournisseur_ID: dupId });
+                            if (count > 0) console.log(`[Deduplicate] Re-linked ${count} Invoices to Fournisseur ${keepId}`);
+                        }
+
+                        // 4. Re-link RFQResponse
+                        if (cds.entities['sap.pme.doc.RFQResponse']) {
+                            const count = await UPDATE('sap.pme.doc.RFQResponse').set({ fournisseur_ID: keepId }).where({ fournisseur_ID: dupId });
+                            if (count > 0) console.log(`[Deduplicate] Re-linked ${count} RFQ Responses to Fournisseur ${keepId}`);
+                        }
+
+                        // 5. Delete the duplicate Fournisseur
+                        await DELETE.from(Fournisseur).where({ ID: dupId });
+                    }
                 }
             }
 

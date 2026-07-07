@@ -8,6 +8,8 @@ const cds = require('@sap/cds');
 const { generatePOFournisseurPDF, generateGRFournisseurPDF, generateInvoiceFournisseurPDF } = require('../lib/pdf-generator');
 const { sendPOFournisseur, sendInvoiceFournisseur, sendGRFournisseur } = require('../lib/email-service');
 
+const _getLocalDate = () => new Intl.DateTimeFormat('fr-CA', { timeZone: 'Africa/Algiers', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+
 module.exports = class SRMService extends cds.ApplicationService {
 
   async init() {
@@ -82,7 +84,7 @@ module.exports = class SRMService extends cds.ApplicationService {
       const [response] = await INSERT.into(RFQResponses).entries({
         rfq_ID          : rfqId,
         fournisseur_ID  : fournisseurId,
-        date            : new Date().toISOString().split('T')[0],
+        date            : _getLocalDate(),
         totalAmount     : parseFloat(totalAmount.toFixed(2)),
         deliveryDays    : deliveryDays || 7,
         validUntil      : validUntil || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
@@ -228,7 +230,7 @@ module.exports = class SRMService extends cds.ApplicationService {
         poNumber     : poNum,
         fournisseur_ID : rfq.fournisseur_ID || response.fournisseur_ID,
         rfq_ID       : rfqId,
-        date         : new Date().toISOString().split('T')[0],
+        date         : _getLocalDate(),
         deliveryDate : delivDate.toISOString().split('T')[0],
         status       : 'SENT',
         totalHT      : parseFloat(totalHT.toFixed(2)),
@@ -324,7 +326,7 @@ module.exports = class SRMService extends cds.ApplicationService {
 
       const [eval_] = await INSERT.into(Evaluations).entries({
         fournisseur_ID  : fournisseurId,
-        date            : new Date().toISOString().split('T')[0],
+        date            : _getLocalDate(),
         evaluatedBy     : req.user?.id || 'admin',
         qualityScore    : quality    || 0,
         deliveryScore   : delivery   || 0,
@@ -345,7 +347,7 @@ module.exports = class SRMService extends cds.ApplicationService {
       const { fournisseurId } = req.data;
       await UPDATE(Fournisseurs).set({
         kycStatus : 'VALIDATED',
-        kycDate   : new Date().toISOString().split('T')[0],
+        kycDate   : _getLocalDate(),
         kycBy     : req.user?.id || 'admin',
         status    : 'ACTIVE'
       }).where({ ID: fournisseurId });
@@ -357,7 +359,7 @@ module.exports = class SRMService extends cds.ApplicationService {
       const { fournisseurId, reason } = req.data;
       await UPDATE(Fournisseurs).set({
         kycStatus : 'REJECTED',
-        kycDate   : new Date().toISOString().split('T')[0],
+        kycDate   : _getLocalDate(),
         kycBy     : req.user?.id || 'admin',
         status    : 'BLOCKED'
       }).where({ ID: fournisseurId });
@@ -398,7 +400,7 @@ module.exports = class SRMService extends cds.ApplicationService {
       const [gr] = await INSERT.into(Receptions).entries({
         receiptNumber : grNum,
         bonCommande_ID: poId,
-        date          : new Date().toISOString().split('T')[0],
+        date          : _getLocalDate(),
         receivedBy    : req.user?.id || 'fournisseur',
         notes         : notes || '',
         status        : 'CONFIRMED',
@@ -520,7 +522,7 @@ module.exports = class SRMService extends cds.ApplicationService {
         fournisseur_ID : po.fournisseur_ID,
         bonCommande_ID : poId,
         reception_ID   : receptionId || null,
-        date           : new Date().toISOString().split('T')[0],
+        date           : _getLocalDate(),
         dueDate        : dueDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
         status         : 'SENT',
         matchStatus    : 'PENDING',
@@ -637,7 +639,7 @@ module.exports = class SRMService extends cds.ApplicationService {
       // 3. Record Payment in Paiement entity
       await INSERT.into(Paiement).entries({
         paymentNumber : payNum,
-        date          : new Date().toISOString().split('T')[0],
+        date          : _getLocalDate(),
         amount        : invoice.totalTTC,
         method        : 'ESPECES',
         reference     : `SUP-PAY-ESPECES-CONFIRMED-${Date.now()}`

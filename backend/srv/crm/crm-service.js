@@ -9,6 +9,8 @@ const { generateDevisPDF, generateFacturePDF, generateCommandePDF } = require('.
 const { sendDevis, sendFacture, sendWelcomeB2B, sendCommande } = require('../lib/email-service');
 const { validateClientB2B } = require('../lib/validators');
 
+const _getLocalDate = () => new Intl.DateTimeFormat('fr-CA', { timeZone: 'Africa/Algiers', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+
 module.exports = class CRMService extends cds.ApplicationService {
 
   async init() {
@@ -122,7 +124,7 @@ module.exports = class CRMService extends cds.ApplicationService {
         ID           : devisId,
         devisNumber  : devNum,
         clientB2B_ID : clientB2B_ID,
-        date         : new Date().toISOString().split('T')[0],
+        date         : _getLocalDate(),
         validUntil   : new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0],
         status       : 'PENDING',
         notes        : notes || '',
@@ -182,7 +184,7 @@ module.exports = class CRMService extends cds.ApplicationService {
         ID             : commandeId,
         orderNumber    : cmdNum,
         clientB2C_ID   : clientB2C_ID,
-        date           : new Date().toISOString().split('T')[0],
+        date           : _getLocalDate(),
         deliveryAddress: deliveryAddress,
         status         : status,
         totalHT        : parseFloat(totalHT.toFixed(2)),
@@ -202,7 +204,7 @@ module.exports = class CRMService extends cds.ApplicationService {
           invoiceNumber   : invNum,
           commande_ID     : commandeId,
           clientB2C_ID    : clientB2C_ID,
-          date            : new Date().toISOString().split('T')[0],
+          date            : _getLocalDate(),
           dueDate         : dueDate.toISOString().split('T')[0],
           status          : 'PAID',
           totalHT         : parseFloat(totalHT.toFixed(2)),
@@ -219,7 +221,7 @@ module.exports = class CRMService extends cds.ApplicationService {
         await INSERT.into(Paiements).entries({
           paymentNumber : payNum,
           facture_ID    : factureId,
-          date          : new Date().toISOString().split('T')[0],
+          date          : _getLocalDate(),
           amount        : parseFloat(totalTTC.toFixed(2)),
           method        : paymentMethod || 'CARTE',
           reference     : paymentRef || `SIM-${Date.now()}`
@@ -260,7 +262,7 @@ module.exports = class CRMService extends cds.ApplicationService {
         commande_ID   : commande.ID,
         clientB2B_ID  : commande.clientB2B_ID,
         clientB2C_ID  : commande.clientB2C_ID,
-        date          : new Date().toISOString().split('T')[0],
+        date          : _getLocalDate(),
         dueDate       : dueDate.toISOString().split('T')[0],
         status        : 'PAID',
         totalHT       : commande.totalHT,
@@ -278,7 +280,7 @@ module.exports = class CRMService extends cds.ApplicationService {
       await INSERT.into(Paiements).entries({
         paymentNumber : payNum,
         facture_ID    : facture.ID,
-        date          : new Date().toISOString().split('T')[0],
+        date          : _getLocalDate(),
         amount        : commande.totalTTC,
         method        : paymentMethod || 'CARTE',
         reference     : paymentRef || `SIM-${Date.now()}`
@@ -328,7 +330,7 @@ module.exports = class CRMService extends cds.ApplicationService {
         clientB2B_ID : devis.clientB2B_ID,
         clientB2C_ID : devis.clientB2C_ID,
         devis_ID     : devis.ID,
-        date         : new Date().toISOString().split('T')[0],
+        date         : _getLocalDate(),
         status       : 'CONFIRMED',
         totalHT      : devis.totalHT,
         totalTVA     : devis.totalTVA,
@@ -378,7 +380,7 @@ module.exports = class CRMService extends cds.ApplicationService {
         commande_ID   : commandeId,
         clientB2B_ID  : cmd.clientB2B_ID,
         clientB2C_ID  : cmd.clientB2C_ID,
-        date          : new Date().toISOString().split('T')[0],
+        date          : _getLocalDate(),
         dueDate       : dueDate.toISOString().split('T')[0],
         status        : 'SENT',
         totalHT       : cmd.totalHT,
@@ -422,7 +424,7 @@ module.exports = class CRMService extends cds.ApplicationService {
         commande_ID   : commande.ID,
         clientB2B_ID  : commande.clientB2B_ID,
         clientB2C_ID  : commande.clientB2C_ID,
-        date          : new Date().toISOString().split('T')[0],
+        date          : _getLocalDate(),
         dueDate       : dueDate.toISOString().split('T')[0],
         status        : 'SENT',
         totalHT       : commande.totalHT,
@@ -453,7 +455,7 @@ module.exports = class CRMService extends cds.ApplicationService {
       const payNum = await this._generateNumber('PAIEMENT', 'PAY');
       const [paiement] = await INSERT.into(Paiements).entries({
         paymentNumber : payNum, facture_ID: factureId,
-        date          : new Date().toISOString().split('T')[0],
+        date          : _getLocalDate(),
         amount, method, reference
       });
 

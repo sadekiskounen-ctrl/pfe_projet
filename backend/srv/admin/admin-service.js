@@ -6,6 +6,7 @@ const cds = require('@sap/cds');
 const { generateRegistrationPDF, generateFacturePDF, generateDevisPDF, generateCommandePDF, generateInvoiceFournisseurPDF } = require('../lib/pdf-generator');
 const { sendAccountBlocked, sendAccountReactivated, sendAccountDeleted, sendFacture } = require('../lib/email-service');
 
+const _getLocalDate = () => new Intl.DateTimeFormat('fr-CA', { timeZone: 'Africa/Algiers', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 
 module.exports = class AdminService extends cds.ApplicationService {
 
@@ -374,7 +375,7 @@ module.exports = class AdminService extends cds.ApplicationService {
         commande_ID   : commande.ID,
         clientB2B_ID  : commande.clientB2B_ID,
         clientB2C_ID  : commande.clientB2C_ID,
-        date          : new Date().toISOString().split('T')[0],
+        date          : _getLocalDate(),
         dueDate       : dueDate.toISOString().split('T')[0],
         status        : 'PAID',
         totalHT       : commande.totalHT,
@@ -405,7 +406,7 @@ module.exports = class AdminService extends cds.ApplicationService {
       await INSERT.into(Paiement).entries({
         paymentNumber : payNum,
         facture_ID    : facture.ID,
-        date          : new Date().toISOString().split('T')[0],
+        date          : _getLocalDate(),
         amount        : commande.totalTTC,
         method        : 'ESPECES',
         reference     : `CASH-ADMIN-${Date.now()}`
@@ -495,7 +496,7 @@ module.exports = class AdminService extends cds.ApplicationService {
       // Record Payment in Paiement entity
       await INSERT.into(Paiement).entries({
         paymentNumber : payNum,
-        date          : new Date().toISOString().split('T')[0],
+        date          : _getLocalDate(),
         amount        : invoice.totalTTC,
         method        : 'CARTE',
         reference     : `SUP-PAY-CARTE-${Date.now()}`

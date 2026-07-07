@@ -15,18 +15,48 @@ module.exports = cds.service.impl(async function() {
         const endDate = `${year}-${month.padStart(2, '0')}-${lastDay}`;
         
         try {
-            // CA et Encours Client
-            // totalRevenue = uniquement les factures entièrement payées (status PAID)
-            const factures = await SELECT.from(FactureClient).where(`date >= '${startDate}' AND date <= '${endDate}'`);
+            // ── CA Mensuel ──────────────────────────────────────────────────────────────
+            // Formule : CA = Σ (Prix de vente unitaire HT × Quantités vendues)
+            // Source  : FactureClientItem (lignes d'articles des factures B2B + B2C)
+            // Périmètre : factures du mois sélectionné, hors DRAFT et CANCELLED
+            const facturesDuMois = await SELECT
+                .from(FactureClient)
+                .columns('ID')
+                .where(`date >= '${startDate}' AND date <= '${endDate}' AND status != 'DRAFT' AND status != 'CANCELLED'`);
+
             let totalRevenue = 0;
+
+            if (facturesDuMois.length > 0) {
+                const factureIds = facturesDuMois.map(f => f.ID);
+                const lignes = await SELECT
+                    .from(FactureClientItem)
+                    .columns('unitPrice', 'quantity')
+                    .where({ parent_ID: { in: factureIds } });
+
+                lignes.forEach(ligne => {
+                    // CA ligne = Prix unitaire HT × Quantité vendue
+                    totalRevenue += parseFloat(ligne.unitPrice || 0) * parseFloat(ligne.quantity || 0);
+                });
+            }
+
+            // En-cours Clients (Revenus attendus globaux) : somme des restes à payer de TOUTES les factures client impayées/partiellement payées
+            const unpaidInvoices = await SELECT.from(FactureClient).where("status != 'PAID' AND status != 'CANCELLED' AND status != 'DRAFT'");
             let encoursClients = 0;
-            
-            factures.forEach(f => {
-                if (f.status === 'PAID') {
-                    totalRevenue += (f.totalTTC || 0);
-                }
-                encoursClients += (f.remainingAmount || 0);
+            unpaidInvoices.forEach(f => {
+                const unpaidAmt = f.remainingAmount !== null && f.remainingAmount !== undefined
+                    ? parseFloat(f.remainingAmount)
+                    : (parseFloat(f.totalTTC || 0) - parseFloat(f.paidAmount || 0));
+                encoursClients += unpaidAmt;
             });
+
+            // Ajouter également les montants des commandes confirmées/en cours qui n'ont pas encore été facturées
+            const CommandeClient = 'sap.pme.doc.CommandeClient';
+            if (cds.entities[CommandeClient]) {
+                const unpaidOrders = await SELECT.from(CommandeClient).where("status != 'PAID' AND status != 'CANCELLED' AND status != 'DRAFT' AND (invoiced = false OR invoiced is null)");
+                unpaidOrders.forEach(c => {
+                    encoursClients += parseFloat(c.totalTTC || 0);
+                });
+            }
             
             // Délais Fournisseurs (Moyenne des jours entre date de commande et livraison)
             const commandes = await SELECT.from(BonCommandeFournisseur).where(`date >= '${startDate}' AND date <= '${endDate}'`);
@@ -60,16 +90,34 @@ module.exports = cds.service.impl(async function() {
         }
     });
 
-    // --- TOP 5 CLIENTS ---
+    // --- TOP 5 CLIENTS (B2B & B2C) ---
     this.on('getTopClients', async (req) => {
-        const top = await SELECT.from(FactureClient)
-            .columns('clientB2B.companyName as name', 'sum(totalTTC) as value')
-            .groupBy('clientB2B.companyName')
-            .orderBy('sum(totalTTC) desc')
-            .limit(5);
-        return (top || []).map((item, index) => ({
-            name: item.name || 'Client Divers',
-            value: item.value || 0,
+        const factures = await SELECT.from(FactureClient).columns(f => {
+            f.totalTTC;
+            f.clientB2B(b => { b.companyName });
+            f.clientB2C(c => { c.firstName; c.lastName; c.fullName });
+        });
+
+        const clientMap = {};
+        factures.forEach(f => {
+            let name = 'Client Divers';
+            if (f.clientB2B && f.clientB2B.companyName) {
+                name = f.clientB2B.companyName;
+            } else if (f.clientB2C) {
+                name = f.clientB2C.fullName || `${f.clientB2C.firstName} ${f.clientB2C.lastName || ''}`.trim() || 'Client Divers';
+            }
+            
+            clientMap[name] = (clientMap[name] || 0) + (parseFloat(f.totalTTC) || 0);
+        });
+
+        const sorted = Object.entries(clientMap)
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value)
+            .slice(0, 5);
+
+        return sorted.map((item, index) => ({
+            name: item.name,
+            value: item.value,
             rank: index + 1
         }));
     });
@@ -110,8 +158,8 @@ module.exports = cds.service.impl(async function() {
         const endDate = `${year}-${month.padStart(2, '0')}-${lastDay}`;
 
         const trend = await SELECT.from(FactureClient)
-            .columns('date', 'sum(totalTTC) as value')
-            .where(`date >= '${startDate}' AND date <= '${endDate}'`)
+            .columns('date', 'sum(totalHT) as value')
+            .where(`date >= '${startDate}' AND date <= '${endDate}' AND status != 'DRAFT' AND status != 'CANCELLED'`)
             .groupBy('date')
             .orderBy('date');
 

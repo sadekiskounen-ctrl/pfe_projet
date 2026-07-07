@@ -64,19 +64,19 @@ export default function Overview({ stats, revenueYear, revenueMonth, onResolveAl
 
   const translations = {
     FR: {
-      caMensuel: "CA Mensuel",
-      ventesDe: "Ventes de ",
+      caMensuel: "CA Mensuel (HT)",
+      ventesDe: "Ventes B2B & B2C — ",
       encoursClients: "En-cours Clients",
       facturesImpayees: "Factures clients impayées",
       clientsActifs: "Clients Actifs",
       profilsActifs: "Profils B2B & B2C actifs",
       fournisseursSrm: "Fournisseurs SRM",
       partenairesActifs: "Partenaires SRM actifs",
-      dailyRevTitle: "📊 Chiffre d'Affaires Journalier",
+      dailyRevTitle: "📊 Chiffre d'Affaires Journalier (HT)",
       legendLine: "Ligne CA",
       legendVolume: "Volume",
       noDataMonth: "Aucune donnée pour ce mois",
-      totalMois: "Total du mois",
+      totalMois: "Total du mois (HT)",
       moyenneJour: "Moyenne/jour",
       picJour: "Pic (Jour ",
       criticalAlerts: "Alertes Critiques",
@@ -86,22 +86,22 @@ export default function Overview({ stats, revenueYear, revenueMonth, onResolveAl
       topSuppliers: "Top Fournisseurs",
       topProducts: "Top Articles Vendus",
       noData: "Aucune donnée",
-      caLabel: "  CA: "
+      caLabel: "  CA HT: "
     },
     EN: {
-      caMensuel: "Monthly Revenue",
-      ventesDe: "Sales of ",
+      caMensuel: "Monthly Revenue (excl. tax)",
+      ventesDe: "B2B & B2C Sales — ",
       encoursClients: "Client Outstanding Balance",
       facturesImpayees: "Unpaid client invoices",
       clientsActifs: "Active Clients",
       profilsActifs: "Active B2B & B2C profiles",
       fournisseursSrm: "SRM Suppliers",
       partenairesActifs: "Active SRM partners",
-      dailyRevTitle: "📊 Daily Revenue",
+      dailyRevTitle: "📊 Daily Revenue (excl. tax)",
       legendLine: "Revenue Line",
       legendVolume: "Volume",
       noDataMonth: "No data for this month",
-      totalMois: "Monthly total",
+      totalMois: "Monthly total (excl. tax)",
       moyenneJour: "Daily average",
       picJour: "Peak (Day ",
       criticalAlerts: "Critical Alerts",
@@ -111,7 +111,7 @@ export default function Overview({ stats, revenueYear, revenueMonth, onResolveAl
       topSuppliers: "Top Suppliers",
       topProducts: "Top Selling Items",
       noData: "No data",
-      caLabel: "  Rev: "
+      caLabel: "  Rev (HT): "
     }
   };
 

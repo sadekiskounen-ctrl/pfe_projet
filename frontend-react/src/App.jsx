@@ -256,7 +256,7 @@ export default function App() {
           fetch(
             `/odata/v4/analytics/getGlobalStats(month='${revenueMonth}',year='${revenueYear}')`,
           ),
-          fetch("/odata/v4/admin/Fournisseurs?$select=ID", {
+          fetch("/odata/v4/admin/BusinessPartners?$filter=bpType eq 'FOURNISSEUR'&$select=ID", {
             headers: getAuthHeaders(),
           }),
           fetch("/odata/v4/analytics/getTopClients()"),

@@ -54,12 +54,25 @@ export default function InvoiceAIExtractorModal({ isOpen, onClose, onRefreshData
 
   const fileInputRef = useRef(null);
 
-  // ── Load suppliers ────────────────────────────────────────
+  // ── Load suppliers (with deduplication by NIF) ──────────────
   useEffect(() => {
     if (isOpen) {
       fetch('/odata/v4/admin/Fournisseurs')
         .then(r => r.json())
-        .then(d => setSuppliers(d.value || []))
+        .then(d => {
+          const raw = d.value || [];
+          // Dédupliquer : garder un seul enregistrement par NIF (ou par ID si pas de NIF)
+          const seen = new Set();
+          const unique = raw.filter(s => {
+            const key = s.nif ? `nif:${s.nif}` : (s.rc ? `rc:${s.rc}` : `id:${s.ID}`);
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+          // Trier par nom
+          unique.sort((a, b) => (a.companyName || '').localeCompare(b.companyName || '', 'fr'));
+          setSuppliers(unique);
+        })
         .catch(() => {});
     }
   }, [isOpen]);
@@ -240,14 +253,14 @@ export default function InvoiceAIExtractorModal({ isOpen, onClose, onRefreshData
   const handleConfirm = async () => {
     let supplierId = selectedSupplierId;
 
-    // Auto-create supplier if not found
+    // Auto-create supplier if not found (or reuse existing)
     if (!supplierId) {
       if (!extFournisseur) {
         showToast('error', 'Fournisseur manquant', 'Saisissez le nom du fournisseur avant de confirmer.');
         return;
       }
       try {
-        showToast('info', 'Création du fournisseur', `"${extFournisseur}" — création automatique...`);
+        showToast('info', 'Recherche du fournisseur', `"${extFournisseur}" — vérification en cours...`);
         const emailSlug = extFournisseur.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 30);
         const createRes = await fetch('/api/create-fournisseur', {
           method: 'POST',
@@ -267,7 +280,11 @@ export default function InvoiceAIExtractorModal({ isOpen, onClose, onRefreshData
         const newSupplier = await createRes.json();
         supplierId = newSupplier.ID;
         setSelectedSupplierId(supplierId);
-        showToast('success', 'Fournisseur créé', `✅ "${extFournisseur}" ajouté (KYC en attente).`);
+        if (newSupplier._existing) {
+          showToast('info', 'Fournisseur existant utilisé', `♻️ "${extFournisseur}" déjà enregistré — réutilisation.`);
+        } else {
+          showToast('success', 'Fournisseur créé', `✅ "${extFournisseur}" ajouté (KYC en attente).`);
+        }
       } catch (err) {
         showToast('error', 'Échec création fournisseur', err.message);
         return;
@@ -624,12 +641,25 @@ export default function InvoiceAIExtractorModal({ isOpen, onClose, onRefreshData
         .ai-select {
           width: 100%; box-sizing: border-box;
           padding: 8px 12px;
-          background: rgba(255,255,255,0.05);
-          border: 1px solid rgba(255,255,255,0.1);
-          border-radius: 8px; color: var(--text-main,#fff);
+          background: var(--elevated-bg, #1e2035);
+          border: 1px solid var(--border, rgba(255,255,255,0.1));
+          border-radius: 8px;
+          color: var(--text-main, #ffffff);
           font-size: 0.85rem; outline: none; cursor: pointer;
+          -webkit-appearance: auto;
+          transition: background 240ms, color 240ms, border-color 240ms;
         }
-        .ai-select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+        .ai-select:focus { border-color: var(--accent, #6366f1); box-shadow: 0 0 0 3px rgba(99,102,241,0.15); }
+        /* Force les options avec les variables de thèmes correspondantes */
+        .ai-select option {
+          background-color: var(--elevated-bg, #1e2035);
+          color: var(--text-main, #ffffff);
+          padding: 6px 10px;
+        }
+        .ai-select option:hover, .ai-select option:checked {
+          background-color: var(--accent, #6366f1);
+          color: #ffffff;
+        }
         /* ── Buttons ── */
         .ai-btn {
           display: inline-flex; align-items: center; gap: 7px;
@@ -878,10 +908,17 @@ export default function InvoiceAIExtractorModal({ isOpen, onClose, onRefreshData
                           </div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, justifyContent: 'flex-end', minWidth: '220px' }}>
                             <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>🏭 Associer au fournisseur :</span>
-                            <select className="ai-select" value={selectedSupplierId} onChange={e => setSelectedSupplierId(e.target.value)} style={{ maxWidth: '240px' }}>
+                            <select
+                              className="ai-select"
+                              value={selectedSupplierId}
+                              onChange={e => setSelectedSupplierId(e.target.value)}
+                              style={{ maxWidth: '240px' }}
+                            >
                               <option value="">-- Auto-créer / Nouveau --</option>
                               {suppliers.map(s => (
-                                <option key={s.ID} value={s.ID}>{s.companyName}{s.nif ? ` (NIF: ${s.nif})` : ''}</option>
+                                <option key={s.ID} value={s.ID}>
+                                  {s.companyName}{s.nif ? ` (NIF: ${s.nif})` : ''}
+                                </option>
                               ))}
                             </select>
                           </div>
